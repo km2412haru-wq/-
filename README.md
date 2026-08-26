@@ -67,3 +67,16 @@ AIに特化していない一般的なフィード（企業の全社ニュース
 ## デプロイ
 
 Vercelへのデプロイを想定しています（`next build` / `next start` に対応した環境であれば他のホスティングでも動作します）。サーバーサイドでRSSを取得するため、フロントエンド専用の静的ホスティング（GitHub Pagesなど）では動作しません。
+
+## スマホのホーム画面に置く（PWA対応）
+
+このアプリはPWA（Progressive Web App）として構成済みです（`app/manifest.ts`、`app/icon.tsx`、`app/apple-icon.tsx`、`public/sw.js`）。**HTTPSで公開されたURL**であれば、以下の手順でホーム画面にアイコンとして追加できます。
+
+1. まずVercel等にデプロイして公開URL（`https://…`）を取得する
+   - GitHubリポジトリをVercelにインポート → デフォルト設定のまま Deploy するだけで動きます（環境変数・APIキーは不要）
+2. そのURLをスマホのブラウザで開く
+   - **iOS (Safari)**: 共有ボタン（□に↑）→「ホーム画面に追加」
+   - **Android (Chrome)**: 右上のメニュー（︙）→「アプリをインストール」または「ホーム画面に追加」（自動でインストールバナーが出ることもあります）
+3. ホーム画面のアイコンをタップすると、アドレスバーなしのアプリらしい見た目（standalone表示）で起動します
+
+アイコンのデザインを変更したい場合は `app/icon.tsx` / `app/apple-icon.tsx`（ブラウザタブ・iOSアイコン用、コードでデザイン）を編集するか、`npm run gen-icons` で `public/icons/` 配下のPWAマニフェスト用アイコン（192px/512px、通常＋Android maskable）を再生成してください。

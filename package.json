@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx --test __tests__/**/*.test.ts"
+    "test": "tsx --test __tests__/**/*.test.ts",
+    "gen-icons": "tsx scripts/gen-icons.mjs"
   },
   "dependencies": {
     "next": "16.3.3",
