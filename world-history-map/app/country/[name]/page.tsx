@@ -9,7 +9,10 @@ import {
   type TopicSummary,
 } from "@/lib/wikipedia";
 import { fetchCountryBasicInfo, formatPopulationJa } from "@/lib/countryInfo";
+import { buildExplainPrompt } from "@/lib/askClaude";
 import type { WorldMapData } from "@/lib/worldMapTypes";
+import AskClaudeButton from "@/components/AskClaudeButton";
+import AskClaudeBox from "@/components/AskClaudeBox";
 
 const TOPICS: Topic[] = ["ethnic", "food", "industry"];
 
@@ -104,6 +107,7 @@ export default async function CountryHistoryPage({
             <section className="eraSection">
               <h2 className="eraLabel">📖 概要</h2>
               <p className="eraText">{detail.intro}</p>
+              <AskClaudeButton prompt={buildExplainPrompt(nameJa, "概要", detail.intro)} />
             </section>
           )}
 
@@ -111,19 +115,25 @@ export default async function CountryHistoryPage({
             <p className="wmPanelStatus">この記事からは時代ごとの情報を抽出できませんでした。</p>
           )}
 
-          {detail.eras.map((group) => (
-            <section key={group.era} className="eraSection">
-              <h2 className="eraLabel">{group.label}</h2>
-              {group.entries.map((entry, i) => (
-                <div key={i} className="eraEntry">
-                  {entry.heading !== group.label.replace(/^\S+\s/, "") && (
-                    <h3 className="eraEntryHeading">{entry.heading}</h3>
-                  )}
-                  <p className="eraText">{entry.text}</p>
-                </div>
-              ))}
-            </section>
-          ))}
+          {detail.eras.map((group) => {
+            const groupText = group.entries.map((e) => e.text).join("\n\n");
+            return (
+              <section key={group.era} className="eraSection">
+                <h2 className="eraLabel">{group.label}</h2>
+                {group.entries.map((entry, i) => (
+                  <div key={i} className="eraEntry">
+                    {entry.heading !== group.label.replace(/^\S+\s/, "") && (
+                      <h3 className="eraEntryHeading">{entry.heading}</h3>
+                    )}
+                    <p className="eraText">{entry.text}</p>
+                  </div>
+                ))}
+                <AskClaudeButton
+                  prompt={buildExplainPrompt(nameJa, group.label.replace(/^\S+\s/, ""), groupText)}
+                />
+              </section>
+            );
+          })}
 
           <div className="eraSection">
             <a className="wmReadMore" href={detail.pageUrl} target="_blank" rel="noopener noreferrer">
@@ -149,6 +159,11 @@ export default async function CountryHistoryPage({
                 >
                   「{summary.title}」の記事を読む →
                 </a>
+                <div style={{ marginTop: 10 }}>
+                  <AskClaudeButton
+                    prompt={buildExplainPrompt(nameJa, TOPIC_LABELS[topic].replace(/^\S+\s/, ""), summary.extract)}
+                  />
+                </div>
               </>
             ) : (
               <p className="wmPanelStatus">関連する記事が見つかりませんでした。</p>
@@ -156,6 +171,8 @@ export default async function CountryHistoryPage({
           </section>
         );
       })}
+
+      <AskClaudeBox countryName={nameJa} />
 
       <footer className="footer">
         国旗・首都・人口は REST Countries

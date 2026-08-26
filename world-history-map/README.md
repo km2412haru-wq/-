@@ -11,6 +11,7 @@
 - さらに **🧑‍🤝‍🧑 民族史 / 🍽️ 食に関する歴史 / 🏭 産業史** を、それぞれ関連するWikipedia記事（「{国名}の民族」「{国名}料理」「{国名}の経済」など）から要約表示
 - 専門記事が見つからない場合は、国の概要記事にフォールバック（その旨を案内バナーで明示）
 - 各セクションから元のWikipedia記事にジャンプ可能
+- **各セクションに「🤖 クロードにやさしく解説してもらう」ボタン**、ページ下部に「気になることをクロードに聞く」入力欄。押すと claude.ai が別タブで開き、質問（「文系大学生にもわかるやさしい言葉で解説して」＋そのセクションの文章、または自由入力した質問）が自動入力された状態になる。**APIキー・課金不要**（claude.aiへのディープリンクのみ）
 - PWA対応でスマホのホーム画面にアイコンとして追加可能
 
 ## 技術スタック
@@ -19,6 +20,7 @@
 - 地図: [`world-atlas`](https://www.npmjs.com/package/world-atlas)（[Natural Earth](https://www.naturalearthdata.com/)データ、パブリックドメイン）+ [`d3-geo`](https://www.npmjs.com/package/d3-geo) + [`topojson-client`](https://www.npmjs.com/package/topojson-client) + [`i18n-iso-countries`](https://www.npmjs.com/package/i18n-iso-countries) で、ビルド時にSVGパス・ISO国コード・日本語/英語国名を生成（`npm run gen-world-map`）
 - 歴史情報: Wikipedia日本語版の公開API（MediaWiki検索API + 全文抽出API）をサーバー側から呼び出し、見出しをキーワードマッチで時代分類（`lib/wikipedia.ts`）
 - 国の基本情報: [REST Countries API](https://restcountries.com/)（首都・人口）+ [flagcdn.com](https://flagcdn.com/)（国旗SVG、ISO alpha-2コードから直接構築）（`lib/countryInfo.ts`）
+- 「クロードに聞く」機能: Claude APIは呼び出さず、`https://claude.ai/new?q=...` へのディープリンクのみ（`lib/askClaude.ts`, `components/AskClaudeButton.tsx`, `components/AskClaudeBox.tsx`）。閲覧者がclaude.aiの別タブでその場でClaudeに質問できる
 - 外部APIキー・DB不要（すべて無料・キー不要の公開API/データ）
 
 ## セットアップ
@@ -36,7 +38,7 @@ npm run dev
 npm test
 ```
 
-`lib/wikipedia.ts` の記事検索・フォールバック・キャッシュロジック、見出しの時代分類（`classifyEra`）、記事本文のセクション分割（`parseSections`）、時代ごとのグルーピング（`groupIntoEras`）、トピック別記事の検索（`fetchTopicSummary`）、`lib/countryInfo.ts` の人口フォーマット（`formatPopulationJa`）とREST Countries呼び出しを、ローカルに立てたHTTPサーバー上のフィクスチャ・ユニットテストで検証しています（外部ネットワーク不要、29件）。
+`lib/wikipedia.ts` の記事検索・フォールバック・キャッシュロジック、見出しの時代分類（`classifyEra`）、記事本文のセクション分割（`parseSections`）、時代ごとのグルーピング（`groupIntoEras`）、トピック別記事の検索（`fetchTopicSummary`）、`lib/countryInfo.ts` の人口フォーマット（`formatPopulationJa`）とREST Countries呼び出し、`lib/askClaude.ts` のプロンプト生成ロジックを、ローカルに立てたHTTPサーバー上のフィクスチャ・ユニットテストで検証しています（外部ネットワーク不要、34件）。
 
 ## ビルド
 
@@ -61,6 +63,7 @@ npm run gen-world-map
 - 係争地域・未承認国家（コソボ、北キプロス、ソマリランドなど）は国旗・首都・人口が取得できない場合があります（ISO国コードを持たないため）。
 - 歴史情報・国の基本情報はいずれもサーバー側で24時間キャッシュしています。
 - 開発サンドボックス環境ではネットワークポリシーによりWikipedia・REST Countries・flagcdn.comへの接続がブロックされることがあります。Vercelや通常のサーバー環境にデプロイすれば問題なく取得できます。
+- **「クロードに聞く」ボタンは、アプリ内で回答を表示するものではありません。** claude.ai を別タブで開き、質問を自動入力するだけです（Claude APIは呼び出していないため無料・APIキー不要ですが、閲覧者がclaude.aiにログインしている必要があります）。アプリ内で回答まで完結させたい場合は、Anthropic APIキーを取得してサーバー側からClaude APIを呼び出す実装に変更できます（従量課金制）。
 
 ## デプロイ
 
