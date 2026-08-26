@@ -298,3 +298,88 @@ export async function fetchCountryHistoryDetail(
   }
   return result;
 }
+
+/* ---------------------------------------------------------------------
+ * Topic summaries: 民族史 / 食に関する歴史 / 産業史
+ *
+ * These aren't sections of the chronological "history of X" article, so
+ * they're fetched from separate, topic-specific Wikipedia articles
+ * instead — the lead summary only (not the full era breakdown), since
+ * those articles are organized by subject, not by time period.
+ * ------------------------------------------------------------------- */
+
+export type Topic = "ethnic" | "food" | "industry";
+
+export const TOPIC_LABELS: Record<Topic, string> = {
+  ethnic: "🧑‍🤝‍🧑 民族史",
+  food: "🍽️ 食に関する歴史",
+  industry: "🏭 産業史",
+};
+
+/** Candidate article titles to search for, tried in order, most specific first. */
+const TOPIC_QUERIES: Record<Topic, (nameJa: string) => string[]> = {
+  ethnic: (n) => [`${n}の民族`, `${n}人`],
+  food: (n) => [`${n}料理`, `${n}の食文化`],
+  industry: (n) => [`${n}の経済`, `${n}の産業`],
+};
+
+export interface TopicSummary {
+  topic: Topic;
+  title: string;
+  extract: string;
+  pageUrl: string;
+}
+
+const topicCache = new Map<string, { value: TopicSummary | null; expiresAt: number }>();
+
+async function findTopicSummary(
+  baseUrl: string,
+  topic: Topic,
+  queries: string[]
+): Promise<TopicSummary | null> {
+  for (const query of queries) {
+    const title = await searchTitle(baseUrl, query);
+    if (!title) continue;
+    const summary = await fetchSummary(baseUrl, title);
+    if (summary) {
+      return {
+        topic,
+        title: summary.title,
+        extract: summary.extract,
+        pageUrl:
+          summary.content_urls?.desktop?.page ??
+          `${baseUrl}/wiki/${encodeURIComponent(summary.title)}`,
+      };
+    }
+  }
+  return null;
+}
+
+export async function fetchTopicSummary(
+  nameJa: string,
+  topic: Topic,
+  options?: { baseUrl?: string }
+): Promise<TopicSummary | null> {
+  const baseUrl = options?.baseUrl ?? DEFAULT_BASE_URL;
+  const useCache = !options?.baseUrl;
+  const cacheKey = `${topic}:${nameJa}`;
+
+  if (useCache) {
+    const cached = topicCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+  }
+
+  let result: TopicSummary | null = null;
+  try {
+    result = await findTopicSummary(baseUrl, topic, TOPIC_QUERIES[topic](nameJa));
+  } catch {
+    result = null;
+  }
+
+  if (useCache) {
+    topicCache.set(cacheKey, { value: result, expiresAt: Date.now() + CACHE_TTL_MS });
+  }
+  return result;
+}

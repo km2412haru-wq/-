@@ -234,6 +234,52 @@ a {
   text-decoration: underline;
 }
 
+.infoStrip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+
+.flagImg {
+  width: 56px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.infoFacts {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.infoFact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoFactLabel {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.infoFactValue {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
 .eraSection {
   margin-bottom: 24px;
   padding-bottom: 20px;
