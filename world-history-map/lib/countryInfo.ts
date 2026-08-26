@@ -11,7 +11,8 @@ export interface CountryBasicInfo {
 }
 
 const REST_COUNTRIES_BASE = "https://restcountries.com/v3.1";
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours — this data barely changes
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours for a successful lookup
+const NEGATIVE_CACHE_TTL_MS = 5 * 60 * 1000; // only 5 minutes for a failed lookup — don't let a transient error stick around all day
 const cache = new Map<string, { value: CountryBasicInfo | null; expiresAt: number }>();
 
 export async function fetchCountryBasicInfo(
@@ -44,13 +45,19 @@ export async function fetchCountryBasicInfo(
           flagUrl: `https://flagcdn.com/${alpha2.toLowerCase()}.svg`,
         };
       }
+    } else {
+      console.error(`fetchCountryBasicInfo(${alpha2}) -> HTTP ${res.status} ${res.statusText}`);
     }
-  } catch {
+  } catch (err) {
+    console.error(`fetchCountryBasicInfo(${alpha2}) failed:`, err);
     result = null;
   }
 
   if (useCache) {
-    cache.set(alpha2, { value: result, expiresAt: Date.now() + CACHE_TTL_MS });
+    cache.set(alpha2, {
+      value: result,
+      expiresAt: Date.now() + (result ? CACHE_TTL_MS : NEGATIVE_CACHE_TTL_MS),
+    });
   }
   return result;
 }

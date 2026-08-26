@@ -21,12 +21,16 @@ export interface CountryHistory {
   isHistorySpecific: boolean;
 }
 
+// Wikimedia's User-Agent policy (meta.wikimedia.org/wiki/User-Agent_policy)
+// asks for an app name, version, and a URL or contact — requests without one
+// are more likely to be rate-limited or blocked outright.
 const HEADERS = {
-  "User-Agent": "AI-MA-Radar-WorldHistoryMap/1.0 (educational hobby project; no contact set)",
+  "User-Agent": "WorldHistoryMap/1.0 (https://mappu-sigma.vercel.app/; hobby project)",
   Accept: "application/json",
 };
 
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours — history doesn't change often
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours for a successful lookup
+const NEGATIVE_CACHE_TTL_MS = 5 * 60 * 1000; // only 5 minutes for "not found" / failure — don't let a transient error stick around all day
 const cache = new Map<string, { value: CountryHistory | null; expiresAt: number }>();
 
 const DEFAULT_BASE_URL = "https://ja.wikipedia.org";
@@ -34,7 +38,10 @@ const DEFAULT_BASE_URL = "https://ja.wikipedia.org";
 async function searchTitle(baseUrl: string, query: string): Promise<string | null> {
   const url = `${baseUrl}/w/api.php?action=query&list=search&format=json&srlimit=1&srsearch=${encodeURIComponent(query)}`;
   const res = await fetch(url, { headers: HEADERS });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.error(`searchTitle("${query}") -> HTTP ${res.status} ${res.statusText}`);
+    return null;
+  }
   const data = await res.json();
   return data?.query?.search?.[0]?.title ?? null;
 }
@@ -51,7 +58,10 @@ async function fetchSummary(
 } | null> {
   const url = `${baseUrl}/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
   const res = await fetch(url, { headers: HEADERS });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.error(`fetchSummary("${title}") -> HTTP ${res.status} ${res.statusText}`);
+    return null;
+  }
   const data = await res.json();
   if (data.type === "disambiguation" || !data.extract) return null;
   return data;
@@ -101,12 +111,16 @@ export async function fetchCountryHistory(
       const summary = await fetchSummary(baseUrl, nameJa);
       if (summary) result = toResult(summary, false);
     }
-  } catch {
+  } catch (err) {
+    console.error(`fetchCountryHistory(${nameJa}) failed:`, err);
     result = null;
   }
 
   if (useCache) {
-    cache.set(nameJa, { value: result, expiresAt: Date.now() + CACHE_TTL_MS });
+    cache.set(nameJa, {
+      value: result,
+      expiresAt: Date.now() + (result ? CACHE_TTL_MS : NEGATIVE_CACHE_TTL_MS),
+    });
   }
   return result;
 }
@@ -240,7 +254,10 @@ async function fetchFullExtract(
 ): Promise<{ title: string; extract: string; pageUrl: string } | null> {
   const url = `${baseUrl}/w/api.php?action=query&prop=extracts&explaintext=true&exsectionformat=wiki&format=json&titles=${encodeURIComponent(title)}`;
   const res = await fetch(url, { headers: HEADERS });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.error(`fetchFullExtract("${title}") -> HTTP ${res.status} ${res.statusText}`);
+    return null;
+  }
   const data = await res.json();
   const pages = data?.query?.pages;
   if (!pages) return null;
@@ -289,12 +306,16 @@ export async function fetchCountryHistoryDetail(
         eras: groupIntoEras(sections),
       };
     }
-  } catch {
+  } catch (err) {
+    console.error(`fetchCountryHistoryDetail(${nameJa}) failed:`, err);
     result = null;
   }
 
   if (useCache) {
-    detailCache.set(nameJa, { value: result, expiresAt: Date.now() + CACHE_TTL_MS });
+    detailCache.set(nameJa, {
+      value: result,
+      expiresAt: Date.now() + (result ? CACHE_TTL_MS : NEGATIVE_CACHE_TTL_MS),
+    });
   }
   return result;
 }
@@ -374,12 +395,16 @@ export async function fetchTopicSummary(
   let result: TopicSummary | null = null;
   try {
     result = await findTopicSummary(baseUrl, topic, TOPIC_QUERIES[topic](nameJa));
-  } catch {
+  } catch (err) {
+    console.error(`fetchTopicSummary(${nameJa}, ${topic}) failed:`, err);
     result = null;
   }
 
   if (useCache) {
-    topicCache.set(cacheKey, { value: result, expiresAt: Date.now() + CACHE_TTL_MS });
+    topicCache.set(cacheKey, {
+      value: result,
+      expiresAt: Date.now() + (result ? CACHE_TTL_MS : NEGATIVE_CACHE_TTL_MS),
+    });
   }
   return result;
 }
