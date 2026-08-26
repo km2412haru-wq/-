@@ -1,33 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { CountryShape, WorldMapData } from "@/lib/worldMapTypes";
-import type { CountryHistory } from "@/lib/wikipedia";
-
-type HistoryState = CountryHistory | "loading" | "error" | null;
 
 export default function WorldMap({ mapData }: { mapData: WorldMapData }) {
-  const [selected, setSelected] = useState<CountryShape | null>(null);
-  const [history, setHistory] = useState<HistoryState>(null);
+  const router = useRouter();
   const [query, setQuery] = useState("");
 
-  async function selectCountry(shape: CountryShape) {
-    setSelected(shape);
-    setQuery("");
-    setHistory("loading");
-    try {
-      const res = await fetch(`/api/history?name=${encodeURIComponent(shape.nameJa)}`);
-      if (!res.ok) throw new Error("not found");
-      const data: CountryHistory = await res.json();
-      setHistory(data);
-    } catch {
-      setHistory("error");
-    }
-  }
-
-  function closePanel() {
-    setSelected(null);
-    setHistory(null);
+  function goToCountry(shape: CountryShape) {
+    router.push(`/country/${encodeURIComponent(shape.nameJa)}`);
   }
 
   const suggestions = useMemo(() => {
@@ -52,7 +34,7 @@ export default function WorldMap({ mapData }: { mapData: WorldMapData }) {
           <ul className="wmSuggestions">
             {suggestions.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => selectCountry(s)}>
+                <button type="button" onClick={() => goToCountry(s)}>
                   {s.nameJa}
                   <span className="wmSuggestionEn">{s.nameEn}</span>
                 </button>
@@ -67,15 +49,14 @@ export default function WorldMap({ mapData }: { mapData: WorldMapData }) {
           viewBox={`0 0 ${mapData.width} ${mapData.height}`}
           className="wmSvg"
           role="img"
-          aria-label="世界地図。国をタップすると歴史が表示されます。"
+          aria-label="世界地図。国をタップすると、その国の時代別の歴史ページが開きます。"
         >
           {mapData.shapes.map((shape) => (
             <path
               key={shape.id}
               d={shape.d}
               className="wmCountry"
-              data-selected={selected?.id === shape.id}
-              onClick={() => selectCountry(shape)}
+              onClick={() => goToCountry(shape)}
             >
               <title>{shape.nameJa}</title>
             </path>
@@ -83,44 +64,7 @@ export default function WorldMap({ mapData }: { mapData: WorldMapData }) {
         </svg>
       </div>
 
-      <p className="wmHint">地図の国をタップ、または上の検索欄から国名を選んでください。</p>
-
-      {selected && (
-        <>
-          <div className="wmOverlay" onClick={closePanel} />
-          <div className="wmPanel" role="dialog" aria-label={`${selected.nameJa}の歴史`}>
-            <div className="wmPanelHeader">
-              <h2 className="wmPanelTitle">{selected.nameJa}</h2>
-              <button className="wmCloseBtn" onClick={closePanel} type="button" aria-label="閉じる">
-                ✕
-              </button>
-            </div>
-
-            {history === "loading" && <p className="wmPanelStatus">読み込み中…</p>}
-            {history === "error" && (
-              <p className="wmPanelStatus">情報を取得できませんでした。時間をおいて試してください。</p>
-            )}
-            {history && typeof history === "object" && (
-              <>
-                {!history.isHistorySpecific && (
-                  <p className="wmPanelNote">
-                    「{selected.nameJa}の歴史」の専門記事が見つからなかったため、国の概要記事を表示しています。
-                  </p>
-                )}
-                <p className="wmExtract">{history.extract}</p>
-                <a
-                  className="wmReadMore"
-                  href={history.pageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wikipediaで続きを読む →
-                </a>
-              </>
-            )}
-          </div>
-        </>
-      )}
+      <p className="wmHint">地図の国をタップ、または上の検索欄から国名を選ぶと、時代別の歴史ページが開きます。</p>
     </>
   );
 }

@@ -186,67 +186,11 @@ a {
   opacity: 0.75;
 }
 
-.wmCountry[data-selected="true"] {
-  fill: var(--accent);
-  opacity: 1;
-}
-
 .wmHint {
   color: var(--text-muted);
   font-size: 0.8rem;
   text-align: center;
   margin: 10px 0 0;
-}
-
-.wmOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 40;
-}
-
-.wmPanel {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-width: 640px;
-  margin: 0 auto;
-  max-height: 70vh;
-  overflow-y: auto;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-bottom: none;
-  border-radius: 16px 16px 0 0;
-  padding: 20px;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
-  z-index: 50;
-}
-
-.wmPanelHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.wmPanelTitle {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.wmCloseBtn {
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text-muted);
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  flex-shrink: 0;
 }
 
 .wmPanelStatus {
@@ -260,15 +204,7 @@ a {
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 0.8rem;
-  margin: 0 0 12px;
-}
-
-.wmExtract {
-  color: var(--text);
-  font-size: 0.94rem;
-  line-height: 1.7;
-  white-space: pre-line;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
 }
 
 .wmReadMore {
@@ -277,8 +213,58 @@ a {
   font-weight: 600;
   font-size: 0.88rem;
   text-decoration: none;
+  margin-top: 8px;
 }
 
 .wmReadMore:hover {
   text-decoration: underline;
+}
+
+/* ---- Country history page (era breakdown) ---- */
+
+.backLink {
+  display: inline-block;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.eraSection {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eraLabel {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.eraEntry {
+  margin-bottom: 14px;
+}
+
+.eraEntry:last-child {
+  margin-bottom: 0;
+}
+
+.eraEntryHeading {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 4px;
+}
+
+.eraText {
+  color: var(--text);
+  font-size: 0.94rem;
+  line-height: 1.75;
+  white-space: pre-line;
+  margin: 0;
 }
