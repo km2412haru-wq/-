@@ -1,4 +1,5 @@
 export type Category = "ma" | "business" | "profit" | "other";
+export type Origin = "jp" | "overseas";
 
 export interface FeedSource {
   /** Display name shown as a badge on each card. */
@@ -17,7 +18,11 @@ export interface NewsItem {
   publishedAt: string | null;
   summary: string;
   source: string;
+  /** Language of the source feed (not a per-article language detection). */
+  lang: "ja" | "en";
   categories: Category[];
+  /** Companies mentioned in the article; can be both, or neither, e.g. a Japan/overseas partnership story. */
+  origin: Origin[];
   /** True if the item didn't clearly match any AI-company keyword and is kept only because its feed is AI-focused. */
   weakMatch: boolean;
 }

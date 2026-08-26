@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import NewsCard from "./NewsCard";
 import { CATEGORY_LABELS } from "@/lib/categorize";
-import type { Category, FetchResult } from "@/lib/types";
+import { ORIGIN_LABELS } from "@/lib/companyOrigin";
+import type { Category, FetchResult, Origin } from "@/lib/types";
 
 const TABS: { key: Category | "all"; label: string }[] = [
   { key: "all", label: "すべて" },
@@ -13,9 +14,17 @@ const TABS: { key: Category | "all"; label: string }[] = [
   { key: "other", label: CATEGORY_LABELS.other },
 ];
 
+const ORIGIN_TABS: { key: Origin | "all"; label: string }[] = [
+  { key: "all", label: "すべて" },
+  { key: "jp", label: ORIGIN_LABELS.jp },
+  { key: "overseas", label: ORIGIN_LABELS.overseas },
+];
+
 export default function Dashboard({ initialData }: { initialData: FetchResult }) {
   const [data, setData] = useState(initialData);
   const [activeTab, setActiveTab] = useState<Category | "all">("all");
+  const [activeOrigin, setActiveOrigin] = useState<Origin | "all">("all");
+  const [jaOnly, setJaOnly] = useState(false);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +47,9 @@ export default function Dashboard({ initialData }: { initialData: FetchResult })
     return data.items.filter((item) => {
       const matchesTab = activeTab === "all" || item.categories.includes(activeTab);
       if (!matchesTab) return false;
+      const matchesOrigin = activeOrigin === "all" || item.origin.includes(activeOrigin);
+      if (!matchesOrigin) return false;
+      if (jaOnly && item.lang !== "ja") return false;
       if (!q) return true;
       return (
         item.title.toLowerCase().includes(q) ||
@@ -45,7 +57,7 @@ export default function Dashboard({ initialData }: { initialData: FetchResult })
         item.source.toLowerCase().includes(q)
       );
     });
-  }, [data.items, activeTab, query]);
+  }, [data.items, activeTab, activeOrigin, jaOnly, query]);
 
   const fetchedAtLabel = new Date(data.fetchedAt).toLocaleString("ja-JP");
 
@@ -82,13 +94,38 @@ export default function Dashboard({ initialData }: { initialData: FetchResult })
             </button>
           ))}
         </div>
-        <input
-          className="searchInput"
-          type="search"
-          placeholder="企業名・キーワードで検索"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+
+        <div className="tabs">
+          {ORIGIN_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              className="tab"
+              data-active={activeOrigin === tab.key}
+              onClick={() => setActiveOrigin(tab.key)}
+              type="button"
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="searchRow">
+          <input
+            className="searchInput"
+            type="search"
+            placeholder="企業名・キーワードで検索"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={jaOnly}
+              onChange={(e) => setJaOnly(e.target.checked)}
+            />
+            日本語の記事のみ
+          </label>
+        </div>
       </div>
 
       <p className="meta">

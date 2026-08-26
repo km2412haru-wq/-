@@ -113,10 +113,34 @@ a {
 
 .controls {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.searchRow {
+  display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
   align-items: center;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 .tabs {
@@ -261,6 +285,12 @@ a {
 .badge[data-cat="other"] {
   background: var(--cat-other-bg);
   color: var(--cat-other-text);
+}
+
+.badge[data-origin] {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
 }
 
 .empty {

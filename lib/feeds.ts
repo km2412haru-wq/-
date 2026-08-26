@@ -51,4 +51,19 @@ export const FEEDS: FeedSource[] = [
     url: "https://www.prnewswire.com/rss/technology-latest-news/artificial-intelligence-latest-news-list.rss",
     lang: "en",
   },
+  {
+    name: "Ledge.ai",
+    url: "https://ledge.ai/feed/",
+    lang: "ja",
+  },
+  {
+    name: "AINOW",
+    url: "https://ainow.ai/feed/",
+    lang: "ja",
+  },
+  {
+    name: "AI-SCHOLAR",
+    url: "https://ai-scholar.tech/feed/",
+    lang: "ja",
+  },
 ];

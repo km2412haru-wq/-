@@ -1,6 +1,7 @@
 import Parser from "rss-parser";
 import { FEEDS } from "./feeds";
 import { categorize } from "./categorize";
+import { detectOrigin } from "./companyOrigin";
 import type { FeedSource, FetchResult, NewsItem } from "./types";
 
 const parser = new Parser({
@@ -46,7 +47,9 @@ async function fetchOneFeed(
         publishedAt,
         summary,
         source: source.name,
+        lang: source.lang,
         categories: categorize(title, summary),
+        origin: detectOrigin(title, summary),
         weakMatch: false,
       };
     });

@@ -1,4 +1,5 @@
 import { CATEGORY_LABELS } from "@/lib/categorize";
+import { ORIGIN_LABELS } from "@/lib/companyOrigin";
 import { formatRelativeTime } from "@/lib/format";
 import type { NewsItem } from "@/lib/types";
 
@@ -22,6 +23,11 @@ export default function NewsCard({ item }: { item: NewsItem }) {
         {item.categories.map((cat) => (
           <span key={cat} className="badge" data-cat={cat}>
             {CATEGORY_LABELS[cat]}
+          </span>
+        ))}
+        {item.origin.map((origin) => (
+          <span key={origin} className="badge" data-origin={origin}>
+            {ORIGIN_LABELS[origin]}
           </span>
         ))}
       </div>
