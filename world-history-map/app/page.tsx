@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import Link from "next/link";
 import WorldMap from "@/components/WorldMap";
 import type { WorldMapData } from "@/lib/worldMapTypes";
 
@@ -19,15 +18,12 @@ export default async function WorldHistoryPage() {
   const mapData = await loadMapData();
 
   return (
-    <main className="page wmPage">
+    <main className="page">
       <div className="header">
         <div>
           <h1 className="title">🗺️ 世界史マップ</h1>
           <p className="subtitle">国をタップすると、その国の歴史をWikipediaから要約表示します</p>
         </div>
-        <Link href="/" className="refreshBtn">
-          ← AI M&amp;A Radar
-        </Link>
       </div>
 
       <WorldMap mapData={mapData} />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import NewsCard from "./NewsCard";
 import { CATEGORY_LABELS } from "@/lib/categorize";
 import { ORIGIN_LABELS } from "@/lib/companyOrigin";
@@ -80,10 +79,6 @@ export default function Dashboard({ initialData }: { initialData: FetchResult })
           {loading ? "更新中…" : "🔄 最新情報に更新"}
         </button>
       </div>
-
-      <Link href="/world-history" className="crossLink">
-        🗺️ 世界史マップも見る →
-      </Link>
 
       <div className="controls">
         <div className="tabs">

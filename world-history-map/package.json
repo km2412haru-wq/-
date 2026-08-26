@@ -1,0 +1,30 @@
+{
+  "name": "world-history-map",
+  "version": "0.1.0",
+  "private": true,
+  "description": "世界地図から国を選ぶと、その国の歴史をWikipediaから要約表示するアプリ",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "tsx --test __tests__/**/*.test.ts",
+    "gen-icons": "tsx scripts/gen-icons.mjs",
+    "gen-world-map": "tsx scripts/gen-world-map.mjs"
+  },
+  "dependencies": {
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "d3-geo": "^3.1.1",
+    "i18n-iso-countries": "^7.14.0",
+    "topojson-client": "^3.1.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5.7.2",
+    "world-atlas": "^2.0.2"
+  }
+}

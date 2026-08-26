@@ -1,0 +1,284 @@
+:root {
+  --bg: #f7f9fa;
+  --bg-elevated: #ffffff;
+  --border: #e1e7ea;
+  --text: #14181a;
+  --text-muted: #667075;
+  --accent: #0891b2;
+  --accent-soft: #e6f7fb;
+  --note-bg: #eef2f3;
+
+  --shadow: 0 1px 2px rgba(20, 20, 30, 0.04), 0 4px 12px rgba(20, 20, 30, 0.04);
+
+  --wm-ocean: #dcecf2;
+  --wm-land: #c6dbe2;
+  --wm-land-border: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1416;
+    --bg-elevated: #171d20;
+    --border: #262e32;
+    --text: #eef3f4;
+    --text-muted: #98a3a8;
+    --accent: #22d3ee;
+    --accent-soft: #123138;
+    --note-bg: #1c2528;
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+
+    --wm-ocean: #0d1b22;
+    --wm-land: #223038;
+    --wm-land-border: #0f1416;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin: 0;
+  max-width: 46ch;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+/* ---- World History Map ---- */
+
+.wmSearchRow {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.wmSuggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 4px;
+  list-style: none;
+  padding: 4px;
+  box-shadow: var(--shadow);
+  z-index: 20;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.wmSuggestions li button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  padding: 9px 10px;
+  border: none;
+  background: none;
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.wmSuggestions li button:hover {
+  background: var(--accent-soft);
+}
+
+.wmSuggestionEn {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.wmMapContainer {
+  width: 100%;
+  aspect-ratio: 960 / 500;
+  background: var(--wm-ocean);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.wmSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.wmCountry {
+  fill: var(--wm-land);
+  stroke: var(--wm-land-border);
+  stroke-width: 0.5;
+  cursor: pointer;
+  transition: fill 0.15s ease;
+}
+
+.wmCountry:hover {
+  fill: var(--accent);
+  opacity: 0.75;
+}
+
+.wmCountry[data-selected="true"] {
+  fill: var(--accent);
+  opacity: 1;
+}
+
+.wmHint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+.wmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 40;
+}
+
+.wmPanel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 640px;
+  margin: 0 auto;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
+  z-index: 50;
+}
+
+.wmPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.wmPanelTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wmCloseBtn {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.wmPanelStatus {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.wmPanelNote {
+  background: var(--note-bg);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  margin: 0 0 12px;
+}
+
+.wmExtract {
+  color: var(--text);
+  font-size: 0.94rem;
+  line-height: 1.7;
+  white-space: pre-line;
+  margin: 0 0 14px;
+}
+
+.wmReadMore {
+  display: inline-block;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.wmReadMore:hover {
+  text-decoration: underline;
+}
