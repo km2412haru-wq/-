@@ -57,7 +57,12 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           <div style={{ fontSize: 13, fontWeight: 800 }}>
             {state.currentMission.emoji} 今回の案件：{state.currentMission.title}
           </div>
-          <span className="tag">プロジェクト{state.projectIndex}</span>
+          <div style={{ display: "flex", gap: 6 }}>
+            <span className="tag" style={{ background: "var(--good-soft)", color: "var(--good)" }}>
+              🧑‍💼 {state.currentMission.roleTag}
+            </span>
+            <span className="tag">プロジェクト{state.projectIndex}</span>
+          </div>
         </div>
         <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.7, margin: "0 0 10px" }}>{state.currentMission.brief}</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
@@ -100,24 +105,6 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
         <Gauge label="予算（会社のお金）" value={Math.max(0, state.budget)} max={state.budgetMax} color="var(--good)" emoji="💰" suffix="万円" />
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-muted)" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              🏦 個人貯金
-              <InfoTip text="会社のプロジェクト予算とは別の、自分自身の貯金。毎週の給料から生活費(8万円)を差し引いた分が積み上がっていく。マイナスになることもある。" />
-            </span>
-            <span style={{ fontWeight: 700, color: state.personalSavings < 0 ? "var(--bad)" : "var(--text)" }}>{state.personalSavings}万円</span>
-          </div>
-          <div className="gauge-track">
-            <div
-              className="gauge-fill"
-              style={{
-                width: `${Math.min(100, (Math.abs(state.personalSavings) / 300) * 100)}%`,
-                background: state.personalSavings < 0 ? "var(--bad)" : "var(--good)",
-              }}
-            />
-          </div>
-        </div>
         <Gauge label="残り納期" value={state.weeksLeft} max={state.projectTotalWeeks} color="var(--warn)" emoji="⏳" suffix="週" />
         <Gauge label="AP（今週の行動回数）" value={state.ap} max={state.apMax} color="var(--accent)" emoji="⚡" />
         <Gauge label="進捗" value={state.progress} max={100} color="#0891b2" emoji="📈" />
@@ -125,6 +112,52 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
         <Gauge label="満足度" value={state.satisfaction} max={100} color="var(--good)" emoji="😊" />
         <Gauge label="疲労度" value={state.fatigue} max={100} color="var(--bad)" emoji="🥱" />
         <Gauge label="トラブル発生率" value={state.riskLevel} max={100} color="var(--warn)" emoji="🎲" />
+      </div>
+
+      <div className="card" style={{ padding: "14px 16px", marginBottom: 14 }}>
+        <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 8, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          🏡 プライベート
+          {state.boughtHouse && <span className="tag">🏠 マイホーム</span>}
+          {state.married && <span className="tag">💍 既婚</span>}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-muted)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                🏦 個人貯金
+                <InfoTip text="会社のプロジェクト予算とは別の、自分自身の貯金。毎週の給料から生活費(8万円)を差し引いた分が積み上がっていく。マイナスになることもある。趣味に使ったり、マイホーム購入・結婚の資金になったりする。" />
+              </span>
+              <span style={{ fontWeight: 700, color: state.personalSavings < 0 ? "var(--bad)" : "var(--text)" }}>{state.personalSavings}万円</span>
+            </div>
+            <div className="gauge-track">
+              <div
+                className="gauge-fill"
+                style={{
+                  width: `${Math.min(100, (Math.abs(state.personalSavings) / 300) * 100)}%`,
+                  background: state.personalSavings < 0 ? "var(--bad)" : "var(--good)",
+                }}
+              />
+            </div>
+          </div>
+          <Gauge
+            label="モチベーション"
+            value={state.motivation}
+            max={100}
+            color="#d946ef"
+            emoji="🎨"
+          />
+        </div>
+        <button
+          className="btn"
+          disabled={blocked || state.hobbySpentThisWeek || state.personalSavings < 15}
+          onClick={() => send({ type: "SPEND_ON_HOBBY" })}
+          style={{ fontSize: 12.5 }}
+        >
+          🎨 趣味に貯金を使う（-15万円・週1回まで／モチベ+10）
+        </button>
+        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "8px 0 0", lineHeight: 1.6 }}>
+          モチベーションが高いほど週の疲労回復が良くなり、80以上を保つと評価スコアも少しずつ増える。放っておくと少しずつ下がる。貯金が貯まるとマイホーム購入や結婚のイベントが訪れることも。
+        </p>
       </div>
 
       <div className="card" style={{ padding: "10px 14px", marginBottom: 14, display: "flex", flexDirection: "column", gap: 8 }}>

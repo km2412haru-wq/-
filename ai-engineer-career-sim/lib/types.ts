@@ -119,6 +119,7 @@ export interface Mission {
   emoji: string;
   title: string;
   brief: string; // 案件の背景・依頼内容（ストーリー）
+  roleTag: string; // 案件の職種フレーバー（AI開発エンジニア/AIコンサルタント/広告テックエンジニア等）
   cultures: CultureType[]; // どの企業文化で発生しうる案件か（会社によって案件の傾向が変わる）
   successQuality: number;
   successProgress: number;
@@ -236,6 +237,10 @@ export interface GameState {
 
   salary: number; // 万円/年
   personalSavings: number; // 万円。会社の予算とは別の、個人の貯金（給料-生活費が毎週積み上がる）
+  motivation: number; // 0-100。プライベートの充実度。趣味に貯金を使うと上がり、放っておくと少しずつ下がる
+  hobbySpentThisWeek: boolean; // 今週すでに趣味にお金を使ったか（週1回まで）
+  boughtHouse: boolean; // マイホームを購入したか
+  married: boolean; // 結婚したか
   currentCompany: Company;
   familiarity: number; // 0-100 馴染み度
   jobHistory: JobHistoryEntry[];

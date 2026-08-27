@@ -540,4 +540,52 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+
+  // ===== 人生の大きな節目（貯金がたまってくると発生する） =====
+  {
+    id: "house_purchase",
+    title: "マイホーム購入を考える時が来た",
+    emoji: "🏠",
+    description: "貯金にも少し余裕が出てきた。不動産屋から紹介された物件が、思いのほか魅力的だ。",
+    weight: (s) => (!s.boughtHouse && s.week >= 8 && s.personalSavings >= 220 ? 1.2 : 0),
+    choices: [
+      {
+        id: "buy",
+        label: "思い切って購入する（-180万円）",
+        tooltip: "生活が安定し、以後の疲労回復が少し良くなる。",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 180, boughtHouse: true, motivation: clamp(s.motivation + 25) },
+          log: "念願のマイホームを購入した！生活の安定感がまるで違う。",
+        }),
+      },
+      {
+        id: "wait",
+        label: "今回は見送る",
+        apply: (s) => ({ state: s, log: "まだ様子を見ることにした。良い物件はまた見つかるはずだ。" }),
+      },
+    ],
+  },
+  {
+    id: "marriage",
+    title: "人生のパートナーとの将来を考えている",
+    emoji: "💍",
+    description: "長く付き合っているパートナーがいる。ふと、この先の人生を一緒に歩むことを考え始めた。",
+    weight: (s) => (!s.married && s.week >= 10 && s.personalSavings >= 100 ? 1 : 0),
+    choices: [
+      {
+        id: "propose",
+        label: "プロポーズする（-60万円）",
+        tooltip: "心強いパートナーができ、モチベーションが大きく上がる。",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 60, married: true, motivation: clamp(s.motivation + 30), satisfaction: clamp(s.satisfaction + 10) },
+          log: "結婚した！心強いパートナーができ、仕事にも良い影響がありそうだ。",
+        }),
+      },
+      {
+        id: "focus_career",
+        label: "今はキャリアに集中する",
+        apply: (s) => ({ state: s, log: "今はキャリアに集中することにした。" }),
+      },
+    ],
+  },
 ];

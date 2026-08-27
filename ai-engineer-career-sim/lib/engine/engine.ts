@@ -30,8 +30,11 @@ export type GameMsg =
   | { type: "ACCEPT_OFFER"; offerId: string }
   | { type: "DECLINE_OFFER"; offerId: string }
   | { type: "RESOLVE_STAY"; stay: boolean }
+  | { type: "SPEND_ON_HOBBY" }
   | { type: "RETIRE" }
   | { type: "GOTO_SCREEN"; screen: Screen };
+
+export const HOBBY_COST = 15; // 万円
 
 const MAX_PROJECTS = 8;
 
@@ -102,6 +105,10 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     scoreMultiplier: 1,
     salary: STARTING_COMPANY.baseSalary,
     personalSavings: 30,
+    motivation: 50,
+    hobbySpentThisWeek: false,
+    boughtHouse: false,
+    married: false,
     currentCompany: STARTING_COMPANY,
     familiarity: 100,
     jobHistory: [],
@@ -448,17 +455,22 @@ const WEEKLY_LIVING_COST = 8; // 万円。家賃・食費などの生活費（�
 function endWeek(state: GameState): GameState {
   if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
   const weeklyIncome = Math.round(state.salary / 52);
+  // 趣味でプライベートが充実しているほど疲れにくい。マイホームがあると生活が安定し、さらに回復しやすい
+  const fatigueRecovery = 6 + Math.round(state.motivation / 25) + (state.boughtHouse ? 2 : 0);
   let s: GameState = {
     ...state,
     week: state.week + 1,
     weeksLeft: state.weeksLeft - 1,
     ap: state.apMax,
-    fatigue: clamp(state.fatigue - 6),
+    fatigue: clamp(state.fatigue - fatigueRecovery),
     familiarity: clamp(state.familiarity + 15),
     riskLevel: state.fatigue > 80 ? clamp(state.riskLevel + 5, 0, 100) : state.riskLevel,
     studiedInARow: state.lastActionLabel === "study" ? state.studiedInARow : 0,
     lastActionLabel: null,
     personalSavings: state.personalSavings + weeklyIncome - WEEKLY_LIVING_COST,
+    motivation: clamp(state.motivation - 2),
+    hobbySpentThisWeek: false,
+    reputation: state.motivation >= 80 ? gainReputation(state, 1) : state.reputation,
   };
   s = pushHistory(s);
   const ev = rollEvent(s);
@@ -557,6 +569,20 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
       }
       let s = performJobChange({ ...state, stayPrompt: null }, offer);
       s = applyAchievements(s, { justJoinedCompanyId: offer.company.id });
+      return s;
+    }
+    case "SPEND_ON_HOBBY": {
+      if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
+      if (state.hobbySpentThisWeek) return { ...state, log: addLog(state, "⏳ 趣味に使えるのは週1回まで。") };
+      if (state.personalSavings < HOBBY_COST) return { ...state, log: addLog(state, "⚠️ 貯金が足りない。") };
+      let s: GameState = {
+        ...state,
+        personalSavings: state.personalSavings - HOBBY_COST,
+        motivation: clamp(state.motivation + 10),
+        hobbySpentThisWeek: true,
+        log: addLog(state, "🎨 貯金を趣味に使ってリフレッシュした。モチベーションが上がった。"),
+      };
+      s = applyAchievements(s, {});
       return s;
     }
     case "RETIRE": {

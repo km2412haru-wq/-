@@ -47,6 +47,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "savings_500", name: "貯金家", desc: "個人貯金を500万円まで貯める", check: (s) => s.personalSavings >= 500 },
   { id: "broke", name: "火の車", desc: "個人貯金がマイナスになる", hidden: true, check: (s) => s.personalSavings < 0 },
   { id: "mission_synergist", name: "案件の勘所を掴む者", desc: "ミッションに刺さるアクションを10回選ぶ", check: (s) => (s.counters.missionSynergyHits ?? 0) >= 10 },
+  { id: "homeowner", name: "マイホームの主", desc: "マイホームを購入する", check: (s) => s.boughtHouse },
+  { id: "married_life", name: "ふたり暮らし", desc: "結婚する", check: (s) => s.married },
+  { id: "work_life_balance", name: "ワークライフバランスの鑑", desc: "モチベーション90以上を保つ", check: (s) => s.motivation >= 90 },
 ];
 
 export const TOTAL_ACHIEVEMENTS = ACHIEVEMENTS.length;
