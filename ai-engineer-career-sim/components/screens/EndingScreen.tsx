@@ -17,7 +17,7 @@ export default function EndingScreen({ state, onRestart, onTitle }: { state: Gam
       <div className="card" style={{ padding: 18, textAlign: "left", marginBottom: 16 }}>
         <div style={{ fontWeight: 800, marginBottom: 10 }}>👑 最終称号：{title.name}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 13 }}>
-          <div>実績スコア：{state.reputation}</div>
+          <div>評価スコア：{state.reputation}</div>
           <div>転職回数：{state.jobChangeCount}回</div>
           <div>最終年収：約{state.salary}万円</div>
           <div>完了プロジェクト：{state.totalProjectsCompleted}件</div>

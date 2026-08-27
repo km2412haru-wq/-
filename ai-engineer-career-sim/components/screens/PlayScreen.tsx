@@ -33,11 +33,6 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           </div>
           <div style={{ fontSize: 20, fontWeight: 800, marginTop: 2 }}>
             👑 {title.name}
-            {next && (
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)", marginLeft: 8 }}>
-                次の称号まであと{next.threshold - state.reputation}
-              </span>
-            )}
           </div>
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -55,6 +50,27 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           </button>
         </div>
       </header>
+
+      <div className="card" style={{ padding: "14px 16px", marginBottom: 14, background: "var(--accent-soft)", border: "none" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: "var(--accent)" }}>⭐ 評価スコア：{state.reputation}</div>
+          <div style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
+            {next ? `次の称号「${next.name}」まであと${next.threshold - state.reputation}` : "最高称号に到達！"}
+          </div>
+        </div>
+        <div className="gauge-track" style={{ marginBottom: 8 }}>
+          <div
+            className="gauge-fill"
+            style={{
+              width: `${next ? Math.min(100, ((state.reputation - title.threshold) / Math.max(1, next.threshold - title.threshold)) * 100) : 100}%`,
+              background: "var(--accent)",
+            }}
+          />
+        </div>
+        <p style={{ fontSize: 11.5, color: "var(--text-muted)", margin: 0, lineHeight: 1.6 }}>
+          評価が高いほど、大きな会社からスカウトが届きやすくなり、称号もランクアップする。ほとんどの行動で少しずつ上がる（ログの「評価+◯」が目印）。
+        </p>
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
         <Gauge label="予算" value={Math.max(0, state.budget)} max={state.budgetMax} color="var(--good)" emoji="💰" suffix="万円" />

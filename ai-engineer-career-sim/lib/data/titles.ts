@@ -4,7 +4,7 @@ export interface TitleTier {
   desc: string;
 }
 
-// 累計実績スコア(reputation)に応じた称号
+// 累計評価スコア(reputation)に応じた称号
 export const TITLES: TitleTier[] = [
   { threshold: 0, name: "見習いエンジニア", desc: "すべてはここから始まる。" },
   { threshold: 40, name: "駆け出しAIエンジニア", desc: "コミットが少しずつ形になってきた。" },

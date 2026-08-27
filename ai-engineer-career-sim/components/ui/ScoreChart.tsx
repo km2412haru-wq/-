@@ -17,7 +17,7 @@ export default function ScoreChart({ history }: { history: HistoryPoint[] }) {
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <Line type="monotone" dataKey="quality" name="精度" stroke="#4f46e5" strokeWidth={2} dot={false} />
         <Line type="monotone" dataKey="satisfaction" name="満足度" stroke="#0f8a4a" strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="reputation" name="実績スコア" stroke="#d92d3f" strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="reputation" name="評価スコア" stroke="#d92d3f" strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

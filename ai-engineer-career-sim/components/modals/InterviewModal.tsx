@@ -52,7 +52,7 @@ export default function InterviewModal({ state, onChallenge }: { state: GameStat
           <Gauge label="合格の手応え" value={Math.round(chance * 100)} max={100} color={toneColor} suffix="%" />
           <div style={{ marginTop: 6, fontSize: 13, fontWeight: 700, color: toneColor }}>{label}</div>
           <p style={{ fontSize: 11.5, color: "var(--text-muted)", margin: "8px 0 0", lineHeight: 1.6 }}>
-            クイズの正解不正解ではなく、これまでのアクションで積み上げた技術力・コミュ力・実績スコアがそのまま合否に反映される。
+            クイズの正解不正解ではなく、これまでのアクションで積み上げた技術力・コミュ力・評価スコアがそのまま合否に反映される。
           </p>
         </div>
 

@@ -79,7 +79,7 @@ export default function SetupScreen({
           <>
             <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>NG+（周回プレイ）</h2>
             <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 12 }}>
-              過去のクリア回数に応じて周回に挑戦できる。予算が縮小しAPI価格が高騰する代わりに、初期実績スコアにボーナスが付く。
+              過去のクリア回数に応じて周回に挑戦できる。予算が縮小しAPI価格が高騰する代わりに、初期評価スコアにボーナスが付く。
             </p>
             <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
               {Array.from({ length: maxNgPlus + 1 }, (_, i) => i).map((lv) => (

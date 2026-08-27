@@ -199,7 +199,7 @@ export interface GameState {
   commScore: number;
   fatigue: number; // 0-100 高いほど悪い
 
-  reputation: number; // 累計実績スコア（キャリアスコア）
+  reputation: number; // 累計評価スコア（キャリアスコア）
   comboCount: number;
   scoreMultiplier: number;
 

@@ -468,7 +468,9 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
       if (!state.activeEvent) return state;
       const choice = state.activeEvent.event.choices.find((c) => c.id === msg.choiceId) ?? state.activeEvent.event.choices[0];
       const result = choice.apply(state);
-      let s: GameState = { ...result.state, activeEvent: null, log: addLog(result.state, `↳ ${result.log}`) };
+      const repDelta = result.state.reputation - state.reputation;
+      const logLine = repDelta > 0 ? `↳ ${result.log}（評価+${repDelta}）` : `↳ ${result.log}`;
+      let s: GameState = { ...result.state, activeEvent: null, log: addLog(result.state, logLine) };
       s = applyAchievements(s, {});
       s = settleAfterEvent(s);
       return s;

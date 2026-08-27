@@ -24,7 +24,7 @@ export default function ApplyModal({ state, onApply, onClose }: { state: GameSta
           </button>
         </div>
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
-          応募にはAPを1消費する。選考はクイズではなく、技術力・コミュ力・実績スコアという「実力」の数値で合否が決まる。ボタンの手応え表示が入り口の合格目安の参考になる。
+          応募にはAPを1消費する。選考はクイズではなく、技術力・コミュ力・評価スコアという「実力」の数値で合否が決まる。ボタンの手応え表示が入り口の合格目安の参考になる。
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 18, maxHeight: "56vh", overflowY: "auto" }} className="scrollbar-thin">
           {tiers.map((tier) => {

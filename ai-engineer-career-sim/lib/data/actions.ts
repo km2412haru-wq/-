@@ -328,6 +328,13 @@ export const ACTIONS: GameAction[] = [
   },
 ];
 
+// 評価スコア（reputation）がどれだけ増えたかをログに一緒に表示し、
+// 「何をすると評価が上がるのか」をその場でわかるようにする
+function withReputationDelta(before: GameState, after: GameState, message: string): string {
+  const delta = after.reputation - before.reputation;
+  return delta > 0 ? `${message}（評価+${delta}）` : message;
+}
+
 export function actionApply(
   action: GameAction,
   choiceId: string | undefined,
@@ -336,8 +343,10 @@ export function actionApply(
   if (action.choices) {
     const c = action.choices.find((c) => c.id === choiceId) ?? action.choices[0];
     const result = c.apply(s);
-    return { state: { ...result.state, log: addLog(result.state, `${action.emoji} ${result.log}`) }, log: result.log };
+    const log = withReputationDelta(s, result.state, result.log);
+    return { state: { ...result.state, log: addLog(result.state, `${action.emoji} ${log}`) }, log };
   }
   const result = action.apply!(s);
-  return { state: { ...result.state, log: addLog(result.state, `${action.emoji} ${result.log}`) }, log: result.log };
+  const log = withReputationDelta(s, result.state, result.log);
+  return { state: { ...result.state, log: addLog(result.state, `${action.emoji} ${log}`) }, log };
 }

@@ -23,7 +23,7 @@ export default function RankingScreen({ ranking, onBack }: { ranking: RankingEnt
                 <th style={{ padding: "6px 8px" }}>日付</th>
                 <th style={{ padding: "6px 8px" }}>称号</th>
                 <th style={{ padding: "6px 8px" }}>ルート</th>
-                <th style={{ padding: "6px 8px" }}>実績スコア</th>
+                <th style={{ padding: "6px 8px" }}>評価スコア</th>
                 <th style={{ padding: "6px 8px" }}>転職回数</th>
                 <th style={{ padding: "6px 8px" }}>エンディング</th>
                 <th style={{ padding: "6px 8px" }}>NG+</th>
