@@ -20,6 +20,17 @@ const STEP_TEMPLATES: Record<Tier, string[]> = {
   1: ["カジュアル面談"],
 };
 
+// 企業の業界タイプによって選考プロセスの中身を変える
+// （同じ難易度でも、コンサルはケース面接、シンクタンクは論理思考テスト、
+// 製造業は技術面接＋工場見学、金融は適性検査中心…と選考の雰囲気が違う）
+const STEPS_CONSULTING_5 = ["書類選考", "ケース面接①", "ケース面接②", "パートナー面接", "最終面接"];
+const STEPS_CONSULTING_4 = ["書類選考", "ケース面接", "グループディスカッション", "最終面接"];
+const STEPS_MANUFACTURING_4 = ["書類選考", "技術面接", "工場見学・適性検査", "最終面接"];
+const STEPS_THINKTANK_4 = ["書類選考", "論理思考テスト", "小論文", "面接"];
+const STEPS_TOYOTA = ["書類選考", "技術面接", "事業理解・プレゼンテーション", "最終面接"];
+const STEPS_MANUFACTURING_2 = ["書類選考", "技術面接＋工場見学"];
+const STEPS_FINANCE_2 = ["適性検査", "人物面接＋最終面接"];
+
 type Overrides = Partial<CompanyAxes>;
 
 function axes(tier: Tier, o: Overrides = {}): CompanyAxes {
@@ -55,8 +66,8 @@ const DEFS: Def[] = [
   { id: "openai", name: "OpenAI", emoji: "🤖", tier: 5, culture: "foreign", baseSalary: 1500, threshold: 340, flavor: "生成AIの最前線。世界中から精鋭が集まる。", o: { techGrowth: 15, wlb: -10 } },
   { id: "anthropic", name: "Anthropic", emoji: "🧠", tier: 5, culture: "foreign", baseSalary: 1500, threshold: 340, flavor: "安全性を重視するAI研究企業。", o: { techGrowth: 15, wlb: -5 } },
   { id: "deepmind", name: "DeepMind", emoji: "🌀", tier: 5, culture: "foreign", baseSalary: 1400, threshold: 330, flavor: "基礎研究志向の強いAI研究機関。", o: { techGrowth: 15, discretion: 10 } },
-  { id: "mckinsey", name: "マッキンゼー・アンド・カンパニー", emoji: "🧩", tier: 5, culture: "foreign", baseSalary: 1300, threshold: 300, flavor: "戦略コンサルの頂点。狭き門と激務で知られる。", o: { wlb: -20, discretion: -10, techGrowth: -15 } },
-  { id: "bcg", name: "ボストン コンサルティング グループ", emoji: "📐", tier: 5, culture: "foreign", baseSalary: 1300, threshold: 300, flavor: "戦略コンサル大手。ケース面接の鬼門。", o: { wlb: -20, discretion: -10, techGrowth: -15 } },
+  { id: "mckinsey", name: "マッキンゼー・アンド・カンパニー", emoji: "🧩", tier: 5, culture: "foreign", baseSalary: 1300, threshold: 300, flavor: "戦略コンサルの頂点。狭き門と激務で知られる。", o: { wlb: -20, discretion: -10, techGrowth: -15 }, steps: STEPS_CONSULTING_5 },
+  { id: "bcg", name: "ボストン コンサルティング グループ", emoji: "📐", tier: 5, culture: "foreign", baseSalary: 1300, threshold: 300, flavor: "戦略コンサル大手。ケース面接の鬼門。", o: { wlb: -20, discretion: -10, techGrowth: -15 }, steps: STEPS_CONSULTING_5 },
   { id: "palantir", name: "Palantir Technologies", emoji: "🛰️", tier: 5, culture: "foreign", baseSalary: 1350, threshold: 310, flavor: "データ分析プラットフォームの雄。選考は硬派。" },
 
   // ===== 難易度4：難関 =====
@@ -70,14 +81,14 @@ const DEFS: Def[] = [
   { id: "databricks", name: "Databricks", emoji: "🧱", tier: 4, culture: "foreign", baseSalary: 1100, threshold: 180, flavor: "データ＋AI基盤プラットフォーム。", o: { techGrowth: 10 } },
   { id: "snowflake", name: "Snowflake", emoji: "❄️", tier: 4, culture: "foreign", baseSalary: 1080, threshold: 175, flavor: "クラウドデータ基盤のリーダー。" },
   { id: "salesforce", name: "Salesforce", emoji: "☁️", tier: 4, culture: "foreign", baseSalary: 1050, threshold: 175, flavor: "SaaSの草分け、AIエージェントにも注力。" },
-  { id: "accenture", name: "アクセンチュア", emoji: "💼", tier: 4, culture: "foreign", baseSalary: 950, threshold: 165, flavor: "総合コンサル最大手。案件は多種多様。", o: { wlb: -10 } },
-  { id: "deloitte", name: "デロイト トーマツ コンサルティング", emoji: "📊", tier: 4, culture: "foreign", baseSalary: 950, threshold: 165, flavor: "Big4系コンサル。論理性を問われる。", o: { wlb: -10 } },
+  { id: "accenture", name: "アクセンチュア", emoji: "💼", tier: 4, culture: "foreign", baseSalary: 950, threshold: 165, flavor: "総合コンサル最大手。案件は多種多様。", o: { wlb: -10 }, steps: STEPS_CONSULTING_4 },
+  { id: "deloitte", name: "デロイト トーマツ コンサルティング", emoji: "📊", tier: 4, culture: "foreign", baseSalary: 950, threshold: 165, flavor: "Big4系コンサル。論理性を問われる。", o: { wlb: -10 }, steps: STEPS_CONSULTING_4 },
   { id: "pfn", name: "Preferred Networks", emoji: "🔬", tier: 4, culture: "japanese_mid", baseSalary: 1000, threshold: 185, flavor: "国内屈指のディープラーニング研究集団。", o: { techGrowth: 20, discretion: 10 } },
-  { id: "keyence", name: "キーエンス", emoji: "⚙️", tier: 4, culture: "japanese_major", baseSalary: 1300, threshold: 195, flavor: "高収益・高年収で知られるセンサーメーカー。", o: { wlb: -10, stability: 10 } },
-  { id: "fanuc", name: "ファナック", emoji: "🦾", tier: 4, culture: "japanese_major", baseSalary: 1050, threshold: 180, flavor: "産業用ロボットの巨人。堅実な社風。", o: { stability: 15 } },
-  { id: "nri", name: "野村総合研究所（NRI）", emoji: "🏛️", tier: 4, culture: "japanese_major", baseSalary: 900, threshold: 170, flavor: "シンクタンク×ITコンサル。論理思考テストが鬼門。", o: { stability: 10 } },
-  { id: "mri", name: "三菱総合研究所（MRI）", emoji: "🏯", tier: 4, culture: "japanese_major", baseSalary: 880, threshold: 168, flavor: "政策提言も手がけるシンクタンク。小論文重視。", o: { stability: 10 } },
-  { id: "toyota", name: "トヨタ自動車", emoji: "🚗", tier: 4, culture: "japanese_major", baseSalary: 900, threshold: 175, flavor: "事業理解とプレゼン力も問われる製造業の巨人。", o: { stability: 15, techGrowth: -5 } },
+  { id: "keyence", name: "キーエンス", emoji: "⚙️", tier: 4, culture: "japanese_major", baseSalary: 1300, threshold: 195, flavor: "高収益・高年収で知られるセンサーメーカー。", o: { wlb: -10, stability: 10 }, steps: STEPS_MANUFACTURING_4 },
+  { id: "fanuc", name: "ファナック", emoji: "🦾", tier: 4, culture: "japanese_major", baseSalary: 1050, threshold: 180, flavor: "産業用ロボットの巨人。堅実な社風。", o: { stability: 15 }, steps: STEPS_MANUFACTURING_4 },
+  { id: "nri", name: "野村総合研究所（NRI）", emoji: "🏛️", tier: 4, culture: "japanese_major", baseSalary: 900, threshold: 170, flavor: "シンクタンク×ITコンサル。論理思考テストが鬼門。", o: { stability: 10 }, steps: STEPS_THINKTANK_4 },
+  { id: "mri", name: "三菱総合研究所（MRI）", emoji: "🏯", tier: 4, culture: "japanese_major", baseSalary: 880, threshold: 168, flavor: "政策提言も手がけるシンクタンク。小論文重視。", o: { stability: 10 }, steps: STEPS_THINKTANK_4 },
+  { id: "toyota", name: "トヨタ自動車", emoji: "🚗", tier: 4, culture: "japanese_major", baseSalary: 900, threshold: 175, flavor: "事業理解とプレゼン力も問われる製造業の巨人。", o: { stability: 15, techGrowth: -5 }, steps: STEPS_TOYOTA },
 
   // ===== 難易度3：中堅・人気企業 =====
   { id: "cyberagent", name: "サイバーエージェント", emoji: "📱", tier: 3, culture: "japanese_mid", baseSalary: 750, threshold: 95, flavor: "広告・ゲーム・AI事業を展開するメガベンチャー。" },
@@ -100,10 +111,10 @@ const DEFS: Def[] = [
   // ===== 難易度2：中間 =====
   { id: "tis", name: "TIS", emoji: "🖥️", tier: 2, culture: "japanese_major", baseSalary: 600, threshold: 45, flavor: "SIer大手、金融系案件が多い。" },
   { id: "scsk", name: "SCSK", emoji: "🖧", tier: 2, culture: "japanese_major", baseSalary: 600, threshold: 45, flavor: "働きやすさに定評のあるSIer。", o: { wlb: 10 } },
-  { id: "panasonic", name: "パナソニック", emoji: "🔌", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 48, flavor: "総合家電・くらしのプラットフォーマー。" },
-  { id: "nec", name: "NEC", emoji: "🖨️", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 48, flavor: "顔認証AIなど社会インフラ寄りの技術に強い。", o: { techGrowth: 10 } },
-  { id: "toshiba", name: "東芝", emoji: "🔋", tier: 2, culture: "japanese_major", baseSalary: 600, threshold: 46, flavor: "再建途上の老舗総合電機。" },
-  { id: "mitsubishielectric", name: "三菱電機", emoji: "🏗️", tier: 2, culture: "japanese_major", baseSalary: 630, threshold: 48, flavor: "重電からFAまで手がける総合電機。" },
+  { id: "panasonic", name: "パナソニック", emoji: "🔌", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 48, flavor: "総合家電・くらしのプラットフォーマー。", steps: STEPS_MANUFACTURING_2 },
+  { id: "nec", name: "NEC", emoji: "🖨️", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 48, flavor: "顔認証AIなど社会インフラ寄りの技術に強い。", o: { techGrowth: 10 }, steps: STEPS_MANUFACTURING_2 },
+  { id: "toshiba", name: "東芝", emoji: "🔋", tier: 2, culture: "japanese_major", baseSalary: 600, threshold: 46, flavor: "再建途上の老舗総合電機。", steps: STEPS_MANUFACTURING_2 },
+  { id: "mitsubishielectric", name: "三菱電機", emoji: "🏗️", tier: 2, culture: "japanese_major", baseSalary: 630, threshold: 48, flavor: "重電からFAまで手がける総合電機。", steps: STEPS_MANUFACTURING_2 },
   { id: "kddi", name: "KDDI", emoji: "📡", tier: 2, culture: "japanese_major", baseSalary: 650, threshold: 50, flavor: "通信キャリア大手、新規事業にも積極的。" },
   { id: "freee", name: "freee", emoji: "🧮", tier: 2, culture: "japanese_mid", baseSalary: 620, threshold: 46, flavor: "スモールビジネスを支えるクラウド会計。", o: { discretion: 10 } },
   { id: "moneyforward", name: "マネーフォワード", emoji: "💰", tier: 2, culture: "japanese_mid", baseSalary: 620, threshold: 46, flavor: "家計簿・法人会計SaaSのリーダー。", o: { discretion: 10 } },
@@ -112,18 +123,18 @@ const DEFS: Def[] = [
   { id: "sansan", name: "Sansan", emoji: "🪪", tier: 2, culture: "japanese_mid", baseSalary: 630, threshold: 47, flavor: "名刺データを起点にした法人DB事業。" },
   { id: "abeja", name: "ABEJA", emoji: "🧪", tier: 2, culture: "japanese_mid", baseSalary: 620, threshold: 45, flavor: "AI導入支援に強みを持つ専業ベンチャー。", o: { techGrowth: 15 } },
   { id: "pkshatechnology", name: "PKSHA Technology", emoji: "🧠", tier: 2, culture: "japanese_mid", baseSalary: 630, threshold: 46, flavor: "アルゴリズム提供を軸にするAI企業。", o: { techGrowth: 15 } },
-  { id: "sonysemi", name: "ソニーセミコンダクタソリューションズ", emoji: "📷", tier: 2, culture: "japanese_major", baseSalary: 650, threshold: 48, flavor: "イメージセンサー世界トップシェア。" },
-  { id: "renesas", name: "ルネサスエレクトロニクス", emoji: "🔧", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 46, flavor: "車載半導体に強い専業メーカー。" },
-  { id: "murata", name: "村田製作所", emoji: "🧲", tier: 2, culture: "japanese_major", baseSalary: 650, threshold: 48, flavor: "電子部品のグローバルリーダー。", o: { stability: 10 } },
-  { id: "tdk", name: "TDK", emoji: "🧷", tier: 2, culture: "japanese_major", baseSalary: 630, threshold: 47, flavor: "電子部品・電池分野の大手。" },
-  { id: "nidec", name: "日本電産(ニデック)", emoji: "🌀", tier: 2, culture: "japanese_major", baseSalary: 640, threshold: 48, flavor: "モーターで世界を獲った精密機械メーカー。" },
-  { id: "omron", name: "オムロン", emoji: "🤖", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 46, flavor: "FA・ヘルスケア機器の大手。" },
-  { id: "nomurasec", name: "野村證券", emoji: "📈", tier: 2, culture: "japanese_major", baseSalary: 700, threshold: 50, flavor: "国内最大手の証券会社。" },
-  { id: "mufg", name: "三菱UFJ銀行", emoji: "🏦", tier: 2, culture: "japanese_major", baseSalary: 680, threshold: 49, flavor: "国内最大のメガバンク。", o: { stability: 15, techGrowth: -10 } },
-  { id: "smbc", name: "三井住友銀行", emoji: "🏦", tier: 2, culture: "japanese_major", baseSalary: 680, threshold: 49, flavor: "メガバンクの一角、DXにも注力。", o: { stability: 15, techGrowth: -10 } },
-  { id: "mizuho", name: "みずほ銀行", emoji: "🏦", tier: 2, culture: "japanese_major", baseSalary: 660, threshold: 48, flavor: "システム統合を乗り越えたメガバンク。", o: { stability: 15, techGrowth: -10 } },
-  { id: "sbisec", name: "SBI証券", emoji: "💹", tier: 2, culture: "japanese_mid", baseSalary: 650, threshold: 47, flavor: "ネット証券最大手。" },
-  { id: "monex", name: "マネックス証券", emoji: "📉", tier: 2, culture: "japanese_mid", baseSalary: 640, threshold: 46, flavor: "個人投資家向けネット証券。" },
+  { id: "sonysemi", name: "ソニーセミコンダクタソリューションズ", emoji: "📷", tier: 2, culture: "japanese_major", baseSalary: 650, threshold: 48, flavor: "イメージセンサー世界トップシェア。", steps: STEPS_MANUFACTURING_2 },
+  { id: "renesas", name: "ルネサスエレクトロニクス", emoji: "🔧", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 46, flavor: "車載半導体に強い専業メーカー。", steps: STEPS_MANUFACTURING_2 },
+  { id: "murata", name: "村田製作所", emoji: "🧲", tier: 2, culture: "japanese_major", baseSalary: 650, threshold: 48, flavor: "電子部品のグローバルリーダー。", o: { stability: 10 }, steps: STEPS_MANUFACTURING_2 },
+  { id: "tdk", name: "TDK", emoji: "🧷", tier: 2, culture: "japanese_major", baseSalary: 630, threshold: 47, flavor: "電子部品・電池分野の大手。", steps: STEPS_MANUFACTURING_2 },
+  { id: "nidec", name: "日本電産(ニデック)", emoji: "🌀", tier: 2, culture: "japanese_major", baseSalary: 640, threshold: 48, flavor: "モーターで世界を獲った精密機械メーカー。", steps: STEPS_MANUFACTURING_2 },
+  { id: "omron", name: "オムロン", emoji: "🤖", tier: 2, culture: "japanese_major", baseSalary: 620, threshold: 46, flavor: "FA・ヘルスケア機器の大手。", steps: STEPS_MANUFACTURING_2 },
+  { id: "nomurasec", name: "野村證券", emoji: "📈", tier: 2, culture: "japanese_major", baseSalary: 700, threshold: 50, flavor: "国内最大手の証券会社。", steps: STEPS_FINANCE_2 },
+  { id: "mufg", name: "三菱UFJ銀行", emoji: "🏦", tier: 2, culture: "japanese_major", baseSalary: 680, threshold: 49, flavor: "国内最大のメガバンク。", o: { stability: 15, techGrowth: -10 }, steps: STEPS_FINANCE_2 },
+  { id: "smbc", name: "三井住友銀行", emoji: "🏦", tier: 2, culture: "japanese_major", baseSalary: 680, threshold: 49, flavor: "メガバンクの一角、DXにも注力。", o: { stability: 15, techGrowth: -10 }, steps: STEPS_FINANCE_2 },
+  { id: "mizuho", name: "みずほ銀行", emoji: "🏦", tier: 2, culture: "japanese_major", baseSalary: 660, threshold: 48, flavor: "システム統合を乗り越えたメガバンク。", o: { stability: 15, techGrowth: -10 }, steps: STEPS_FINANCE_2 },
+  { id: "sbisec", name: "SBI証券", emoji: "💹", tier: 2, culture: "japanese_mid", baseSalary: 650, threshold: 47, flavor: "ネット証券最大手。", steps: STEPS_FINANCE_2 },
+  { id: "monex", name: "マネックス証券", emoji: "📉", tier: 2, culture: "japanese_mid", baseSalary: 640, threshold: 46, flavor: "個人投資家向けネット証券。", steps: STEPS_FINANCE_2 },
 
   // ===== 難易度1：応募しやすい/積極採用中 =====
   { id: "aiinside", name: "AI inside", emoji: "📇", tier: 1, culture: "japanese_mid", baseSalary: 500, threshold: 15, flavor: "AI-OCRで知られる国産AI企業。" },

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GameAction, GameState } from "@/lib/types";
 import { GameMsg, playerAge } from "@/lib/engine/engine";
+import { budgetMood, fatigueMood, projectWeather, riskMood } from "@/lib/engine/mood";
 import { ACTIONS } from "@/lib/data/actions";
 import { titleForReputation, nextTitle } from "@/lib/data/titles";
 import Gauge from "../ui/Gauge";
@@ -26,6 +27,8 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
   const title = titleForReputation(state.reputation);
   const next = nextTitle(state.reputation);
   const blocked = !!(state.activeEvent || state.interview || state.pendingScout || state.stayPrompt);
+  const weather = projectWeather(state);
+  const comboBonusPercent = Math.round((state.scoreMultiplier - 1) * 100);
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: "20px 16px 80px" }}>
@@ -53,6 +56,19 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           </button>
         </div>
       </header>
+
+      <div className="card" style={{ padding: "12px 16px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ fontSize: 34, lineHeight: 1 }}>{weather.emoji}</div>
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <div style={{ fontWeight: 800, fontSize: 14 }}>プロジェクトの調子：{weather.label}</div>
+          <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{weather.advice}</div>
+        </div>
+        {state.comboCount >= 3 && (
+          <div className="tag" style={{ background: "var(--warn-soft)", color: "var(--warn)", fontSize: 12 }}>
+            🔥 {state.comboCount}連続成功中！評価+{comboBonusPercent}%ブースト
+          </div>
+        )}
+      </div>
 
       <div className="card" style={{ padding: "14px 16px", marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
@@ -106,14 +122,22 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-        <Gauge label="予算（会社のお金）" value={Math.max(0, state.budget)} max={state.budgetMax} color="var(--good)" emoji="💰" suffix="万円" />
+        <Gauge
+          label="予算（会社のお金）"
+          value={Math.max(0, state.budget)}
+          max={state.budgetMax}
+          color="var(--good)"
+          emoji="💰"
+          suffix="万円"
+          mood={budgetMood((Math.max(0, state.budget) / Math.max(1, state.budgetMax)) * 100)}
+        />
         <Gauge label="残り納期" value={state.weeksLeft} max={state.projectTotalWeeks} color="var(--warn)" emoji="⏳" suffix="ヶ月" />
         <Gauge label="AP（今月の行動回数）" value={state.ap} max={state.apMax} color="var(--accent)" emoji="⚡" />
         <Gauge label="進捗" value={state.progress} max={100} color="#0891b2" emoji="📈" />
         <Gauge label="精度" value={state.quality} max={100} color="var(--accent)" emoji="🎯" />
         <Gauge label="満足度" value={state.satisfaction} max={100} color="var(--good)" emoji="😊" />
-        <Gauge label="疲労度" value={state.fatigue} max={100} color="var(--bad)" emoji="🥱" />
-        <Gauge label="トラブル発生率" value={state.riskLevel} max={100} color="var(--warn)" emoji="🎲" />
+        <Gauge label="疲労度" value={state.fatigue} max={100} color="var(--bad)" emoji="🥱" mood={fatigueMood(state.fatigue)} />
+        <Gauge label="トラブル発生率" value={state.riskLevel} max={100} color="var(--warn)" emoji="🎲" mood={riskMood(state.riskLevel)} />
       </div>
 
       <div className="card" style={{ padding: "14px 16px", marginBottom: 14 }}>

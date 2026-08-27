@@ -7,6 +7,7 @@ export default function Gauge({
   color,
   suffix,
   emoji,
+  mood,
 }: {
   label: string;
   value: number;
@@ -14,6 +15,7 @@ export default function Gauge({
   color: string;
   suffix?: string;
   emoji?: string;
+  mood?: { emoji: string; label: string };
 }) {
   const pct = Math.max(0, Math.min(100, (value / Math.max(1, max)) * 100));
   return (
@@ -31,6 +33,11 @@ export default function Gauge({
       <div className="gauge-track">
         <div className="gauge-fill" style={{ width: `${pct}%`, background: color }} />
       </div>
+      {mood && (
+        <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>
+          {mood.emoji} {mood.label}
+        </div>
+      )}
     </div>
   );
 }
