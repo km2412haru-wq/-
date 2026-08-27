@@ -178,11 +178,11 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
         </div>
         <button
           className="btn"
-          disabled={blocked || state.hobbySpentThisMonth || state.personalSavings < 8}
+          disabled={blocked}
           onClick={() => setShowBuy(true)}
           style={{ fontSize: 12.5 }}
         >
-          🛍️ 貯金で買い物をする（1ヶ月に1回まで）
+          🛍️ 貯金で買い物・資格取得をする
         </button>
         <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "8px 0 0", lineHeight: 1.6 }}>
           モチベーションが高いほど月々の疲労回復が良くなり、80以上を保つと評価スコアも少しずつ増える。放っておくと少しずつ下がる。貯金が貯まるとマイホーム購入・結婚・出産のイベントが訪れることも。
@@ -218,9 +218,16 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
         </button>
       </div>
 
-      <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px" }}>今月のアクション</h3>
+      <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px" }}>
+        今月のアクション
+        {ACTIONS.some((a) => a.roleTagRequired === state.currentMission.roleTag) && (
+          <span style={{ fontSize: 11, fontWeight: 600, color: "var(--accent)", marginLeft: 8 }}>
+            ✨ 今回は「{state.currentMission.roleTag}」専用アクションが使える
+          </span>
+        )}
+      </h3>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 8, marginBottom: 18 }}>
-        {ACTIONS.map((a) => {
+        {ACTIONS.filter((a) => !a.roleTagRequired || a.roleTagRequired === state.currentMission.roleTag).map((a) => {
           const isRecommended = state.currentMission.recommendedActionIds.includes(a.id);
           return (
           <button
@@ -233,7 +240,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
               padding: 12,
               cursor: "pointer",
               opacity: blocked || state.ap < a.apCost ? 0.5 : 1,
-              border: isRecommended ? "2px solid var(--accent)" : undefined,
+              border: isRecommended ? "2px solid var(--accent)" : a.roleTagRequired ? "2px solid var(--good)" : undefined,
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
@@ -244,6 +251,9 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
                 AP{a.apCost}
               </span>
             </div>
+            {a.roleTagRequired && (
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--good)", marginTop: 4 }}>✨ {a.roleTagRequired}専用アクション</div>
+            )}
             {isRecommended && (
               <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--accent)", marginTop: 4 }}>🎯 このミッションに刺さる（評価2倍）</div>
             )}
@@ -334,6 +344,9 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           onBuy={(itemId) => {
             send({ type: "SPEND_ON_HOBBY", itemId });
             setShowBuy(false);
+          }}
+          onGetCertification={(certId) => {
+            send({ type: "GET_CERTIFICATION", certId });
           }}
         />
       )}

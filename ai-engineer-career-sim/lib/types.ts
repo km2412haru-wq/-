@@ -10,6 +10,9 @@ export type CultureType =
 
 export type Tier = 1 | 2 | 3 | 4 | 5;
 
+// 業界タイプ（今の勤め先との「親和性」を測るのに使う）
+export type Industry = "tech" | "consulting" | "thinktank" | "trading" | "finance" | "manufacturing" | "general";
+
 // オファー比較レーダーチャートの7軸
 export interface CompanyAxes {
   salary: number; // 給与
@@ -27,6 +30,7 @@ export interface Company {
   emoji: string;
   tier: Tier;
   culture: CultureType;
+  industry: Industry; // 業界タイプ。現職からの転職しやすさ（親和性）に影響する
   interviewSteps: string[]; // 選考ステップ名の配列
   axes: CompanyAxes;
   scoreThreshold: number; // このスコア以上でスカウトが来やすくなる
@@ -71,6 +75,7 @@ export interface GameAction {
   effects?: EffectHint[]; // 何にどう作用するか（choicesがある場合はchoice側に持たせる）
   term?: { name: string; desc: string }; // 用語解説
   routes?: RouteType[]; // 指定ルートのみ強化/専用の場合
+  roleTagRequired?: string; // 指定した案件の職種（roleTag）の時だけ出現する専用アクション
   choices?: ActionChoice[]; // 選択肢がある場合（この場合 apply は使わない）
   apply?: (s: GameState) => { state: GameState; log: string };
 }
@@ -130,6 +135,17 @@ export interface Mission {
   flavorSuccess: string;
   flavorPartial: string;
   flavorFail: string;
+}
+
+// 資格：貯金で取得できる、恒久的に技術力/コミュ力を底上げする買い物
+export interface Certification {
+  id: string;
+  emoji: string;
+  name: string;
+  cost: number; // 万円
+  techGain: number;
+  commGain: number;
+  log: string;
 }
 
 export interface JobHistoryEntry {
@@ -244,6 +260,8 @@ export interface GameState {
   married: boolean; // 結婚したか
   hasChild: boolean; // 子供が生まれたか
   hasPet: boolean; // ペットを飼っているか
+  hasPartner: boolean; // 交際相手がいるか（合コン等で得られる。結婚イベントが起きやすくなる）
+  certifications: string[]; // 取得した資格のid一覧
   currentCompany: Company;
   familiarity: number; // 0-100 馴染み度
   jobHistory: JobHistoryEntry[];

@@ -5,6 +5,7 @@ import {
   Company,
   GameEvent,
   GameState,
+  Industry,
   Offer,
   RouteType,
   Screen,
@@ -12,6 +13,7 @@ import {
 } from "../types";
 import { COMPANIES, STARTING_COMPANY, companiesByTier } from "../data/companies";
 import { ACTIONS, actionApply } from "../data/actions";
+import { CERTIFICATIONS } from "../data/certifications";
 import { EVENTS } from "../data/events";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { titleForReputation } from "../data/titles";
@@ -33,6 +35,7 @@ export type GameMsg =
   | { type: "DECLINE_OFFER"; offerId: string }
   | { type: "RESOLVE_STAY"; stay: boolean }
   | { type: "SPEND_ON_HOBBY"; itemId: string }
+  | { type: "GET_CERTIFICATION"; certId: string }
   | { type: "RETIRE" }
   | { type: "GOTO_SCREEN"; screen: Screen };
 
@@ -76,11 +79,37 @@ export function stepThreshold(company: Company, stepIdx: number): number {
   return (TIER_BASE_THRESHOLD[company.tier] ?? 30) + stepIdx * 10;
 }
 
+// 業界の近さ（親和性）。同業界なら大きく有利、隣接業界なら少し有利、畑違いは不利になる。
+// 「企業は一律の難易度では測れない、今の職場との相性がある」を数値化したもの。
+const INDUSTRY_ADJACENCY: Partial<Record<Industry, Industry[]>> = {
+  consulting: ["thinktank", "trading", "finance"],
+  thinktank: ["consulting", "finance"],
+  trading: ["consulting", "finance", "general"],
+  finance: ["consulting", "thinktank", "trading"],
+  tech: ["manufacturing"],
+  manufacturing: ["tech"],
+  general: ["trading", "tech"],
+};
+
+export function industryAffinity(current: Company, target: Company): number {
+  if (current.industry === target.industry) return 15;
+  if (INDUSTRY_ADJACENCY[current.industry]?.includes(target.industry)) return 6;
+  return -8;
+}
+
+export function industryAffinityLabel(current: Company, target: Company): { value: number; label: string } {
+  const value = industryAffinity(current, target);
+  if (value >= 15) return { value, label: "同業界で強い親和性" };
+  if (value > 0) return { value, label: "近い業界でやや有利" };
+  return { value, label: "畑違いでやや不利" };
+}
+
 export function estimatePassChance(state: GameState, company: Company, stepIdx: number): number {
   const focus = focusForStep(company.interviewSteps[stepIdx] ?? "");
   const power = interviewPower(state, focus);
   const threshold = stepThreshold(company, stepIdx);
-  return Math.max(0.06, Math.min(0.95, 0.5 + (power - threshold) / 50));
+  const affinity = industryAffinity(state.currentCompany, company);
+  return Math.max(0.06, Math.min(0.95, 0.5 + (power + affinity - threshold) / 50));
 }
 
 export function passChanceLabel(p: number): { label: string; tone: "good" | "warn" | "bad" } {
@@ -135,6 +164,8 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     married: false,
     hasChild: false,
     hasPet: false,
+    hasPartner: false,
+    certifications: [],
     currentCompany: STARTING_COMPANY,
     familiarity: 100,
     jobHistory: [],
@@ -521,6 +552,7 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
       if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
       const action = ACTIONS.find((a) => a.id === msg.actionId);
       if (!action) return state;
+      if (action.roleTagRequired && action.roleTagRequired !== state.currentMission.roleTag) return state;
       if (state.ap < action.apCost) return { ...state, log: addLog(state, "⚠️ APが足りない。") };
       const { state: applied } = actionApply(action, msg.choiceId, state);
       let s: GameState = { ...applied, ap: state.ap - action.apCost, lastActionLabel: action.id, dataChoiceHistory: state.dataChoiceHistory };
@@ -618,6 +650,24 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
         log: addLog(state, `${item.emoji} ${item.log}`),
       };
       if (item.ownedFlag === "ownsCar") s = { ...s, ownsCar: true };
+      s = applyAchievements(s, {});
+      return s;
+    }
+    case "GET_CERTIFICATION": {
+      if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
+      const cert = CERTIFICATIONS.find((c) => c.id === msg.certId);
+      if (!cert) return state;
+      if (state.certifications.includes(cert.id)) return { ...state, log: addLog(state, "すでに取得済みの資格だ。") };
+      if (state.personalSavings < cert.cost) return { ...state, log: addLog(state, "⚠️ 貯金が足りない。") };
+      let s: GameState = {
+        ...state,
+        personalSavings: state.personalSavings - cert.cost,
+        techScore: state.techScore + cert.techGain,
+        commScore: state.commScore + cert.commGain,
+        certifications: [...state.certifications, cert.id],
+        motivation: clamp(state.motivation + 6),
+        log: addLog(state, `${cert.emoji} ${cert.log}`),
+      };
       s = applyAchievements(s, {});
       return s;
     }

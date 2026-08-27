@@ -1,7 +1,7 @@
 "use client";
 
 import { GameState } from "@/lib/types";
-import { estimatePassChance, interviewPower, passChanceLabel, stepThreshold } from "@/lib/engine/engine";
+import { estimatePassChance, industryAffinityLabel, interviewPower, passChanceLabel, stepThreshold } from "@/lib/engine/engine";
 import { FOCUS_LABEL } from "@/lib/data/interviewFlavor";
 import Gauge from "../ui/Gauge";
 
@@ -15,6 +15,8 @@ export default function InterviewModal({ state, onChallenge }: { state: GameStat
   const chance = estimatePassChance(state, company, step);
   const { label, tone } = passChanceLabel(chance);
   const toneColor = tone === "good" ? "var(--good)" : tone === "warn" ? "var(--warn)" : "var(--bad)";
+  const affinity = industryAffinityLabel(state.currentCompany, company);
+  const affinityColor = affinity.value > 0 ? "var(--good)" : "var(--bad)";
 
   return (
     <div className="modal-overlay">
@@ -46,13 +48,16 @@ export default function InterviewModal({ state, onChallenge }: { state: GameStat
         <p style={{ fontSize: 14.5, lineHeight: 1.7, margin: "6px 0 18px" }}>{flavor}</p>
 
         <div className="card" style={{ padding: 14, background: "var(--bg-sunken)", border: "none", marginBottom: 18 }}>
-          <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
+          <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
             🔧 技術力 {state.techScore} ・ 💬 コミュ力 {state.commScore}（このステップの実力スコア：{power} / 目安：{threshold}）
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: affinityColor, marginBottom: 8 }}>
+            🧭 {state.currentCompany.name}からの応募：{affinity.label}（{affinity.value > 0 ? "+" : ""}{affinity.value}）
           </div>
           <Gauge label="合格の手応え" value={Math.round(chance * 100)} max={100} color={toneColor} suffix="%" />
           <div style={{ marginTop: 6, fontSize: 13, fontWeight: 700, color: toneColor }}>{label}</div>
           <p style={{ fontSize: 11.5, color: "var(--text-muted)", margin: "8px 0 0", lineHeight: 1.6 }}>
-            クイズの正解不正解ではなく、これまでのアクションで積み上げた技術力・コミュ力・評価スコアがそのまま合否に反映される。
+            クイズの正解不正解ではなく、これまでのアクションで積み上げた技術力・コミュ力・評価スコアがそのまま合否に反映される。企業は一律の難易度ではなく、今の勤め先との業界の近さ（親和性）でも通りやすさが変わる。
           </p>
         </div>
 

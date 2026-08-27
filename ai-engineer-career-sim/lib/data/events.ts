@@ -570,7 +570,8 @@ export const EVENTS: GameEvent[] = [
     title: "人生のパートナーとの将来を考えている",
     emoji: "💍",
     description: "長く付き合っているパートナーがいる。ふと、この先の人生を一緒に歩むことを考え始めた。",
-    weight: (s) => (!s.married && playerAge(s) >= 24 && s.personalSavings >= 100 ? 1 : 0),
+    // 交際相手(hasPartner)がいると出会いの土台があるぶん、結婚を考えるきっかけがぐっと増える
+    weight: (s) => (!s.married && playerAge(s) >= 24 && s.personalSavings >= 100 ? (s.hasPartner ? 2.5 : 1) : 0),
     choices: [
       {
         id: "propose",
@@ -608,6 +609,71 @@ export const EVENTS: GameEvent[] = [
         id: "not_yet",
         label: "もう少し先のことにする",
         apply: (s) => ({ state: s, log: "もう少しキャリアを固めてからにすることにした。" }),
+      },
+    ],
+  },
+
+  // ===== 出会い（合コン・マッチングアプリ）：交際相手(hasPartner)を得るきっかけ。結婚イベントの重みを上げる =====
+  {
+    id: "godokon",
+    title: "同期に合コンに誘われた",
+    emoji: "🍻",
+    description: "「たまには息抜きしなよ」と同期に合コンに誘われた。行くか、今回はパスするか。",
+    weight: (s) => (!s.hasPartner ? 0.7 : 0.15),
+    choices: [
+      {
+        id: "attend",
+        label: "参加する（-5万円）",
+        tooltip: "良い出会いがあるかもしれない。外れてもリフレッシュにはなる。",
+        apply: (s) => {
+          const met = chance(0.35);
+          return {
+            state: {
+              ...s,
+              personalSavings: s.personalSavings - 5,
+              hasPartner: met ? true : s.hasPartner,
+              motivation: clamp(s.motivation + (met ? 15 : 5)),
+              satisfaction: clamp(s.satisfaction + (met ? 5 : 0)),
+            },
+            log: met ? "合コンで意気投合した人ができた！新しい交際が始まりそうだ。" : "合コンは楽しかったが、特に進展はなかった。良い息抜きにはなった。",
+          };
+        },
+      },
+      {
+        id: "skip",
+        label: "今回はパスする",
+        apply: (s) => ({ state: s, log: "今回は仕事を優先し、パスすることにした。" }),
+      },
+    ],
+  },
+  {
+    id: "matching_app",
+    title: "マッチングアプリを始めてみようか迷っている",
+    emoji: "📱",
+    description: "友人に勧められたマッチングアプリ。プロフィールを整えてみようか迷っている。",
+    weight: (s) => (!s.hasPartner ? 0.6 : 0),
+    choices: [
+      {
+        id: "try",
+        label: "プロフィールを整えて始めてみる（-3万円）",
+        tooltip: "写真やプロフィール文の準備に少しお金がかかるが、出会いの母数が増える。",
+        apply: (s) => {
+          const met = chance(0.3);
+          return {
+            state: {
+              ...s,
+              personalSavings: s.personalSavings - 3,
+              hasPartner: met ? true : s.hasPartner,
+              motivation: clamp(s.motivation + (met ? 12 : 3)),
+            },
+            log: met ? "マッチングアプリで気の合う人と出会えた！連絡を取り合うようになった。" : "マッチングアプリを試してみたが、まだこれといった相手はいない。",
+          };
+        },
+      },
+      {
+        id: "not_interested",
+        label: "やめておく",
+        apply: (s) => ({ state: s, log: "今は乗り気になれず、やめておくことにした。" }),
       },
     ],
   },

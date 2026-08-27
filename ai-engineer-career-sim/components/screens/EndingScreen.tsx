@@ -22,7 +22,8 @@ export default function EndingScreen({ state, onRestart, onTitle }: { state: Gam
           <div>転職回数：{state.jobChangeCount}回</div>
           <div>最終年収：約{state.salary}万円</div>
           <div>個人貯金：{state.personalSavings}万円</div>
-          <div>私生活：{[state.boughtHouse && "🏠マイホーム", state.married && "💍既婚"].filter(Boolean).join("・") || "特になし"}</div>
+          <div>私生活：{[state.boughtHouse && "🏠マイホーム", state.married && "💍既婚", state.hasPartner && !state.married && "💑交際中"].filter(Boolean).join("・") || "特になし"}</div>
+          <div>取得資格：{state.certifications.length}個</div>
           <div>完了プロジェクト：{state.totalProjectsCompleted}件</div>
           <div>失敗プロジェクト：{state.totalProjectsFailed}件</div>
           <div>解除実績：{state.unlockedAchievements.length}個</div>

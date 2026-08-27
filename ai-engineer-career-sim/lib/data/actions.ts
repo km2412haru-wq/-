@@ -404,6 +404,175 @@ export const ACTIONS: GameAction[] = [
       };
     },
   },
+  // ここから下は「案件専用アクション」。roleTagRequiredを持ち、
+  // 今の案件の職種（roleTag）と一致する時だけ行動選択肢に現れる。
+  // 「基本同じボタンが最適」にならないよう、案件の職種ごとに選択肢そのものを変える仕掛け。
+  {
+    id: "exec_presentation",
+    label: "経営層向け提案資料を作る",
+    emoji: "📊",
+    apCost: 2,
+    category: "social",
+    roleTagRequired: "AIコンサルタント",
+    tooltip: "AI導入の効果とロードマップを経営層に刺さる形で言語化する。コンサル案件だけの専用アクション。",
+    when: "AIコンサルタント案件で、評価とコミュ力を大きく伸ばしたい時",
+    effects: [
+      { label: "コミュ力+6", tone: "good" },
+      { label: "進捗+8", tone: "good" },
+      { label: "満足度+3", tone: "good" },
+      { label: "評価+3", tone: "good" },
+      { label: "予算-10万円", tone: "bad" },
+      { label: "疲労+6", tone: "bad" },
+    ],
+    apply: (s) => {
+      const fam = familiarityFactor(s);
+      const combo = bumpCombo(s);
+      return {
+        state: {
+          ...s,
+          progress: clamp(s.progress + Math.round(8 * fam), 0, 100),
+          commScore: s.commScore + 6,
+          satisfaction: clamp(s.satisfaction + 3),
+          budget: s.budget - 10,
+          fatigue: clamp(s.fatigue + 6),
+          reputation: gainReputation(s, 3),
+          ...combo,
+        },
+        log: "経営層向けの提案資料を練り上げた。説得力のあるロードマップが完成した。",
+      };
+    },
+  },
+  {
+    id: "ab_test",
+    label: "配信A/Bテストを回す",
+    emoji: "🎯",
+    apCost: 1,
+    category: "quality",
+    roleTagRequired: "広告テックエンジニア",
+    tooltip: "広告クリエイティブや配信ロジックの複数パターンを比較検証する。広告テック案件だけの専用アクション。",
+    when: "広告テックエンジニア案件で、精度と進捗を効率よく伸ばしたい時",
+    effects: [
+      { label: "精度+6", tone: "good" },
+      { label: "進捗+6", tone: "good" },
+      { label: "評価+2", tone: "good" },
+      { label: "予算-8万円", tone: "bad" },
+      { label: "疲労+3", tone: "bad" },
+    ],
+    apply: (s) => {
+      const fam = familiarityFactor(s);
+      const combo = bumpCombo(s);
+      return {
+        state: {
+          ...s,
+          quality: clamp(s.quality + Math.round(6 * fam * techBonus(s))),
+          progress: clamp(s.progress + Math.round(6 * fam), 0, 100),
+          budget: s.budget - 8,
+          fatigue: clamp(s.fatigue + 3),
+          reputation: gainReputation(s, 2),
+          ...combo,
+        },
+        log: "配信のA/Bテストを回した。勝ちパターンが見えてきた。",
+      };
+    },
+  },
+  {
+    id: "monitoring_setup",
+    label: "監視・アラート基盤を整備する",
+    emoji: "📡",
+    apCost: 1,
+    category: "quality",
+    roleTagRequired: "MLOpsエンジニア",
+    tooltip: "モデルの性能劣化やサーバー異常を即座に検知できる仕組みを作る。MLOps案件だけの専用アクション。",
+    when: "MLOpsエンジニア案件で、トラブル発生率を大きく抑えたい時",
+    effects: [
+      { label: "トラブル発生率-14", tone: "good" },
+      { label: "技術力+3", tone: "good" },
+      { label: "評価+2", tone: "good" },
+      { label: "予算-12万円", tone: "bad" },
+      { label: "疲労+4", tone: "bad" },
+    ],
+    apply: (s) => {
+      const combo = bumpCombo(s);
+      return {
+        state: {
+          ...s,
+          riskLevel: clamp(s.riskLevel - 14, 0, 100),
+          techScore: s.techScore + 3,
+          budget: s.budget - 12,
+          fatigue: clamp(s.fatigue + 4),
+          reputation: gainReputation(s, 2),
+          ...combo,
+        },
+        log: "監視・アラート基盤を整備した。異常を即座に検知できるようになった。",
+      };
+    },
+  },
+  {
+    id: "stat_validation",
+    label: "統計的な有意性を検証する",
+    emoji: "📐",
+    apCost: 1,
+    category: "data",
+    roleTagRequired: "データサイエンティスト",
+    tooltip: "施策やモデルの効果が偶然ではないかを統計的に検証する。データサイエンティスト案件だけの専用アクション。",
+    when: "データサイエンティスト案件で、精度と技術力を伸ばしたい時",
+    effects: [
+      { label: "精度+5", tone: "good" },
+      { label: "技術力+4", tone: "good" },
+      { label: "評価+2", tone: "good" },
+      { label: "予算-6万円", tone: "bad" },
+      { label: "疲労+4", tone: "bad" },
+    ],
+    apply: (s) => {
+      const fam = familiarityFactor(s);
+      const combo = bumpCombo(s);
+      return {
+        state: {
+          ...s,
+          quality: clamp(s.quality + Math.round(5 * fam * techBonus(s))),
+          techScore: s.techScore + 4,
+          budget: s.budget - 6,
+          fatigue: clamp(s.fatigue + 4),
+          reputation: gainReputation(s, 2),
+          ...combo,
+        },
+        log: "施策効果の統計的有意性を検証した。自信を持って結論を出せる。",
+      };
+    },
+  },
+  {
+    id: "pair_programming",
+    label: "ペアプログラミングで実装する",
+    emoji: "👥",
+    apCost: 1,
+    category: "build",
+    roleTagRequired: "AI開発エンジニア",
+    tooltip: "チームメンバーと組んで実装する。進捗と技術力を同時に伸ばせる。AI開発エンジニア案件だけの専用アクション。",
+    when: "AI開発エンジニア案件で、進捗と技術力を同時に伸ばしたい時",
+    effects: [
+      { label: "進捗+9", tone: "good" },
+      { label: "技術力+4", tone: "good" },
+      { label: "評価+2", tone: "good" },
+      { label: "予算-6万円", tone: "bad" },
+      { label: "疲労+5", tone: "bad" },
+    ],
+    apply: (s) => {
+      const fam = familiarityFactor(s);
+      const combo = bumpCombo(s);
+      return {
+        state: {
+          ...s,
+          progress: clamp(s.progress + Math.round(9 * fam), 0, 100),
+          techScore: s.techScore + 4,
+          budget: s.budget - 6,
+          fatigue: clamp(s.fatigue + 5),
+          reputation: gainReputation(s, 2),
+          ...combo,
+        },
+        log: "ペアプログラミングで実装を進めた。二人分の視点でバグにも早く気づけた。",
+      };
+    },
+  },
   {
     id: "rest",
     label: "休む/リフレッシュする",

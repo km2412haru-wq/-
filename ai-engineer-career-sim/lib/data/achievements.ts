@@ -54,6 +54,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "pet_owner", name: "もふもふライフ", desc: "ペットを飼う", hidden: true, check: (s) => s.hasPet },
   { id: "new_parent", name: "新米パパ・ママ", desc: "子供が生まれる", check: (s) => s.hasChild },
   { id: "full_house", name: "人生の勝ち組", desc: "マイホーム・結婚・子供・車をすべて達成する", hidden: true, check: (s) => s.boughtHouse && s.married && s.hasChild && s.ownsCar },
+  { id: "cert_hunter", name: "資格ハンター", desc: "資格を3つ取得する", check: (s) => s.certifications.length >= 3 },
+  { id: "cert_master", name: "資格マスター", desc: "すべての資格を取得する", hidden: true, check: (s) => s.certifications.length >= 6 },
+  { id: "found_partner", name: "運命の出会い", desc: "交際相手ができる", check: (s) => s.hasPartner },
 ];
 
 export const TOTAL_ACHIEVEMENTS = ACHIEVEMENTS.length;
