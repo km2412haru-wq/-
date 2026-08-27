@@ -30,7 +30,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
         <div>
           <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-            {state.currentCompany.emoji} {state.currentCompany.name} ・ プロジェクト{state.projectIndex} ・ 第{state.week}週
+            {state.currentCompany.emoji} {state.currentCompany.name} ・ 第{state.week}週
           </div>
           <div style={{ fontSize: 20, fontWeight: 800, marginTop: 2 }}>
             👑 {title.name}
@@ -51,6 +51,22 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           </button>
         </div>
       </header>
+
+      <div className="card" style={{ padding: "14px 16px", marginBottom: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
+          <div style={{ fontSize: 13, fontWeight: 800 }}>
+            {state.currentMission.emoji} 今回の案件：{state.currentMission.title}
+          </div>
+          <span className="tag">プロジェクト{state.projectIndex}</span>
+        </div>
+        <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.7, margin: "0 0 10px" }}>{state.currentMission.brief}</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
+          <span className="tag" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+            🎯 目標：精度{state.currentMission.successQuality}以上・進捗{state.currentMission.successProgress}以上でリリース成功
+          </span>
+        </div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--warn)" }}>{state.currentMission.bonusLabel}</div>
+      </div>
 
       <div className="card" style={{ padding: "14px 16px", marginBottom: 14, background: "var(--accent-soft)", border: "none" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>

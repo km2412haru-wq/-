@@ -16,6 +16,7 @@ import { EVENTS } from "../data/events";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { titleForReputation } from "../data/titles";
 import { focusForStep, pickFlavor } from "../data/interviewFlavor";
+import { pickMission } from "../data/missions";
 import { addLog, chance, clamp, gainReputation, rand } from "./helpers";
 
 export type GameMsg =
@@ -74,6 +75,7 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
       : route === "prompt"
       ? "プロンプトエンジニアとして言葉の力でAIを操る。"
       : "MLOpsエンジニアとして安定稼働と自動化にこだわる。";
+  const { mission, usedIds } = pickMission([]);
   return {
     screen: "play",
     route,
@@ -83,6 +85,8 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     weeksLeft,
     projectTotalWeeks: weeksLeft,
     projectIndex: 1,
+    currentMission: mission,
+    usedMissionIds: usedIds,
     budget: budgetMax,
     budgetMax,
     ap: apMax,
@@ -108,7 +112,10 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     appliedRecently: {},
     stayPrompt: null,
     activeEvent: null,
-    log: [`🌱 ${STARTING_COMPANY.name}でのキャリアが始まった。${routeIntro}`],
+    log: [
+      `${mission.emoji} 最初の案件は「${mission.title}」。${mission.brief}`,
+      `🌱 ${STARTING_COMPANY.name}でのキャリアが始まった。${routeIntro}`,
+    ],
     history: [{ week: 0, quality: route === "ml" ? 15 : 10, satisfaction: 50, reputation: 0 }],
     unlockedAchievements: [],
     seenCompanies: [],
@@ -174,11 +181,13 @@ function rollEvent(state: GameState): GameEvent | null {
   return pool[pool.length - 1].e;
 }
 
-// ============ プロジェクト終了判定 ============
+// ============ プロジェクト終了判定（案件＝ミッションごとに成功条件が変わる） ============
 function resolveProjectEnd(state: GameState): GameState {
-  const success = state.quality >= 50 && state.progress >= 75;
-  const partial = !success && (state.progress >= 45 || state.quality >= 40);
-  const repGain = success ? 25 + Math.round(state.quality / 4) : partial ? 8 : 0;
+  const mission = state.currentMission;
+  const success = state.quality >= mission.successQuality && state.progress >= mission.successProgress;
+  const partial = !success && (state.progress >= mission.successProgress * 0.6 || state.quality >= mission.successQuality * 0.8);
+  const bonusHit = (success || partial) && mission.bonusCheck(state);
+  const repGain = (success ? 25 + Math.round(state.quality / 4) : partial ? 8 : 0) + (bonusHit ? mission.bonusReputation : 0);
   let s: GameState = {
     ...state,
     reputation: gainReputation(state, repGain),
@@ -190,20 +199,24 @@ function resolveProjectEnd(state: GameState): GameState {
     ...s,
     log: addLog(
       s,
-      success
-        ? `🎉 プロジェクト完了！高品質でリリースできた（精度${Math.round(state.quality)} / 進捗${Math.round(state.progress)}）。`
-        : partial
-        ? `📦 プロジェクトはなんとか形になった（精度${Math.round(state.quality)} / 進捗${Math.round(state.progress)}）。`
-        : `💥 プロジェクトは納期に間に合わず、不完全な状態でリリースされた…。`
+      `${mission.emoji} ${success ? mission.flavorSuccess : partial ? mission.flavorPartial : mission.flavorFail}（精度${Math.round(state.quality)} / 進捗${Math.round(
+        state.progress
+      )}）`
     ),
   };
+  if (bonusHit) {
+    s = { ...s, log: addLog(s, `✨ ${mission.bonusLabel.replace("🎁 ", "")}を達成した！`) };
+  }
   s = applyAchievements(s, { justEndedProject: true, projectSucceeded: success || partial });
 
-  // 次のプロジェクトへ
+  // 次のプロジェクト（新しい案件）へ
   const nextWeeks = rand(8, 14);
+  const { mission: nextMission, usedIds } = pickMission(s.usedMissionIds);
   s = {
     ...s,
     projectIndex: s.projectIndex + 1,
+    currentMission: nextMission,
+    usedMissionIds: usedIds,
     weeksLeft: nextWeeks,
     projectTotalWeeks: nextWeeks,
     progress: 0,
@@ -214,6 +227,7 @@ function resolveProjectEnd(state: GameState): GameState {
     incidentFreeProject: true,
     modelChoice: null,
     ap: s.apMax,
+    log: addLog(s, `${nextMission.emoji} 次の案件は「${nextMission.title}」。${nextMission.brief}`),
   };
   s = { ...s, incidentFreeProject: true };
 
@@ -352,6 +366,8 @@ function resolveInterviewChallenge(state: GameState): GameState {
 // ============ 転職 ============
 function performJobChange(state: GameState, offer: Offer): GameState {
   const weeksWorked = state.week;
+  const nextWeeks = rand(8, 14);
+  const { mission: nextMission, usedIds } = pickMission(state.usedMissionIds);
   const s: GameState = {
     ...state,
     jobHistory: [
@@ -367,8 +383,11 @@ function performJobChange(state: GameState, offer: Offer): GameState {
     budget: Math.round(state.budgetMax * (0.9 + offer.company.tier * 0.05)),
     progress: 0,
     riskLevel: 25,
-    weeksLeft: rand(8, 14),
-    projectTotalWeeks: state.projectTotalWeeks,
+    projectIndex: 1,
+    currentMission: nextMission,
+    usedMissionIds: usedIds,
+    weeksLeft: nextWeeks,
+    projectTotalWeeks: nextWeeks,
     ap: state.apMax,
     stayPrompt: null,
   };
@@ -378,7 +397,9 @@ function performJobChange(state: GameState, offer: Offer): GameState {
       : offer.company.culture === "japanese_major"
       ? "稟議や根回しなど、日系大手らしい進め方を覚える必要がありそうだ。"
       : "新しいチームのカルチャーに早く馴染みたい。";
-  return { ...s, log: addLog(s, `🚪 ${offer.company.emoji} ${offer.company.name} へ転職した！${cultureNote}`) };
+  let s2: GameState = { ...s, log: addLog(s, `🚪 ${offer.company.emoji} ${offer.company.name} へ転職した！${cultureNote}`) };
+  s2 = { ...s2, log: addLog(s2, `${nextMission.emoji} 新天地での最初の案件は「${nextMission.title}」。${nextMission.brief}`) };
+  return s2;
 }
 
 // ============ エンディング ============

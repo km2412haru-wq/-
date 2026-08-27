@@ -112,6 +112,23 @@ export interface InterviewState {
   flavor: string; // このステップで何が問われるかの説明文
 }
 
+// プロジェクトごとのミッション：毎回同じ作業に見えないよう、案件ごとに
+// 物語・成功条件・ボーナス条件を変える
+export interface Mission {
+  id: string;
+  emoji: string;
+  title: string;
+  brief: string; // 案件の背景・依頼内容（ストーリー）
+  successQuality: number;
+  successProgress: number;
+  bonusLabel: string; // 追加ボーナスの説明文（常に表示する）
+  bonusReputation: number;
+  bonusCheck: (s: GameState) => boolean;
+  flavorSuccess: string;
+  flavorPartial: string;
+  flavorFail: string;
+}
+
 export interface JobHistoryEntry {
   companyId: string;
   name: string;
@@ -196,6 +213,8 @@ export interface GameState {
   weeksLeft: number; // 現プロジェクトの残り納期
   projectTotalWeeks: number;
   projectIndex: number; // 現職での何個目のプロジェクトか
+  currentMission: Mission; // 今のプロジェクトのミッション（案件ごとに変わる）
+  usedMissionIds: string[]; // 直近で使ったミッション（連続で同じ案件にならないようにする）
 
   budget: number;
   budgetMax: number;
