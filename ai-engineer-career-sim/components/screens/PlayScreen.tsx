@@ -7,6 +7,7 @@ import { ACTIONS } from "@/lib/data/actions";
 import { titleForReputation, nextTitle } from "@/lib/data/titles";
 import Gauge from "../ui/Gauge";
 import InfoTip from "../ui/InfoTip";
+import EffectChips from "../ui/EffectChips";
 import ScoreChart from "../ui/ScoreChart";
 import EventModal from "../modals/EventModal";
 import ScoutModal from "../modals/ScoutModal";
@@ -134,6 +135,18 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
               <span>{a.tooltip}</span>
               {a.term && <InfoTip text={`【${a.term.name}】${a.term.desc}`} />}
             </div>
+            {a.when && (
+              <div style={{ fontSize: 11, color: "var(--accent)", marginTop: 6, fontWeight: 600 }}>🕐 いつ：{a.when}</div>
+            )}
+            {a.effects ? (
+              <div style={{ marginTop: 6 }}>
+                <EffectChips effects={a.effects} />
+              </div>
+            ) : (
+              a.choices && (
+                <div style={{ fontSize: 10.5, color: "var(--text-muted)", marginTop: 6 }}>👉 選択肢ごとに効果が異なる（クリックして確認）</div>
+              )
+            )}
           </button>
         ))}
       </div>
@@ -171,9 +184,13 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
                     setChoiceAction(null);
                   }}
                 >
-                  <span>
+                  <span style={{ display: "block" }}>
                     <div style={{ fontWeight: 700 }}>{c.label}</div>
                     {c.tooltip && <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 400, marginTop: 2 }}>{c.tooltip}</div>}
+                    <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, marginTop: 6 }}>🕐 いつ：{c.when}</div>
+                    <div style={{ marginTop: 6 }}>
+                      <EffectChips effects={c.effects} />
+                    </div>
                   </span>
                 </button>
               ))}

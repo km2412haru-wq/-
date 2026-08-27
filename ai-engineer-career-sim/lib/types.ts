@@ -45,10 +45,18 @@ export type ActionCategory =
   | "career"
   | "rest";
 
+// アクションの効果を1つずつ明記するためのチップ（例：「進捗+3」「評価+1」）
+export interface EffectHint {
+  label: string;
+  tone: "good" | "bad" | "neutral";
+}
+
 export interface ActionChoice {
   id: string;
   label: string;
   tooltip: string;
+  when: string; // いつ使うか
+  effects: EffectHint[]; // 何にどう作用するか（評価スコアへの影響を含む）
   apply: (s: GameState) => { state: GameState; log: string };
 }
 
@@ -59,6 +67,8 @@ export interface GameAction {
   apCost: number;
   category: ActionCategory;
   tooltip: string;
+  when?: string; // いつ使うか（choicesがある場合はchoice側に持たせる）
+  effects?: EffectHint[]; // 何にどう作用するか（choicesがある場合はchoice側に持たせる）
   term?: { name: string; desc: string }; // 用語解説
   routes?: RouteType[]; // 指定ルートのみ強化/専用の場合
   choices?: ActionChoice[]; // 選択肢がある場合（この場合 apply は使わない）
