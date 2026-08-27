@@ -1,5 +1,12 @@
-// 職種ルート
-export type RouteType = "ml" | "prompt" | "mlops";
+// 職種ルート（現在はAIコンサルタント一本）
+export type RouteType = "consultant";
+
+// 住まいのグレード。シェアハウス→アパート→マンションの順にアップグレードできる
+// （マイホーム購入はboughtHouseフラグで別管理・最終形態）
+export type Residence = "share_house" | "apartment" | "mansion";
+
+// 勤務地。企業の業界から自動的に決まる（郊外＝工場地帯が多い製造業、それ以外は都心）
+export type WorkLocation = "urban" | "suburb";
 
 // 転職先の企業文化タイプ（イベント/演出の出し分けに使う）
 export type CultureType =
@@ -74,7 +81,6 @@ export interface GameAction {
   when?: string; // いつ使うか（choicesがある場合はchoice側に持たせる）
   effects?: EffectHint[]; // 何にどう作用するか（choicesがある場合はchoice側に持たせる）
   term?: { name: string; desc: string }; // 用語解説
-  routes?: RouteType[]; // 指定ルートのみ強化/専用の場合
   roleTagRequired?: string; // 指定した案件の職種（roleTag）の時だけ出現する専用アクション
   choices?: ActionChoice[]; // 選択肢がある場合（この場合 apply は使わない）
   apply?: (s: GameState) => { state: GameState; log: string };
@@ -137,12 +143,13 @@ export interface Mission {
   flavorFail: string;
 }
 
-// 資格：貯金で取得できる、恒久的に技術力/コミュ力を底上げする買い物
+// 資格：「資格勉強をする」アクションをコツコツ積み重ねて取得する。
+// 取得すると恒久的に技術力/コミュ力が底上げされる
 export interface Certification {
   id: string;
   emoji: string;
   name: string;
-  cost: number; // 万円
+  studyPerSession: number; // 1回の資格勉強アクションで進む習熟度（0〜100のうち何%進むか）
   techGain: number;
   commGain: number;
   log: string;
@@ -175,7 +182,7 @@ export interface AchievementCtx {
 
 export interface ChallengeFlags {
   halfBudget: boolean;
-  shortSprint: boolean; // 1ヶ月クリア縛り(納期を大幅短縮)
+  shortSprint: boolean; // 2ヶ月クリア縛り(納期を大幅短縮)
   priceHike?: boolean; // API価格高騰(NG+由来。createInitialStateが自動算出する)
 }
 
@@ -228,7 +235,7 @@ export interface GameState {
   ngPlusLevel: number;
   challenge: ChallengeFlags;
 
-  week: number; // 累計経過月数（1ターン=1ヶ月）
+  week: number; // 累計経過月数（1ターン=2ヶ月）
   weeksLeft: number; // 現プロジェクトの残り納期（ヶ月）
   projectTotalWeeks: number;
   projectIndex: number; // 現職での何個目のプロジェクトか
@@ -252,16 +259,18 @@ export interface GameState {
   scoreMultiplier: number;
 
   salary: number; // 万円/年
-  personalSavings: number; // 万円。会社の予算とは別の、個人の貯金（給料-生活費が毎月積み上がる）
+  personalSavings: number; // 万円。会社の予算とは別の、個人の貯金（給料-生活費-家賃が2ヶ月ごとに積み上がる）
   motivation: number; // 0-100。プライベートの充実度。買い物に貯金を使うと上がり、放っておくと少しずつ下がる
-  hobbySpentThisMonth: boolean; // 今月すでに買い物をしたか（月1回まで）
+  hobbySpentThisMonth: boolean; // このターン（2ヶ月）ですでに買い物をしたか
   boughtHouse: boolean; // マイホームを購入したか
+  residence: Residence; // 住まいのグレード（マイホーム購入後は実質的に上書きされる）
   ownsCar: boolean; // 車を購入したか
   married: boolean; // 結婚したか
   hasChild: boolean; // 子供が生まれたか
   hasPet: boolean; // ペットを飼っているか
   hasPartner: boolean; // 交際相手がいるか（合コン等で得られる。結婚イベントが起きやすくなる）
   certifications: string[]; // 取得した資格のid一覧
+  certStudyProgress: Record<string, number>; // 勉強中の資格の習熟度（id→0-100、100で取得）
   currentCompany: Company;
   familiarity: number; // 0-100 馴染み度
   jobHistory: JobHistoryEntry[];

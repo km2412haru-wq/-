@@ -1,8 +1,6 @@
 "use client";
 
-import { RankingEntry, RouteType } from "@/lib/types";
-
-const ROUTE_LABEL: Record<RouteType, string> = { ml: "🧠 ML", prompt: "💬 プロンプト", mlops: "⚙️ MLOps" };
+import { RankingEntry } from "@/lib/types";
 
 export default function RankingScreen({ ranking, onBack }: { ranking: RankingEntry[]; onBack: () => void }) {
   return (
@@ -22,7 +20,6 @@ export default function RankingScreen({ ranking, onBack }: { ranking: RankingEnt
                 <th style={{ padding: "6px 8px" }}>#</th>
                 <th style={{ padding: "6px 8px" }}>日付</th>
                 <th style={{ padding: "6px 8px" }}>称号</th>
-                <th style={{ padding: "6px 8px" }}>ルート</th>
                 <th style={{ padding: "6px 8px" }}>評価スコア</th>
                 <th style={{ padding: "6px 8px" }}>転職回数</th>
                 <th style={{ padding: "6px 8px" }}>エンディング</th>
@@ -35,7 +32,6 @@ export default function RankingScreen({ ranking, onBack }: { ranking: RankingEnt
                   <td style={{ padding: "6px 8px" }}>{i + 1}</td>
                   <td style={{ padding: "6px 8px", color: "var(--text-muted)" }}>{r.date}</td>
                   <td style={{ padding: "6px 8px", fontWeight: 700 }}>{r.title}</td>
-                  <td style={{ padding: "6px 8px" }}>{ROUTE_LABEL[r.route]}</td>
                   <td style={{ padding: "6px 8px", fontVariantNumeric: "tabular-nums" }}>{r.reputation}</td>
                   <td style={{ padding: "6px 8px" }}>{r.jobChangeCount}</td>
                   <td style={{ padding: "6px 8px" }}>{r.ending}</td>

@@ -1,7 +1,7 @@
 "use client";
 
 import { GameState } from "@/lib/types";
-import { computeEndingType, playerAge } from "@/lib/engine/engine";
+import { computeEndingType, playerAge, RESIDENCE_LABEL } from "@/lib/engine/engine";
 import { titleForReputation } from "@/lib/data/titles";
 
 export default function EndingScreen({ state, onRestart, onTitle }: { state: GameState; onRestart: () => void; onTitle: () => void }) {
@@ -22,7 +22,8 @@ export default function EndingScreen({ state, onRestart, onTitle }: { state: Gam
           <div>転職回数：{state.jobChangeCount}回</div>
           <div>最終年収：約{state.salary}万円</div>
           <div>個人貯金：{state.personalSavings}万円</div>
-          <div>私生活：{[state.boughtHouse && "🏠マイホーム", state.married && "💍既婚", state.hasPartner && !state.married && "💑交際中"].filter(Boolean).join("・") || "特になし"}</div>
+          <div>住まい：{state.boughtHouse ? "🏠マイホーム" : RESIDENCE_LABEL[state.residence]}</div>
+          <div>私生活：{[state.married && "💍既婚", state.hasChild && "👶子育て中", state.hasPartner && !state.married && "💑交際中"].filter(Boolean).join("・") || "特になし"}</div>
           <div>取得資格：{state.certifications.length}個</div>
           <div>完了プロジェクト：{state.totalProjectsCompleted}件</div>
           <div>失敗プロジェクト：{state.totalProjectsFailed}件</div>

@@ -25,7 +25,7 @@ export default function TitleScreen({
         <div style={{ fontSize: 52, marginBottom: 8 }}>🌱🤖</div>
         <h1 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 6px" }}>駆け出しAIエンジニア物語</h1>
         <p style={{ color: "var(--text-muted)", margin: "0 0 28px", lineHeight: 1.7 }}>
-          22歳、新卒でシード期スタートアップに飛び込むところから始まる、AIエンジニアのキャリア・シミュレーション。
+          22歳、新卒でシード期スタートアップに飛び込むところから始まる、AIコンサルタントのキャリア・シミュレーション。
           <br />
           限られた工数と予算をやりくりし、実績を積んでキャリアと私生活を切り拓こう。
         </p>

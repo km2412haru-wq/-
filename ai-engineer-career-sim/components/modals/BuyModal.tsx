@@ -1,20 +1,20 @@
 "use client";
 
-import { GameState } from "@/lib/types";
-import { HOBBY_ITEMS } from "@/lib/engine/engine";
-import { CERTIFICATIONS } from "@/lib/data/certifications";
+import { Residence, GameState } from "@/lib/types";
+import { HOBBY_ITEMS, RESIDENCE_LABEL, RESIDENCE_MOVE_COST, nextResidence } from "@/lib/engine/engine";
 
 export default function BuyModal({
   state,
   onBuy,
-  onGetCertification,
+  onMoveResidence,
   onClose,
 }: {
   state: GameState;
   onBuy: (itemId: string) => void;
-  onGetCertification: (certId: string) => void;
+  onMoveResidence: (to: Residence) => void;
   onClose: () => void;
 }) {
+  const upgrade = nextResidence(state.residence);
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -25,7 +25,7 @@ export default function BuyModal({
           </button>
         </div>
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
-          買い物ができるのは1ヶ月に1回まで。金額が大きいほどモチベーションの伸びも大きい。
+          買い物ができるのは2ヶ月に1回まで。金額が大きいほどモチベーションの伸びも大きい。
         </p>
         <div style={{ display: "grid", gap: 8 }}>
           {HOBBY_ITEMS.map((item) => {
@@ -59,40 +59,34 @@ export default function BuyModal({
           })}
         </div>
 
-        <h4 style={{ fontSize: 14, fontWeight: 800, margin: "18px 0 4px" }}>🎓 資格を取る</h4>
+        <h4 style={{ fontSize: 14, fontWeight: 800, margin: "18px 0 4px" }}>🏠 住み替える</h4>
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
-          月の買い物枠とは別枠。一度取得すれば効果はずっと残る、技術力・コミュ力の恒久的な底上げ。
+          買い物枠とは別枠。住まいのグレードを上げると家賃は増えるが、モチベーションが上がり通勤の負担も減る。
         </p>
-        <div style={{ display: "grid", gap: 8 }}>
-          {CERTIFICATIONS.map((cert) => {
-            const owned = state.certifications.includes(cert.id);
-            const disabled = owned || state.personalSavings < cert.cost;
-            return (
-              <button
-                key={cert.id}
-                className="btn btn-block"
-                style={{ justifyContent: "flex-start", padding: "12px 14px", textAlign: "left" }}
-                disabled={disabled}
-                onClick={() => onGetCertification(cert.id)}
-              >
-                <span style={{ display: "block" }}>
-                  <div style={{ fontWeight: 700, display: "flex", justifyContent: "space-between", gap: 8 }}>
-                    <span>
-                      {cert.emoji} {cert.name}
-                      {owned && <span style={{ color: "var(--text-muted)", fontWeight: 400 }}> （取得済み）</span>}
-                    </span>
-                    <span style={{ color: "var(--warn)" }}>-{cert.cost}万円</span>
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 400, marginTop: 2 }}>
-                    {cert.techGain ? `技術力+${cert.techGain} ` : ""}
-                    {cert.commGain ? `・ コミュ力+${cert.commGain}` : ""}
-                    ・ モチベ+6
-                  </div>
+        {state.boughtHouse ? (
+          <p style={{ fontSize: 12.5, color: "var(--text-muted)" }}>すでにマイホームを購入済みなので、住み替えの必要はない。</p>
+        ) : upgrade ? (
+          <button
+            className="btn btn-block"
+            style={{ justifyContent: "flex-start", padding: "12px 14px", textAlign: "left" }}
+            disabled={state.personalSavings < RESIDENCE_MOVE_COST[upgrade]}
+            onClick={() => onMoveResidence(upgrade)}
+          >
+            <span style={{ display: "block" }}>
+              <div style={{ fontWeight: 700, display: "flex", justifyContent: "space-between", gap: 8 }}>
+                <span>
+                  {RESIDENCE_LABEL[state.residence]} → {RESIDENCE_LABEL[upgrade]}
                 </span>
-              </button>
-            );
-          })}
-        </div>
+                <span style={{ color: "var(--warn)" }}>-{RESIDENCE_MOVE_COST[upgrade]}万円</span>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 400, marginTop: 2 }}>
+                引っ越し費用（一度きり）・モチベ+10・以後の家賃は上がるが通勤は楽になる
+              </div>
+            </span>
+          </button>
+        ) : (
+          <p style={{ fontSize: 12.5, color: "var(--text-muted)" }}>すでに最上級の住まいだ。次はマイホーム購入を検討しよう。</p>
+        )}
       </div>
     </div>
   );

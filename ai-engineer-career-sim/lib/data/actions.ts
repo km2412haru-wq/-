@@ -1,5 +1,6 @@
 import { GameAction, GameState } from "../types";
 import { addLog, bumpCombo, chance, clamp, familiarityFactor, gainReputation, resetCombo } from "../engine/helpers";
+import { CERTIFICATIONS } from "./certifications";
 
 function techBonus(s: GameState): number {
   return 1 + clamp(s.techScore, 0, 200) / 400; // techScore100で+25%程度
@@ -241,7 +242,7 @@ export const ACTIONS: GameAction[] = [
     term: { name: "RAG", desc: "Retrieval-Augmented Generation。外部知識を検索して回答に反映させることで、精度や最新性を上げる手法。" },
     when: "精度・満足度を伸ばしたい時",
     effects: [
-      { label: "精度+7（プロンプト職は+10）", tone: "good" },
+      { label: "精度+7", tone: "good" },
       { label: "進捗+3", tone: "good" },
       { label: "評価+1", tone: "good" },
       { label: "予算-5万円", tone: "bad" },
@@ -249,12 +250,11 @@ export const ACTIONS: GameAction[] = [
     ],
     apply: (s) => {
       const fam = familiarityFactor(s);
-      const routeBonus = s.route === "prompt" ? 3 : 0;
       const combo = bumpCombo(s);
       return {
         state: {
           ...s,
-          quality: clamp(s.quality + Math.round((7 + routeBonus) * fam * techBonus(s))),
+          quality: clamp(s.quality + Math.round(7 * fam * techBonus(s))),
           progress: clamp(s.progress + Math.round(3 * fam), 0, 100),
           budget: s.budget - 5,
           fatigue: clamp(s.fatigue + 3),
@@ -367,6 +367,62 @@ export const ACTIONS: GameAction[] = [
       },
       log: "技術記事/論文を読み込んだ。次の一手が有利になりそうだ。",
     }),
+  },
+  {
+    id: "cert_study",
+    label: "資格勉強をする",
+    emoji: "🎓",
+    apCost: 1,
+    category: "growth",
+    tooltip: "業務時間外にコツコツ資格の勉強をする。お金で買うのではなく、複数回積み重ねて100%になると正式に取得できる。",
+    term: { name: "資格", desc: "取得すると技術力/コミュ力が恒久的に底上げされる。1回の勉強で習熟度が一定%進み、100%で取得となる。" },
+    when: "コツコツ実力の底上げをしたい時（資格ごとに必要な回数が違う）",
+    choices: CERTIFICATIONS.map((cert) => ({
+      id: cert.id,
+      label: `${cert.emoji} ${cert.name}`,
+      tooltip: `1回の勉強で習熟度+${cert.studyPerSession}%（100%で取得）。取得すると技術力+${cert.techGain}・コミュ力+${cert.commGain}が恒久的に加わる。`,
+      when: "コツコツ実力の底上げをしたい時",
+      effects: [
+        { label: `習熟度+${cert.studyPerSession}%`, tone: "good" },
+        { label: "評価+1（取得時は+2）", tone: "good" },
+        { label: "疲労+3", tone: "bad" },
+      ],
+      apply: (s: GameState) => {
+        if (s.certifications.includes(cert.id)) {
+          return { state: s, log: `${cert.name}はすでに取得済みだ。` };
+        }
+        const cur = s.certStudyProgress[cert.id] ?? 0;
+        const next = cur + cert.studyPerSession;
+        if (next >= 100) {
+          const restProgress = { ...s.certStudyProgress };
+          delete restProgress[cert.id];
+          return {
+            state: {
+              ...s,
+              certStudyProgress: restProgress,
+              certifications: [...s.certifications, cert.id],
+              techScore: s.techScore + cert.techGain,
+              commScore: s.commScore + cert.commGain,
+              fatigue: clamp(s.fatigue + 3),
+              motivation: clamp(s.motivation + 8),
+              reputation: gainReputation(s, 2),
+              ...bumpCombo(s),
+            },
+            log: `${cert.emoji} ${cert.log}`,
+          };
+        }
+        return {
+          state: {
+            ...s,
+            certStudyProgress: { ...s.certStudyProgress, [cert.id]: next },
+            fatigue: clamp(s.fatigue + 3),
+            reputation: gainReputation(s, 1),
+            ...bumpCombo(s),
+          },
+          log: `${cert.emoji} ${cert.name}の勉強を進めた。（習熟度${next}%）`,
+        };
+      },
+    })),
   },
   {
     id: "consult_team",

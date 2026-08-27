@@ -43,7 +43,7 @@ export function familiarityFactor(state: GameState): number {
 
 export const STARTING_AGE = 22; // プレイヤーは22歳（新卒）からキャリアをスタートする
 
-// 1ターン = 1ヶ月なので、12ターンごとに歳を取る
+// week は累計経過月数（1ターン=2ヶ月ずつ進む）。12ヶ月ごとに歳を取る
 export function playerAge(state: GameState): number {
   return STARTING_AGE + Math.floor(state.week / 12);
 }

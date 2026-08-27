@@ -7,13 +7,14 @@ import {
   GameState,
   Industry,
   Offer,
+  Residence,
   RouteType,
   Screen,
   StepFocus,
+  WorkLocation,
 } from "../types";
 import { COMPANIES, STARTING_COMPANY, companiesByTier } from "../data/companies";
 import { ACTIONS, actionApply } from "../data/actions";
-import { CERTIFICATIONS } from "../data/certifications";
 import { EVENTS } from "../data/events";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { titleForReputation } from "../data/titles";
@@ -35,7 +36,7 @@ export type GameMsg =
   | { type: "DECLINE_OFFER"; offerId: string }
   | { type: "RESOLVE_STAY"; stay: boolean }
   | { type: "SPEND_ON_HOBBY"; itemId: string }
-  | { type: "GET_CERTIFICATION"; certId: string }
+  | { type: "MOVE_RESIDENCE"; to: Residence }
   | { type: "RETIRE" }
   | { type: "GOTO_SCREEN"; screen: Screen };
 
@@ -120,16 +121,63 @@ export function passChanceLabel(p: number): { label: string; tone: "good" | "war
   return { label: "かなり厳しい", tone: "bad" };
 }
 
+// ============ 勤務地・住まい（通勤の負担が「感覚でわかる」ようにする） ============
+// 勤務地は会社ごとに個別設定する代わりに業界から自動的に決める（製造業＝郊外の工場地帯が多い、それ以外は都心）
+export function companyLocation(company: Company): WorkLocation {
+  return company.industry === "manufacturing" ? "suburb" : "urban";
+}
+
+export const RESIDENCE_LABEL: Record<Residence, string> = {
+  share_house: "🛏️ シェアハウス",
+  apartment: "🏢 ワンルームアパート",
+  mansion: "🏙️ デザイナーズマンション",
+};
+
+// 住まいのグレードアップにかかる引っ越し費用（万円、一度きり）
+export const RESIDENCE_MOVE_COST: Record<Residence, number> = {
+  share_house: 0,
+  apartment: 18,
+  mansion: 45,
+};
+
+const RESIDENCE_RENT: Record<Residence, number> = { share_house: 8, apartment: 16, mansion: 28 };
+const RESIDENCE_ORDER: Residence[] = ["share_house", "apartment", "mansion"];
+
+// マイホーム購入後は家賃がかからなくなる（購入時に大きな一時支出をしている前提）
+export function monthlyRent(state: GameState): number {
+  if (state.boughtHouse) return 0;
+  return RESIDENCE_RENT[state.residence];
+}
+
+// 通勤の負担。マイホームや便利な住まいほど楽になり、郊外勤務（工場など）は車がないと大変になる
+function commuteFatiguePenalty(state: GameState): number {
+  if (state.boughtHouse) return 0;
+  const loc = companyLocation(state.currentCompany);
+  if (loc === "suburb") {
+    if (state.ownsCar) return 1;
+    return state.residence === "mansion" ? 3 : state.residence === "apartment" ? 5 : 7;
+  }
+  return state.residence === "mansion" ? 0 : state.residence === "apartment" ? 2 : 4;
+}
+
+export function commuteMood(state: GameState): { emoji: string; label: string } {
+  const p = commuteFatiguePenalty(state);
+  if (p <= 0) return { emoji: "😌", label: "通勤の負担はほぼない" };
+  if (p <= 2) return { emoji: "🙂", label: "通勤は楽な方" };
+  if (p <= 4) return { emoji: "😐", label: "通勤はそこそこ大変" };
+  return { emoji: "😩", label: "通勤がかなりしんどい（住み替えや車の購入を検討したい）" };
+}
+
+export function nextResidence(current: Residence): Residence | null {
+  const idx = RESIDENCE_ORDER.indexOf(current);
+  return idx >= 0 && idx < RESIDENCE_ORDER.length - 1 ? RESIDENCE_ORDER[idx + 1] : null;
+}
+
 export function createInitialState(route: RouteType, challenge: ChallengeFlags, ngPlusLevel: number): GameState {
   const budgetMax = Math.round((challenge.halfBudget ? 260 : 520) * (1 - Math.min(0.4, 0.08 * ngPlusLevel)));
-  const apMax = route === "mlops" ? 4 : 3;
-  const weeksLeft = challenge.shortSprint ? 1 : 12;
-  const routeIntro =
-    route === "ml"
-      ? "MLエンジニアとしてモデルの中身にとことんこだわっていく。"
-      : route === "prompt"
-      ? "プロンプトエンジニアとして言葉の力でAIを操る。"
-      : "MLOpsエンジニアとして安定稼働と自動化にこだわる。";
+  const apMax = 4; // 1ターン=2ヶ月になった分、行動回数も少し多めにしてある
+  const weeksLeft = challenge.shortSprint ? 2 : 12;
+  const routeIntro = "AIコンサルタントとして、AI導入の構想からプロジェクト推進までを担っていく。";
   const { mission, usedIds } = pickMission([], STARTING_COMPANY.culture);
   return {
     screen: "play",
@@ -147,10 +195,10 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     ap: apMax,
     apMax,
     progress: 0,
-    quality: route === "ml" ? 15 : 10,
+    quality: 10,
     satisfaction: 50,
-    techScore: route === "ml" ? 10 : 0,
-    commScore: route === "prompt" ? 5 : 0,
+    techScore: 0,
+    commScore: 5,
     fatigue: 10,
     reputation: Math.round(ngPlusLevel * 15),
     comboCount: 0,
@@ -160,12 +208,14 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     motivation: 50,
     hobbySpentThisMonth: false,
     boughtHouse: false,
+    residence: "share_house",
     ownsCar: false,
     married: false,
     hasChild: false,
     hasPet: false,
     hasPartner: false,
     certifications: [],
+    certStudyProgress: {},
     currentCompany: STARTING_COMPANY,
     familiarity: 100,
     jobHistory: [],
@@ -181,7 +231,7 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
       `${mission.emoji} 最初の案件は「${mission.title}」。${mission.brief}`,
       `🌱 ${STARTING_COMPANY.name}でのキャリアが始まった。${routeIntro}`,
     ],
-    history: [{ week: 0, quality: route === "ml" ? 15 : 10, satisfaction: 50, reputation: 0 }],
+    history: [{ week: 0, quality: 10, satisfaction: 50, reputation: 0 }],
     unlockedAchievements: [],
     seenCompanies: [],
     seenEvents: [],
@@ -507,31 +557,44 @@ function settleAfterEvent(state: GameState): GameState {
   return s;
 }
 
-const MONTHLY_LIVING_COST = 30; // 万円。家賃・食費などの生活費（給料から毎月差し引かれる）
+export const MONTHS_PER_TURN = 2; // 1ターン=2ヶ月
+const BASE_LIVING_COST = 20; // 万円/月。家賃を除く生活費（食費・光熱費など）
+const RESIDENCE_MOTIVATION_PER_TURN: Record<Residence, number> = { share_house: -2, apartment: 0, mansion: 2 };
 
 function endWeek(state: GameState): GameState {
   if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
-  const monthlyIncome = Math.round(state.salary / 12);
+  const monthlyIncome = Math.round((state.salary / 12) * MONTHS_PER_TURN);
+  const livingCost = (BASE_LIVING_COST + monthlyRent(state)) * MONTHS_PER_TURN;
   // 趣味でプライベートが充実しているほど疲れにくい。マイホームがあると生活が安定し、さらに回復しやすい
-  const fatigueRecovery = 6 + Math.round(state.motivation / 25) + (state.boughtHouse ? 2 : 0);
+  const fatigueRecovery = (6 + Math.round(state.motivation / 25) + (state.boughtHouse ? 2 : 0)) * MONTHS_PER_TURN;
+  const commutePenalty = commuteFatiguePenalty(state);
+  const residenceMotivation = state.boughtHouse ? 3 : RESIDENCE_MOTIVATION_PER_TURN[state.residence];
   const ageBefore = playerAge(state);
   let s: GameState = {
     ...state,
-    week: state.week + 1,
-    weeksLeft: state.weeksLeft - 1,
+    week: state.week + MONTHS_PER_TURN,
+    weeksLeft: state.weeksLeft - MONTHS_PER_TURN,
     ap: state.apMax,
-    fatigue: clamp(state.fatigue - fatigueRecovery),
-    familiarity: clamp(state.familiarity + 15),
+    fatigue: clamp(state.fatigue - fatigueRecovery + commutePenalty),
+    familiarity: clamp(state.familiarity + 15 * MONTHS_PER_TURN),
     riskLevel: state.fatigue > 80 ? clamp(state.riskLevel + 5, 0, 100) : state.riskLevel,
     studiedInARow: state.lastActionLabel === "study" ? state.studiedInARow : 0,
     lastActionLabel: null,
-    personalSavings: state.personalSavings + monthlyIncome - MONTHLY_LIVING_COST,
-    motivation: clamp(state.motivation - 2),
+    personalSavings: state.personalSavings + monthlyIncome - livingCost,
+    motivation: clamp(state.motivation - 2 * MONTHS_PER_TURN + residenceMotivation),
     hobbySpentThisMonth: false,
     reputation: state.motivation >= 80 ? gainReputation(state, 1) : state.reputation,
   };
   if (playerAge(s) > ageBefore) {
-    s = { ...s, log: addLog(s, `🎂 ${playerAge(s)}歳の誕生日を迎えた。`) };
+    // 年齢を重ねるごとに給与が見直される。評価スコアが高いほど昇給率も良くなる
+    const raiseRate = 0.03 + Math.min(0.09, s.reputation / 3000) + rand(-1, 3) / 100;
+    const oldSalary = s.salary;
+    const newSalary = Math.max(oldSalary, Math.round(oldSalary * (1 + raiseRate)));
+    s = {
+      ...s,
+      salary: newSalary,
+      log: addLog(s, `🎂 ${playerAge(s)}歳の誕生日を迎えた。年齢とともに給与も見直され、年収${newSalary}万円になった（+${newSalary - oldSalary}万円）。`),
+    };
   }
   s = pushHistory(s);
   const ev = rollEvent(s);
@@ -637,7 +700,7 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
       if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
       const item = HOBBY_ITEMS.find((i) => i.id === msg.itemId);
       if (!item) return state;
-      if (state.hobbySpentThisMonth) return { ...state, log: addLog(state, "⏳ 買い物ができるのは月1回まで。") };
+      if (state.hobbySpentThisMonth) return { ...state, log: addLog(state, "⏳ 買い物ができるのはこの2ヶ月ですでに使い切った。") };
       if (item.oneTime && item.ownedFlag && state[item.ownedFlag]) return { ...state, log: addLog(state, "すでに持っている。") };
       if (state.personalSavings < item.cost) return { ...state, log: addLog(state, "⚠️ 貯金が足りない。") };
       let s: GameState = {
@@ -653,23 +716,21 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
       s = applyAchievements(s, {});
       return s;
     }
-    case "GET_CERTIFICATION": {
+    case "MOVE_RESIDENCE": {
       if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
-      const cert = CERTIFICATIONS.find((c) => c.id === msg.certId);
-      if (!cert) return state;
-      if (state.certifications.includes(cert.id)) return { ...state, log: addLog(state, "すでに取得済みの資格だ。") };
-      if (state.personalSavings < cert.cost) return { ...state, log: addLog(state, "⚠️ 貯金が足りない。") };
-      let s: GameState = {
+      if (state.boughtHouse) return { ...state, log: addLog(state, "すでにマイホームがある。") };
+      const next = nextResidence(state.residence);
+      if (!next || next !== msg.to) return state;
+      const cost = RESIDENCE_MOVE_COST[msg.to];
+      if (state.personalSavings < cost) return { ...state, log: addLog(state, "⚠️ 引っ越し費用が足りない。") };
+      const s: GameState = {
         ...state,
-        personalSavings: state.personalSavings - cert.cost,
-        techScore: state.techScore + cert.techGain,
-        commScore: state.commScore + cert.commGain,
-        certifications: [...state.certifications, cert.id],
-        motivation: clamp(state.motivation + 6),
-        log: addLog(state, `${cert.emoji} ${cert.log}`),
+        residence: msg.to,
+        personalSavings: state.personalSavings - cost,
+        motivation: clamp(state.motivation + 10),
+        log: addLog(state, `📦 ${RESIDENCE_LABEL[msg.to]}に引っ越した。生活が少し快適になった。`),
       };
-      s = applyAchievements(s, {});
-      return s;
+      return applyAchievements(s, {});
     }
     case "RETIRE": {
       if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;

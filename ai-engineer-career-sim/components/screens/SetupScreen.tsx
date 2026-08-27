@@ -3,12 +3,6 @@
 import { useState } from "react";
 import { CareerMeta, RouteType } from "@/lib/types";
 
-const ROUTES: { id: RouteType; label: string; emoji: string; desc: string }[] = [
-  { id: "ml", label: "MLエンジニア特化", emoji: "🧠", desc: "モデルの中身にこだわる。技術力の伸びが早い。" },
-  { id: "prompt", label: "プロンプトエンジニア特化", emoji: "💬", desc: "言葉でAIを操る。RAG/プロンプト系の効果が高い。" },
-  { id: "mlops", label: "インフラ・MLOps特化", emoji: "⚙️", desc: "安定運用に強い。1ターンの行動回数が多い。" },
-];
-
 export default function SetupScreen({
   meta,
   onBack,
@@ -18,7 +12,7 @@ export default function SetupScreen({
   onBack: () => void;
   onStart: (route: RouteType, challenge: { halfBudget: boolean; shortSprint: boolean }, ngPlusLevel: number) => void;
 }) {
-  const [route, setRoute] = useState<RouteType>("ml");
+  const route: RouteType = "consultant";
   const [halfBudget, setHalfBudget] = useState(false);
   const [shortSprint, setShortSprint] = useState(false);
   const maxNgPlus = Math.min(5, meta.gamesCleared);
@@ -30,30 +24,25 @@ export default function SetupScreen({
         <button className="btn btn-ghost" onClick={onBack} style={{ marginBottom: 16 }}>
           ← タイトルへ戻る
         </button>
-        <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>職種ルートを選ぶ</h2>
+        <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>あなたの職種</h2>
         <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 16 }}>
-          ルートによって得意なアクションやエンディングが変わる。
+          このシミュレーションでは、AI導入の構想からプロジェクト推進までを担う「AIコンサルタント」としてキャリアをスタートする。
         </p>
         <div style={{ display: "grid", gap: 10, marginBottom: 24 }}>
-          {ROUTES.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => setRoute(r.id)}
-              className="card"
-              style={{
-                textAlign: "left",
-                padding: 16,
-                cursor: "pointer",
-                border: route === r.id ? "2px solid var(--accent)" : "1px solid var(--border)",
-                background: route === r.id ? "var(--accent-soft)" : "var(--bg-elevated)",
-              }}
-            >
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                {r.emoji} {r.label}
-              </div>
-              <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{r.desc}</div>
-            </button>
-          ))}
+          <div
+            className="card"
+            style={{
+              textAlign: "left",
+              padding: 16,
+              border: "2px solid var(--accent)",
+              background: "var(--accent-soft)",
+            }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>🧑‍💼 AIコンサルタント</div>
+            <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
+              クライアント企業へのAI導入提案から推進まで担う。コミュ力を軸に、技術力とのバランスでキャリアを築いていく。
+            </div>
+          </div>
         </div>
 
         <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>チャレンジモード（任意）</h2>
@@ -69,8 +58,8 @@ export default function SetupScreen({
           <label className="card" style={{ display: "flex", alignItems: "center", gap: 10, padding: 12, cursor: "pointer" }}>
             <input type="checkbox" checked={shortSprint} onChange={(e) => setShortSprint(e.target.checked)} />
             <div>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>⏱️ 1ヶ月クリア縛り</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>最初のプロジェクトの納期がわずか1ヶ月になる。</div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>⏱️ 2ヶ月クリア縛り</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>最初のプロジェクトの納期がわずか2ヶ月（1ターン）になる。</div>
             </div>
           </label>
         </div>

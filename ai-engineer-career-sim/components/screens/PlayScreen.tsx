@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GameAction, GameState } from "@/lib/types";
-import { GameMsg, playerAge } from "@/lib/engine/engine";
+import { commuteMood, GameMsg, playerAge, RESIDENCE_LABEL } from "@/lib/engine/engine";
 import { budgetMood, fatigueMood, projectWeather, riskMood } from "@/lib/engine/mood";
 import { ACTIONS } from "@/lib/data/actions";
 import { titleForReputation, nextTitle } from "@/lib/data/titles";
@@ -132,7 +132,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           mood={budgetMood((Math.max(0, state.budget) / Math.max(1, state.budgetMax)) * 100)}
         />
         <Gauge label="残り納期" value={state.weeksLeft} max={state.projectTotalWeeks} color="var(--warn)" emoji="⏳" suffix="ヶ月" />
-        <Gauge label="AP（今月の行動回数）" value={state.ap} max={state.apMax} color="var(--accent)" emoji="⚡" />
+        <Gauge label="AP（この2ヶ月の行動回数）" value={state.ap} max={state.apMax} color="var(--accent)" emoji="⚡" />
         <Gauge label="進捗" value={state.progress} max={100} color="#0891b2" emoji="📈" />
         <Gauge label="精度" value={state.quality} max={100} color="var(--accent)" emoji="🎯" />
         <Gauge label="満足度" value={state.satisfaction} max={100} color="var(--good)" emoji="😊" />
@@ -143,18 +143,22 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       <div className="card" style={{ padding: "14px 16px", marginBottom: 14 }}>
         <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 8, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           🏡 プライベート
-          {state.boughtHouse && <span className="tag">🏠 マイホーム</span>}
+          <span className="tag">{state.boughtHouse ? "🏠 マイホーム" : RESIDENCE_LABEL[state.residence]}</span>
           {state.married && <span className="tag">💍 既婚</span>}
           {state.hasChild && <span className="tag">👶 子育て中</span>}
           {state.ownsCar && <span className="tag">🚗 マイカー</span>}
           {state.hasPet && <span className="tag">🐾 ペット</span>}
+        </div>
+        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10, display: "flex", alignItems: "center", gap: 4 }}>
+          {commuteMood(state).emoji} {state.currentCompany.name}への通勤：{commuteMood(state).label}
+          <InfoTip text="勤務地は会社の業界で変わる（製造業は郊外の工場地帯になりやすい）。住まいのグレードを上げたり、郊外勤務なら車を持つと通勤の負担（疲労）が減る。マイホームがあれば通勤はほぼ気にならない。" />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-muted)" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 🏦 個人貯金
-                <InfoTip text="会社のプロジェクト予算とは別の、自分自身の貯金。毎月の給料から生活費(30万円)を差し引いた分が積み上がっていく。マイナスになることもある。買い物に使ったり、マイホーム購入・結婚・出産の資金になったりする。" />
+                <InfoTip text="会社のプロジェクト予算とは別の、自分自身の貯金。給料から生活費・家賃を差し引いた分が2ヶ月ごとに積み上がっていく（住まいのグレードが上がるほど家賃も上がる）。マイナスになることもある。買い物や住み替え、マイホーム購入・結婚・出産の資金になったりする。" />
               </span>
               <span style={{ fontWeight: 700, color: state.personalSavings < 0 ? "var(--bad)" : "var(--text)" }}>{state.personalSavings}万円</span>
             </div>
@@ -182,10 +186,10 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           onClick={() => setShowBuy(true)}
           style={{ fontSize: 12.5 }}
         >
-          🛍️ 貯金で買い物・資格取得をする
+          🛍️ 貯金で買い物・住み替えをする
         </button>
         <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "8px 0 0", lineHeight: 1.6 }}>
-          モチベーションが高いほど月々の疲労回復が良くなり、80以上を保つと評価スコアも少しずつ増える。放っておくと少しずつ下がる。貯金が貯まるとマイホーム購入・結婚・出産のイベントが訪れることも。
+          モチベーションが高いほど疲労回復が良くなり、80以上を保つと評価スコアも少しずつ増える。放っておくと少しずつ下がる。貯金が貯まるとマイホーム購入・結婚・出産のイベントが訪れることも。資格は「資格勉強をする」アクションでコツコツ取得できる。
         </p>
       </div>
 
@@ -219,7 +223,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       </div>
 
       <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px" }}>
-        今月のアクション
+        この2ヶ月のアクション
         {ACTIONS.some((a) => a.roleTagRequired === state.currentMission.roleTag) && (
           <span style={{ fontSize: 11, fontWeight: 600, color: "var(--accent)", marginLeft: 8 }}>
             ✨ 今回は「{state.currentMission.roleTag}」専用アクションが使える
@@ -279,7 +283,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       </div>
 
       <button className="btn btn-primary btn-block" style={{ padding: 14, fontSize: 16, marginBottom: 22 }} disabled={blocked} onClick={() => send({ type: "END_WEEK" })}>
-        今月を終える →
+        この2ヶ月を終える →
       </button>
 
       <div className="card" style={{ padding: 14 }}>
@@ -345,8 +349,8 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
             send({ type: "SPEND_ON_HOBBY", itemId });
             setShowBuy(false);
           }}
-          onGetCertification={(certId) => {
-            send({ type: "GET_CERTIFICATION", certId });
+          onMoveResidence={(to) => {
+            send({ type: "MOVE_RESIDENCE", to });
           }}
         />
       )}
