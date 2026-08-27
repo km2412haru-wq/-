@@ -5,17 +5,17 @@ import {
   Company,
   GameEvent,
   GameState,
-  InterviewQuestion,
   Offer,
   RouteType,
   Screen,
+  StepFocus,
 } from "../types";
 import { COMPANIES, STARTING_COMPANY, companiesByTier } from "../data/companies";
 import { ACTIONS, actionApply } from "../data/actions";
 import { EVENTS } from "../data/events";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { titleForReputation } from "../data/titles";
-import { categoryForStep, pickQuestion } from "../data/interviewQuestions";
+import { focusForStep, pickFlavor } from "../data/interviewFlavor";
 import { addLog, chance, clamp, gainReputation, rand } from "./helpers";
 
 export type GameMsg =
@@ -25,7 +25,7 @@ export type GameMsg =
   | { type: "APPLY_TO_COMPANY"; companyId: string }
   | { type: "OPEN_SCOUT_INTERVIEW" }
   | { type: "DISMISS_SCOUT" }
-  | { type: "ANSWER_INTERVIEW"; optionId: string }
+  | { type: "CHALLENGE_INTERVIEW" }
   | { type: "ACCEPT_OFFER"; offerId: string }
   | { type: "DECLINE_OFFER"; offerId: string }
   | { type: "RESOLVE_STAY"; stay: boolean }
@@ -33,6 +33,36 @@ export type GameMsg =
   | { type: "GOTO_SCREEN"; screen: Screen };
 
 const MAX_PROJECTS = 8;
+
+// ============ 選考の合否判定（クイズではなく実力の数値で決める） ============
+const TIER_BASE_THRESHOLD: Record<number, number> = { 1: 12, 2: 30, 3: 55, 4: 85, 5: 125 };
+
+// このステップで問われる力を重視して「実力スコア」を算出する
+export function interviewPower(state: GameState, focus: StepFocus): number {
+  const { techScore, commScore, reputation } = state;
+  const base =
+    focus === "tech" ? techScore * 1.3 + commScore * 0.4 : focus === "comm" ? commScore * 1.3 + techScore * 0.4 : techScore * 0.85 + commScore * 0.85;
+  return base + reputation * 0.12;
+}
+
+export function stepThreshold(company: Company, stepIdx: number): number {
+  return (TIER_BASE_THRESHOLD[company.tier] ?? 30) + stepIdx * 10;
+}
+
+export function estimatePassChance(state: GameState, company: Company, stepIdx: number): number {
+  const focus = focusForStep(company.interviewSteps[stepIdx] ?? "");
+  const power = interviewPower(state, focus);
+  const threshold = stepThreshold(company, stepIdx);
+  return Math.max(0.06, Math.min(0.95, 0.5 + (power - threshold) / 50));
+}
+
+export function passChanceLabel(p: number): { label: string; tone: "good" | "warn" | "bad" } {
+  if (p >= 0.75) return { label: "余裕の手応え", tone: "good" };
+  if (p >= 0.55) return { label: "良い手応え", tone: "good" };
+  if (p >= 0.4) return { label: "五分五分", tone: "warn" };
+  if (p >= 0.2) return { label: "ちょっと厳しい", tone: "warn" };
+  return { label: "かなり厳しい", tone: "bad" };
+}
 
 export function createInitialState(route: RouteType, challenge: ChallengeFlags, ngPlusLevel: number): GameState {
   const budgetMax = Math.round((challenge.halfBudget ? 260 : 520) * (1 - Math.min(0.4, 0.08 * ngPlusLevel)));
@@ -240,19 +270,10 @@ function rollScout(state: GameState): GameState {
   };
 }
 
-// ============ 面接 ============
-function buildQuestion(company: Company, stepIdx: number): InterviewQuestion {
-  const stepName = company.interviewSteps[stepIdx] ?? "面接";
-  const cat = categoryForStep(stepName);
-  const q = pickQuestion(cat);
-  const opts = [...q.options]
-    .map((o, i) => ({ id: `opt${i}`, label: o.label, correct: o.correct }))
-    .sort(() => Math.random() - 0.5);
-  return { prompt: q.prompt, options: opts, note: q.note };
-}
-
+// ============ 面接（クイズではなく、育てた「実力」の数値で合否が決まる） ============
 function startInterview(state: GameState, company: Company, origin: "scout" | "apply"): GameState {
   const startStep = origin === "scout" && company.interviewSteps.length > 1 ? 1 : 0;
+  const focus = focusForStep(company.interviewSteps[startStep] ?? "面接");
   return {
     ...state,
     pendingScout: null,
@@ -261,34 +282,30 @@ function startInterview(state: GameState, company: Company, origin: "scout" | "a
       step: startStep,
       passedSteps: startStep,
       failed: false,
-      question: buildQuestion(company, startStep),
+      focus,
+      flavor: pickFlavor(focus),
     },
     interviewOrigin: origin,
     log: addLog(state, `📝 ${company.emoji} ${company.name} の選考「${company.interviewSteps[startStep] ?? "面接"}」が始まった。`),
   };
 }
 
-function resolveInterviewAnswer(state: GameState, optionId: string): GameState {
+function resolveInterviewChallenge(state: GameState): GameState {
   if (!state.interview) return state;
   const iv = state.interview;
   const company = iv.company;
-  const opt = iv.question.options.find((o) => o.id === optionId);
-  const correct = !!opt?.correct;
-  const statFactor = state.techScore / 220 + state.commScore / 220;
-  const difficultyPenalty = company.tier * 0.07;
-  const passProb = Math.max(0.06, Math.min(0.95, (correct ? 0.6 : 0.2) + statFactor - difficultyPenalty));
+  const passProb = estimatePassChance(state, company, iv.step);
   const passed = chance(passProb);
-  const noteLog = `${opt?.correct ? "✅" : "❌"} ${iv.question.note}`;
+  const scoreLog = `（実力スコア${Math.round(interviewPower(state, iv.focus))} / 目安${stepThreshold(company, iv.step)}）`;
 
   if (!passed) {
-    const s: GameState = {
+    return {
       ...state,
       interview: null,
       interviewOrigin: null,
       appliedRecently: { ...state.appliedRecently, [company.id]: state.week },
-      log: addLog(state, `😢 ${company.emoji} ${company.name} の選考は「${company.interviewSteps[iv.step]}」で不合格だった。${noteLog}`),
+      log: addLog(state, `😢 ${company.emoji} ${company.name} の選考は「${company.interviewSteps[iv.step]}」で不合格だった${scoreLog}。`),
     };
-    return s;
   }
 
   const nextStep = iv.step + 1;
@@ -316,18 +333,19 @@ function resolveInterviewAnswer(state: GameState, optionId: string): GameState {
       log: addLog(
         state,
         fanfare
-          ? `🎊🎉 最終選考通過！${company.emoji} ${company.name} から内定が届いた！！ ${noteLog}`
-          : `🎉 ${company.emoji} ${company.name} から内定が届いた！ ${noteLog}`
+          ? `🎊🎉 最終選考通過！${company.emoji} ${company.name} から内定が届いた！！${scoreLog}`
+          : `🎉 ${company.emoji} ${company.name} から内定が届いた！${scoreLog}`
       ),
     };
     s = applyAchievements(s, {});
     return s;
   }
 
+  const nextFocus = focusForStep(company.interviewSteps[nextStep] ?? "面接");
   return {
     ...state,
-    interview: { ...iv, step: nextStep, passedSteps: iv.passedSteps + 1, question: buildQuestion(company, nextStep) },
-    log: addLog(state, `➡️ 「${company.interviewSteps[iv.step]}」通過！次は「${company.interviewSteps[nextStep]}」。${noteLog}`),
+    interview: { ...iv, step: nextStep, passedSteps: iv.passedSteps + 1, focus: nextFocus, flavor: pickFlavor(nextFocus) },
+    log: addLog(state, `➡️ 「${company.interviewSteps[iv.step]}」通過！次は「${company.interviewSteps[nextStep]}」${scoreLog}。`),
   };
 }
 
@@ -474,8 +492,8 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
       if (!state.pendingScout) return state;
       return { ...state, pendingScout: null, log: addLog(state, `🙅 ${state.pendingScout.name} のスカウトは今回見送った。`) };
     }
-    case "ANSWER_INTERVIEW": {
-      let s = resolveInterviewAnswer(state, msg.optionId);
+    case "CHALLENGE_INTERVIEW": {
+      let s = resolveInterviewChallenge(state);
       s = applyAchievements(s, {});
       return s;
     }

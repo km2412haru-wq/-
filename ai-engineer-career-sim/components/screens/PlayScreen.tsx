@@ -67,6 +67,17 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
         <Gauge label="トラブル発生率" value={state.riskLevel} max={100} color="var(--warn)" emoji="🎲" />
       </div>
 
+      <div className="card" style={{ padding: "10px 14px", marginBottom: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ fontSize: 11.5, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
+          この2つの力が、転職の面接での「実力」になる
+          <InfoTip text="面接はクイズではなく、ここまでのアクションで積み上げた技術力・コミュ力の数値でそのまま合否が決まる。数値が高いほど難しい企業にも通りやすくなる。" />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <Gauge label="技術力" value={state.techScore} max={170} color="var(--accent)" emoji="🔧" />
+          <Gauge label="コミュ力" value={state.commScore} max={170} color="var(--good)" emoji="💬" />
+        </div>
+      </div>
+
       <div className="card" style={{ padding: 14, marginBottom: 14 }}>
         <ScoreChart history={state.history} />
       </div>
@@ -182,7 +193,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       {state.pendingScout && (
         <ScoutModal company={state.pendingScout} onOpen={() => send({ type: "OPEN_SCOUT_INTERVIEW" })} onDismiss={() => send({ type: "DISMISS_SCOUT" })} />
       )}
-      {state.interview && <InterviewModal interview={state.interview} onAnswer={(optionId) => send({ type: "ANSWER_INTERVIEW", optionId })} />}
+      {state.interview && <InterviewModal state={state} onChallenge={() => send({ type: "CHALLENGE_INTERVIEW" })} />}
       {state.stayPrompt && <StayPromptModal offer={state.stayPrompt} onResolve={(stay) => send({ type: "RESOLVE_STAY", stay })} />}
     </div>
   );

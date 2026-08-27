@@ -30,6 +30,16 @@ export default function TitleScreen({
           限られた工数と予算をやりくりし、実績を積んでキャリアを切り拓こう。
         </p>
 
+        <div className="card" style={{ padding: "16px 18px", marginBottom: 16, textAlign: "left" }}>
+          <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 10 }}>🔰 あそびかた（専門知識は不要です）</div>
+          <ol style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6, fontSize: 13, lineHeight: 1.6, color: "var(--text-muted)" }}>
+            <li>毎週、リストから行動を選ぶ（例：「休む」「チームに相談する」など）だけでOK</li>
+            <li>行動を選ぶと「技術力」「コミュ力」などの数値が育っていく</li>
+            <li>育てた数値がそのまま面接の実力になり、憧れの企業にも挑戦できる</li>
+            <li>納期までに製品を完成させながら、キャリアを自由に切り拓こう</li>
+          </ol>
+        </div>
+
         <div className="card" style={{ padding: "16px 18px", marginBottom: 20, textAlign: "left" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
             <span>

@@ -90,18 +90,16 @@ export interface Offer {
   receivedWeek: number;
 }
 
+// 選考ステップでどの力が重視されるか（クイズではなく、蓄積した実力そのもので判定する）
+export type StepFocus = "tech" | "comm" | "balance";
+
 export interface InterviewState {
   company: Company;
   step: number; // 0-indexed 現在のステップ
   passedSteps: number;
   failed: boolean;
-  question: InterviewQuestion;
-}
-
-export interface InterviewQuestion {
-  prompt: string;
-  options: { id: string; label: string; correct: boolean }[];
-  note: string;
+  focus: StepFocus;
+  flavor: string; // このステップで何が問われるかの説明文
 }
 
 export interface JobHistoryEntry {
