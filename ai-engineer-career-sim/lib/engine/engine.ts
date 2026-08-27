@@ -75,7 +75,7 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
       : route === "prompt"
       ? "プロンプトエンジニアとして言葉の力でAIを操る。"
       : "MLOpsエンジニアとして安定稼働と自動化にこだわる。";
-  const { mission, usedIds } = pickMission([]);
+  const { mission, usedIds } = pickMission([], STARTING_COMPANY.culture);
   return {
     screen: "play",
     route,
@@ -101,6 +101,7 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     comboCount: 0,
     scoreMultiplier: 1,
     salary: STARTING_COMPANY.baseSalary,
+    personalSavings: 30,
     currentCompany: STARTING_COMPANY,
     familiarity: 100,
     jobHistory: [],
@@ -211,7 +212,7 @@ function resolveProjectEnd(state: GameState): GameState {
 
   // 次のプロジェクト（新しい案件）へ
   const nextWeeks = rand(8, 14);
-  const { mission: nextMission, usedIds } = pickMission(s.usedMissionIds);
+  const { mission: nextMission, usedIds } = pickMission(s.usedMissionIds, s.currentCompany.culture);
   s = {
     ...s,
     projectIndex: s.projectIndex + 1,
@@ -367,7 +368,7 @@ function resolveInterviewChallenge(state: GameState): GameState {
 function performJobChange(state: GameState, offer: Offer): GameState {
   const weeksWorked = state.week;
   const nextWeeks = rand(8, 14);
-  const { mission: nextMission, usedIds } = pickMission(state.usedMissionIds);
+  const { mission: nextMission, usedIds } = pickMission(state.usedMissionIds, offer.company.culture);
   const s: GameState = {
     ...state,
     jobHistory: [
@@ -442,8 +443,11 @@ function settleAfterEvent(state: GameState): GameState {
   return s;
 }
 
+const WEEKLY_LIVING_COST = 8; // 万円。家賃・食費などの生活費（給料から毎週差し引かれる）
+
 function endWeek(state: GameState): GameState {
   if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
+  const weeklyIncome = Math.round(state.salary / 52);
   let s: GameState = {
     ...state,
     week: state.week + 1,
@@ -454,6 +458,7 @@ function endWeek(state: GameState): GameState {
     riskLevel: state.fatigue > 80 ? clamp(state.riskLevel + 5, 0, 100) : state.riskLevel,
     studiedInARow: state.lastActionLabel === "study" ? state.studiedInARow : 0,
     lastActionLabel: null,
+    personalSavings: state.personalSavings + weeklyIncome - WEEKLY_LIVING_COST,
   };
   s = pushHistory(s);
   const ev = rollEvent(s);

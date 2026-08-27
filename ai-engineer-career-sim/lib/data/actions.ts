@@ -437,18 +437,25 @@ function withReputationDelta(before: GameState, after: GameState, message: strin
   return delta > 0 ? `${message}（評価+${delta}）` : message;
 }
 
+// 今の案件（ミッション）が推奨するアクションを選ぶと、評価スコアの伸びが倍になる。
+// 「どれを押しても同じ」ではなく、案件ごとに最適な一手が変わるようにする仕掛け。
+function withMissionSynergy(before: GameState, after: GameState, actionId: string, message: string): { state: GameState; log: string } {
+  const isRecommended = before.currentMission.recommendedActionIds.includes(actionId);
+  const baseDelta = after.reputation - before.reputation;
+  if (!isRecommended || baseDelta <= 0) return { state: after, log: message };
+  return {
+    state: { ...after, reputation: after.reputation + baseDelta, counters: { ...after.counters, missionSynergyHits: (after.counters.missionSynergyHits ?? 0) + 1 } },
+    log: `${message} 🎯このミッションに刺さる一手で評価が倍増！`,
+  };
+}
+
 export function actionApply(
   action: GameAction,
   choiceId: string | undefined,
   s: GameState
 ): { state: GameState; log: string } {
-  if (action.choices) {
-    const c = action.choices.find((c) => c.id === choiceId) ?? action.choices[0];
-    const result = c.apply(s);
-    const log = withReputationDelta(s, result.state, result.log);
-    return { state: { ...result.state, log: addLog(result.state, `${action.emoji} ${log}`) }, log };
-  }
-  const result = action.apply!(s);
-  const log = withReputationDelta(s, result.state, result.log);
-  return { state: { ...result.state, log: addLog(result.state, `${action.emoji} ${log}`) }, log };
+  const raw = action.choices ? (action.choices.find((c) => c.id === choiceId) ?? action.choices[0]).apply(s) : action.apply!(s);
+  const synergized = withMissionSynergy(s, raw.state, action.id, raw.log);
+  const log = withReputationDelta(s, synergized.state, synergized.log);
+  return { state: { ...synergized.state, log: addLog(synergized.state, `${action.emoji} ${log}`) }, log };
 }

@@ -119,11 +119,13 @@ export interface Mission {
   emoji: string;
   title: string;
   brief: string; // 案件の背景・依頼内容（ストーリー）
+  cultures: CultureType[]; // どの企業文化で発生しうる案件か（会社によって案件の傾向が変わる）
   successQuality: number;
   successProgress: number;
   bonusLabel: string; // 追加ボーナスの説明文（常に表示する）
   bonusReputation: number;
   bonusCheck: (s: GameState) => boolean;
+  recommendedActionIds: string[]; // このミッションで特に効果が高いアクション（選ぶと評価ボーナスが倍になる）
   flavorSuccess: string;
   flavorPartial: string;
   flavorFail: string;
@@ -233,6 +235,7 @@ export interface GameState {
   scoreMultiplier: number;
 
   salary: number; // 万円/年
+  personalSavings: number; // 万円。会社の予算とは別の、個人の貯金（給料-生活費が毎週積み上がる）
   currentCompany: Company;
   familiarity: number; // 0-100 馴染み度
   jobHistory: JobHistoryEntry[];

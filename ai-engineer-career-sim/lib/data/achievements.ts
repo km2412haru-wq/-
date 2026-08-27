@@ -44,6 +44,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "route_mlops", name: "MLOpsエンジニアの道", desc: "インフラ・MLOps特化ルートでエンディングを見る", check: (s, c) => !!c.justSawEnding && s.route === "mlops" },
   { id: "big_spender", name: "豪快な予算執行", desc: "1プロジェクトの予算上限を500以上にする", check: (s) => s.budgetMax >= 500 },
   { id: "resilient", name: "不屈の精神", desc: "満足度10以下から満足度60以上まで立て直す", hidden: true, check: (s) => s.satisfaction >= 60 && s.fatigue <= 40 && s.reputation > 0 },
+  { id: "savings_500", name: "貯金家", desc: "個人貯金を500万円まで貯める", check: (s) => s.personalSavings >= 500 },
+  { id: "broke", name: "火の車", desc: "個人貯金がマイナスになる", hidden: true, check: (s) => s.personalSavings < 0 },
+  { id: "mission_synergist", name: "案件の勘所を掴む者", desc: "ミッションに刺さるアクションを10回選ぶ", check: (s) => (s.counters.missionSynergyHits ?? 0) >= 10 },
 ];
 
 export const TOTAL_ACHIEVEMENTS = ACHIEVEMENTS.length;

@@ -65,7 +65,16 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
             🎯 目標：精度{state.currentMission.successQuality}以上・進捗{state.currentMission.successProgress}以上でリリース成功
           </span>
         </div>
-        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--warn)" }}>{state.currentMission.bonusLabel}</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--warn)", marginBottom: 6 }}>{state.currentMission.bonusLabel}</div>
+        <div style={{ fontSize: 11.5, color: "var(--accent)", fontWeight: 600 }}>
+          🎯 このミッションに刺さるアクション：
+          {state.currentMission.recommendedActionIds
+            .map((id) => ACTIONS.find((a) => a.id === id))
+            .filter((a): a is GameAction => !!a)
+            .map((a) => `${a.emoji} ${a.label}`)
+            .join(" / ")}
+          （評価スコアの伸びが倍になる）
+        </div>
       </div>
 
       <div className="card" style={{ padding: "14px 16px", marginBottom: 14, background: "var(--accent-soft)", border: "none" }}>
@@ -90,7 +99,25 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-        <Gauge label="予算" value={Math.max(0, state.budget)} max={state.budgetMax} color="var(--good)" emoji="💰" suffix="万円" />
+        <Gauge label="予算（会社のお金）" value={Math.max(0, state.budget)} max={state.budgetMax} color="var(--good)" emoji="💰" suffix="万円" />
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-muted)" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              🏦 個人貯金
+              <InfoTip text="会社のプロジェクト予算とは別の、自分自身の貯金。毎週の給料から生活費(8万円)を差し引いた分が積み上がっていく。マイナスになることもある。" />
+            </span>
+            <span style={{ fontWeight: 700, color: state.personalSavings < 0 ? "var(--bad)" : "var(--text)" }}>{state.personalSavings}万円</span>
+          </div>
+          <div className="gauge-track">
+            <div
+              className="gauge-fill"
+              style={{
+                width: `${Math.min(100, (Math.abs(state.personalSavings) / 300) * 100)}%`,
+                background: state.personalSavings < 0 ? "var(--bad)" : "var(--good)",
+              }}
+            />
+          </div>
+        </div>
         <Gauge label="残り納期" value={state.weeksLeft} max={state.projectTotalWeeks} color="var(--warn)" emoji="⏳" suffix="週" />
         <Gauge label="AP（今週の行動回数）" value={state.ap} max={state.apMax} color="var(--accent)" emoji="⚡" />
         <Gauge label="進捗" value={state.progress} max={100} color="#0891b2" emoji="📈" />
@@ -131,13 +158,21 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
 
       <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px" }}>今週のアクション</h3>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 8, marginBottom: 18 }}>
-        {ACTIONS.map((a) => (
+        {ACTIONS.map((a) => {
+          const isRecommended = state.currentMission.recommendedActionIds.includes(a.id);
+          return (
           <button
             key={a.id}
             disabled={blocked || state.ap < a.apCost}
             onClick={() => (a.choices ? setChoiceAction(a) : send({ type: "DO_ACTION", actionId: a.id }))}
             className="card"
-            style={{ textAlign: "left", padding: 12, cursor: "pointer", opacity: blocked || state.ap < a.apCost ? 0.5 : 1 }}
+            style={{
+              textAlign: "left",
+              padding: 12,
+              cursor: "pointer",
+              opacity: blocked || state.ap < a.apCost ? 0.5 : 1,
+              border: isRecommended ? "2px solid var(--accent)" : undefined,
+            }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
               <div style={{ fontWeight: 700, fontSize: 13.5 }}>
@@ -147,6 +182,9 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
                 AP{a.apCost}
               </span>
             </div>
+            {isRecommended && (
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--accent)", marginTop: 4 }}>🎯 このミッションに刺さる（評価2倍）</div>
+            )}
             <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 6, lineHeight: 1.5, display: "flex", gap: 4, alignItems: "flex-start" }}>
               <span>{a.tooltip}</span>
               {a.term && <InfoTip text={`【${a.term.name}】${a.term.desc}`} />}
@@ -164,7 +202,8 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
               )
             )}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <button className="btn btn-primary btn-block" style={{ padding: 14, fontSize: 16, marginBottom: 22 }} disabled={blocked} onClick={() => send({ type: "END_WEEK" })}>

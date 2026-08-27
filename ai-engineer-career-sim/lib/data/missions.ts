@@ -1,18 +1,22 @@
-import { Mission } from "../types";
+import { CultureType, Mission } from "../types";
 
 // プロジェクトごとの「案件」。同じ作業ループでも、依頼内容・成功条件・
-// ボーナス条件が毎回変わることで、単調さを崩す。
+// ボーナス条件・有利なアクションが毎回変わることで、単調さを崩す。
+// cultures は「どんな会社ならこの案件を任されそうか」を表し、転職先によって
+// 出やすい案件の傾向が変わるようにする。
 export const MISSIONS: Mission[] = [
   {
     id: "reco_engine",
     emoji: "🛒",
     title: "ECサイトのレコメンドエンジン刷新",
     brief: "急成長中のECサイトから、購入率を底上げするレコメンド機能の刷新を依頼された。ユーザーの反応がダイレクトに数字に出る、やりがいのある案件だ。",
+    cultures: ["startup", "japanese_mid"],
     successQuality: 50,
     successProgress: 75,
     bonusLabel: "🎁 満足度80以上で「大好評」ボーナス評価+15",
     bonusReputation: 15,
     bonusCheck: (s) => s.satisfaction >= 80,
+    recommendedActionIds: ["requirements", "consult_team"],
     flavorSuccess: "レコメンド精度が上がり、購入率が目に見えて改善した。クライアントは大喜びだ。",
     flavorPartial: "なんとか形になったレコメンド機能をリリース。反応はまずまずといったところ。",
     flavorFail: "思うようにレコメンドが刺さらず、クライアントの反応は今ひとつだった…。",
@@ -22,11 +26,13 @@ export const MISSIONS: Mission[] = [
     emoji: "📞",
     title: "コールセンター向け自動応答AI",
     brief: "問い合わせ対応を自動化するプロジェクト。誤回答は即クレームに直結するため、精度への要求がとにかく厳しい。",
+    cultures: ["japanese_major", "japanese_mid"],
     successQuality: 65,
     successProgress: 65,
     bonusLabel: "🎁 トラブル発生率20以下で「安定運用」ボーナス評価+15",
     bonusReputation: 15,
     bonusCheck: (s) => s.riskLevel <= 20,
+    recommendedActionIds: ["requirements", "evaluate_test"],
     flavorSuccess: "誤回答をほぼゼロに抑えた自動応答AIが本番稼働。オペレーターの負担も大きく減った。",
     flavorPartial: "自動応答AIはリリースしたが、まだ人の目でのチェックが欠かせない出来だった。",
     flavorFail: "誤回答が多発し、かえって問い合わせが増えてしまった…。",
@@ -36,11 +42,13 @@ export const MISSIONS: Mission[] = [
     emoji: "📚",
     title: "社内ナレッジ検索チャットボット",
     brief: "散らばった社内ドキュメントを横断検索できるチャットボットを作ってほしいという依頼。プロンプト設計と検索精度の両方が問われる。",
+    cultures: ["foreign", "japanese_mid", "startup"],
     successQuality: 55,
     successProgress: 70,
     bonusLabel: "🎁 技術力40以上で「社内注目の的」ボーナス評価+15",
     bonusReputation: 15,
     bonusCheck: (s) => s.techScore >= 40,
+    recommendedActionIds: ["study", "model_select"],
     flavorSuccess: "欲しい情報が一発で見つかると社内で評判になり、他部署からも導入相談が来た。",
     flavorPartial: "一応使えるチャットボットは完成したが、検索精度にはまだ課題が残る。",
     flavorFail: "欲しい情報になかなかたどり着けず、結局誰も使わなくなってしまった…。",
@@ -50,11 +58,13 @@ export const MISSIONS: Mission[] = [
     emoji: "🕵️",
     title: "不正検知システムの構築",
     brief: "金融系クライアントから、取引の不正を検知するモデルの構築を依頼された。見逃しも誤検知も許されない、緊張感のある案件だ。",
+    cultures: ["japanese_major", "foreign"],
     successQuality: 70,
     successProgress: 70,
     bonusLabel: "🎁 予算を30%以上残して完了で「堅実な仕事」ボーナス評価+20",
     bonusReputation: 20,
     bonusCheck: (s) => s.budget >= s.budgetMax * 0.3,
+    recommendedActionIds: ["evaluate_test", "code_review"],
     flavorSuccess: "高精度な不正検知モデルが本番稼働。金融機関からの信頼を勝ち取った。",
     flavorPartial: "不正検知モデルは完成したが、まだ精度に改善の余地がある状態でのリリースとなった。",
     flavorFail: "見逃しと誤検知が相次ぎ、クライアントの信頼を大きく損なってしまった…。",
@@ -64,11 +74,13 @@ export const MISSIONS: Mission[] = [
     emoji: "🎨",
     title: "SNS向け画像生成機能",
     brief: "「とにかく早くリリースして反応を見たい」というスタートアップらしいノリの案件。完璧さより、スピードが求められる。",
+    cultures: ["startup"],
     successQuality: 35,
     successProgress: 85,
     bonusLabel: "🎁 進捗95以上で「爆速リリース」ボーナス評価+15",
     bonusReputation: 15,
     bonusCheck: (s) => s.progress >= 95,
+    recommendedActionIds: ["prototype", "data_collect"],
     flavorSuccess: "圧倒的なスピードでリリースした画像生成機能がSNSで話題になった。",
     flavorPartial: "ひとまずリリースはできたが、話題になるにはもう一押し欲しいところだった。",
     flavorFail: "リリースが間に合わず、話題性を活かしきれなかった…。",
@@ -78,11 +90,13 @@ export const MISSIONS: Mission[] = [
     emoji: "🩺",
     title: "医療画像診断支援AI",
     brief: "医師の診断を補助する画像解析AI。人の健康に関わるからこそ、生半可な精度では出せない。",
+    cultures: ["foreign", "japanese_major"],
     successQuality: 80,
     successProgress: 65,
     bonusLabel: "🎁 精度90以上で「学会レベル」ボーナス評価+25",
     bonusReputation: 25,
     bonusCheck: (s) => s.quality >= 90,
+    recommendedActionIds: ["data_collect", "prompt_rag"],
     flavorSuccess: "極めて高い精度を達成した診断支援AIは、医師からも太鼓判を押された。",
     flavorPartial: "診断支援AIは実用レベルに達したが、まだ医師の最終チェックが手放せない。",
     flavorFail: "精度が実用に届かず、医療現場への導入は見送りとなった…。",
@@ -92,11 +106,13 @@ export const MISSIONS: Mission[] = [
     emoji: "📢",
     title: "広告配信最適化エンジン",
     brief: "広告費用対効果を最大化するための最適化エンジン。営業チームからの期待値がとにかく高い。",
+    cultures: ["japanese_mid", "startup", "foreign"],
     successQuality: 50,
     successProgress: 80,
     bonusLabel: "🎁 満足度75以上で「営業チーム大絶賛」ボーナス評価+15",
     bonusReputation: 15,
     bonusCheck: (s) => s.satisfaction >= 75,
+    recommendedActionIds: ["requirements", "consult_team"],
     flavorSuccess: "広告効果が明確に改善し、営業チームから絶賛された。",
     flavorPartial: "最適化エンジンはリリースしたが、効果の実感にはもう少し時間がかかりそうだ。",
     flavorFail: "期待されていたほどの改善は見られず、営業チームをがっかりさせてしまった…。",
@@ -106,11 +122,13 @@ export const MISSIONS: Mission[] = [
     emoji: "🎙️",
     title: "議事録自動作成ツール",
     brief: "会議の音声を自動で文字起こし・要約するツール。地味だが社内の評判はじわじわ広がっている。",
+    cultures: ["japanese_major", "japanese_mid"],
     successQuality: 50,
     successProgress: 60,
     bonusLabel: "🎁 疲労40以下で完了で「無理のないペース」ボーナス評価+10",
     bonusReputation: 10,
     bonusCheck: (s) => s.fatigue <= 40,
+    recommendedActionIds: ["rest", "consult_team"],
     flavorSuccess: "無理のないペースで完成させた議事録ツールは、社内で静かに、しかし確実に定着した。",
     flavorPartial: "議事録ツールはリリースしたが、要約の精度にはまだムラがある。",
     flavorFail: "要約が的外れなことが多く、結局手作業に戻ってしまった…。",
@@ -120,11 +138,13 @@ export const MISSIONS: Mission[] = [
     emoji: "📦",
     title: "在庫需要予測AI",
     brief: "限られた予算の中で、欠品と過剰在庫を減らす需要予測モデルを求められている。コスト意識がシビアな現場だ。",
+    cultures: ["japanese_major"],
     successQuality: 55,
     successProgress: 70,
     bonusLabel: "🎁 予算を40%以上残して完了で「コスト意識の高さ」ボーナス評価+20",
     bonusReputation: 20,
     bonusCheck: (s) => s.budget >= s.budgetMax * 0.4,
+    recommendedActionIds: ["consult_team", "study"],
     flavorSuccess: "低コストで高精度な需要予測を実現し、経営陣から高く評価された。",
     flavorPartial: "需要予測モデルはリリースしたが、まだ在庫の無駄が残っている。",
     flavorFail: "予測が外れ続け、在庫の無駄がかえって増えてしまった…。",
@@ -134,11 +154,13 @@ export const MISSIONS: Mission[] = [
     emoji: "💁",
     title: "カスタマーサポートBOTのリニューアル",
     brief: "既存のサポートBOTがユーザーから不評で、抜本的なテコ入れを任された。ユーザー満足度の回復が最優先のミッションだ。",
+    cultures: ["startup", "japanese_mid"],
     successQuality: 45,
     successProgress: 70,
     bonusLabel: "🎁 満足度85以上で「V字回復」ボーナス評価+20",
     bonusReputation: 20,
     bonusCheck: (s) => s.satisfaction >= 85,
+    recommendedActionIds: ["requirements", "consult_team"],
     flavorSuccess: "不評だったサポートBOTが見事なV字回復。ユーザーからの評価コメントも様変わりした。",
     flavorPartial: "サポートBOTはリニューアルしたが、まだ評判の回復途中といったところだ。",
     flavorFail: "リニューアルしても評判は上向かず、クレームが減らなかった…。",
@@ -148,11 +170,13 @@ export const MISSIONS: Mission[] = [
     emoji: "🤝",
     title: "社内異動・採用マッチングAI",
     brief: "人と部署の相性を予測するマッチングAI。技術的には地味だが、関係部署との調整が多く、コミュ力が問われる案件だ。",
+    cultures: ["japanese_major", "japanese_mid"],
     successQuality: 45,
     successProgress: 65,
     bonusLabel: "🎁 コミュ力40以上で「社内調整の達人」ボーナス評価+15",
     bonusReputation: 15,
     bonusCheck: (s) => s.commScore >= 40,
+    recommendedActionIds: ["consult_team", "requirements"],
     flavorSuccess: "関係部署をうまく巻き込みながら仕上げたマッチングAIは、人事部の強力な武器になった。",
     flavorPartial: "マッチングAIはリリースしたが、現場ではまだ人力での調整が欠かせない。",
     flavorFail: "関係部署との調整がうまくいかず、現場に浸透しないまま終わってしまった…。",
@@ -162,22 +186,31 @@ export const MISSIONS: Mission[] = [
     emoji: "🛡️",
     title: "セキュリティ監査支援AI",
     brief: "脆弱性を検知し優先順位づけを行う監査支援AI。見落としは重大インシデントに直結するため、テストと検証が要になる。",
+    cultures: ["foreign", "japanese_major"],
     successQuality: 60,
     successProgress: 65,
     bonusLabel: "🎁 このプロジェクトで無事故なら「鉄壁の守り」ボーナス評価+20",
     bonusReputation: 20,
     bonusCheck: (s) => s.incidentFreeProject,
+    recommendedActionIds: ["evaluate_test", "code_review"],
     flavorSuccess: "一件の事故もなく監査支援AIをリリース。セキュリティチームから絶大な信頼を得た。",
     flavorPartial: "監査支援AIはリリースしたが、検知の抜け漏れがまだ心配される状態だ。",
     flavorFail: "重要な脆弱性を見落としてしまい、信頼を大きく損なってしまった…。",
   },
 ];
 
-export function pickMission(usedIds: string[]): { mission: Mission; usedIds: string[] } {
-  let pool = MISSIONS.filter((m) => !usedIds.includes(m.id));
+// 会社の文化に合った案件だけを候補にする（例：スタートアップならスピード重視の案件が多い）。
+// 直近で経験した案件は避け、候補が尽きたら履歴をリセットして一巡させる。
+export function pickMission(usedIds: string[], culture: CultureType): { mission: Mission; usedIds: string[] } {
+  const cultureFits = (m: Mission) => m.cultures.includes(culture);
+  let pool = MISSIONS.filter((m) => cultureFits(m) && !usedIds.includes(m.id));
   let nextUsed = usedIds;
   if (pool.length === 0) {
-    // 全案件を経験したら一巡：リセットして続ける
+    pool = MISSIONS.filter(cultureFits);
+    nextUsed = [];
+  }
+  if (pool.length === 0) {
+    // 念のためのフォールバック（本来は全カルチャーに候補があるので通らない）
     pool = MISSIONS;
     nextUsed = [];
   }

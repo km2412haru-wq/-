@@ -462,4 +462,82 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+
+  // ===== プライベートの懐事情（会社の予算ではなく個人の貯金に影響する） =====
+  {
+    id: "friend_wedding",
+    title: "友人の結婚式に呼ばれた",
+    emoji: "💒",
+    description: "学生時代の友人から結婚式の招待状が届いた。忙しい時期だが、断る理由もない。",
+    weight: () => 0.8,
+    choices: [
+      {
+        id: "attend",
+        label: "ご祝儀を包んで出席する",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 4, satisfaction: clamp(s.satisfaction + 3) },
+          log: "友人の門出を祝った。財布は少し軽くなったが、良いリフレッシュになった。",
+        }),
+      },
+    ],
+  },
+  {
+    id: "side_hustle",
+    title: "副業のスポット案件が舞い込んだ",
+    emoji: "💻",
+    description: "知人経由で、土日にできる小さな副業の話が来た。個人の懐にはありがたい話だ。",
+    weight: () => 0.7,
+    choices: [
+      {
+        id: "take_it",
+        label: "引き受けて臨時収入を得る",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings + 8, fatigue: clamp(s.fatigue + 4) },
+          log: "週末を使って副業をこなした。個人の貯金が少し増えた。",
+        }),
+      },
+      {
+        id: "decline",
+        label: "本業に集中するため見送る",
+        apply: (s) => ({
+          state: { ...s, fatigue: clamp(s.fatigue - 3) },
+          log: "今回は本業に集中することにした。",
+        }),
+      },
+    ],
+  },
+  {
+    id: "investment_gain",
+    title: "積み立てていた投資信託が値上がりした",
+    emoji: "📈",
+    description: "何となく始めていた積立投資が、思いのほか値上がりしているのに気づいた。",
+    weight: () => 0.6,
+    choices: [
+      {
+        id: "keep",
+        label: "そのまま持ち続ける",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings + 6 },
+          log: "評価額が伸びていた。個人の資産が少し増えた気分だ。",
+        }),
+      },
+    ],
+  },
+  {
+    id: "unexpected_repair",
+    title: "自宅の家電が壊れた",
+    emoji: "🔧",
+    description: "洗濯機が突然うんともすんとも言わなくなった。買い替えは避けられなさそうだ。",
+    weight: () => 0.6,
+    choices: [
+      {
+        id: "replace",
+        label: "新しいものを買い替える",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 7 },
+          log: "急な出費だったが、生活には代えられない。",
+        }),
+      },
+    ],
+  },
 ];
