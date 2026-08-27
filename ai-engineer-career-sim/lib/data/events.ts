@@ -1,5 +1,5 @@
 import { GameEvent } from "../types";
-import { chance, clamp } from "../engine/helpers";
+import { chance, clamp, playerAge } from "../engine/helpers";
 
 export const EVENTS: GameEvent[] = [
   {
@@ -547,7 +547,7 @@ export const EVENTS: GameEvent[] = [
     title: "マイホーム購入を考える時が来た",
     emoji: "🏠",
     description: "貯金にも少し余裕が出てきた。不動産屋から紹介された物件が、思いのほか魅力的だ。",
-    weight: (s) => (!s.boughtHouse && s.week >= 8 && s.personalSavings >= 220 ? 1.2 : 0),
+    weight: (s) => (!s.boughtHouse && playerAge(s) >= 25 && s.personalSavings >= 220 ? 1.2 : 0),
     choices: [
       {
         id: "buy",
@@ -570,7 +570,7 @@ export const EVENTS: GameEvent[] = [
     title: "人生のパートナーとの将来を考えている",
     emoji: "💍",
     description: "長く付き合っているパートナーがいる。ふと、この先の人生を一緒に歩むことを考え始めた。",
-    weight: (s) => (!s.married && s.week >= 10 && s.personalSavings >= 100 ? 1 : 0),
+    weight: (s) => (!s.married && playerAge(s) >= 24 && s.personalSavings >= 100 ? 1 : 0),
     choices: [
       {
         id: "propose",
@@ -585,6 +585,114 @@ export const EVENTS: GameEvent[] = [
         id: "focus_career",
         label: "今はキャリアに集中する",
         apply: (s) => ({ state: s, log: "今はキャリアに集中することにした。" }),
+      },
+    ],
+  },
+  {
+    id: "child_born",
+    title: "新しい家族を迎えることになった",
+    emoji: "👶",
+    description: "パートナーとの間に、新しい命を授かった。人生の大きな転機だ。",
+    weight: (s) => (s.married && !s.hasChild && playerAge(s) >= 26 && s.personalSavings >= 80 ? 0.9 : 0),
+    choices: [
+      {
+        id: "welcome",
+        label: "喜んで迎える（-50万円）",
+        tooltip: "出産・育児の準備費用がかかるが、何物にも代えがたい喜びだ。",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 50, hasChild: true, motivation: clamp(s.motivation + 25), satisfaction: clamp(s.satisfaction + 8) },
+          log: "新しい家族が増えた！生活は大変になりそうだが、何物にも代えがたい喜びだ。",
+        }),
+      },
+      {
+        id: "not_yet",
+        label: "もう少し先のことにする",
+        apply: (s) => ({ state: s, log: "もう少しキャリアを固めてからにすることにした。" }),
+      },
+    ],
+  },
+
+  // ===== プライベートの細かな出来事（追加分） =====
+  {
+    id: "adopt_pet",
+    title: "保護犬・保護猫の里親募集を見かけた",
+    emoji: "🐾",
+    description: "SNSで里親を探している子の投稿が流れてきた。一目で心を掴まれてしまった。",
+    weight: (s) => (!s.hasPet ? 0.5 : 0),
+    choices: [
+      {
+        id: "adopt",
+        label: "家族として迎える（-10万円）",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 10, hasPet: true, motivation: clamp(s.motivation + 15) },
+          log: "新しい家族（ペット）を迎えた。帰宅が楽しみになった。",
+        }),
+      },
+      {
+        id: "not_now",
+        label: "今の生活では難しいと見送る",
+        apply: (s) => ({ state: s, log: "今は難しいと判断し、見送った。" }),
+      },
+    ],
+  },
+  {
+    id: "gym_membership",
+    title: "近所にジムができた",
+    emoji: "🏋️",
+    description: "オープンキャンペーンのチラシをもらった。体を動かす習慣、そろそろ始めてみようか。",
+    weight: () => 0.6,
+    choices: [
+      {
+        id: "join",
+        label: "入会する（-5万円）",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 5, motivation: clamp(s.motivation + 8), fatigue: clamp(s.fatigue - 5) },
+          log: "ジムに入会した。汗を流すと頭もすっきりする。",
+        }),
+      },
+      {
+        id: "skip",
+        label: "今回は見送る",
+        apply: (s) => ({ state: s, log: "今回は見送った。" }),
+      },
+    ],
+  },
+  {
+    id: "exam_course",
+    title: "資格取得の講座広告が目に留まった",
+    emoji: "🎓",
+    description: "業務に関連する資格の通信講座広告が目に留まった。スキルアップの足しになりそうだ。",
+    weight: () => 0.5,
+    choices: [
+      {
+        id: "enroll",
+        label: "受講する（-12万円）",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 12, techScore: s.techScore + 5 },
+          log: "資格講座を受講した。技術力の底上げになった。",
+        }),
+      },
+      {
+        id: "pass",
+        label: "見送る",
+        apply: (s) => ({ state: s, log: "今回は見送った。" }),
+      },
+    ],
+  },
+  {
+    id: "lost_wallet",
+    title: "財布を落としてしまった",
+    emoji: "😢",
+    description: "外出先で気づいたら財布がなくなっていた。運が悪かったとしか言いようがない。",
+    weight: () => 0.4,
+    choices: [
+      {
+        id: "unlucky",
+        label: "諦めて再発行の手続きをする",
+        apply: (s) => ({
+          state: { ...s, personalSavings: s.personalSavings - 12, satisfaction: clamp(s.satisfaction - 2) },
+          log: "財布ごと現金を失ってしまった…。再発行の手続きに追われた。",
+        }),
       },
     ],
   },

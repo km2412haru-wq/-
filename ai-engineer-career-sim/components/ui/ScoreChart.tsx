@@ -8,7 +8,7 @@ export default function ScoreChart({ history }: { history: HistoryPoint[] }) {
     <ResponsiveContainer width="100%" height={200}>
       <LineChart data={history} margin={{ top: 6, right: 12, bottom: 0, left: -18 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-        <XAxis dataKey="week" tick={{ fill: "var(--text-muted)", fontSize: 11 }} label={{ value: "週", position: "insideBottomRight", fontSize: 10, fill: "var(--text-muted)" }} />
+        <XAxis dataKey="week" tick={{ fill: "var(--text-muted)", fontSize: 11 }} label={{ value: "ヶ月", position: "insideBottomRight", fontSize: 10, fill: "var(--text-muted)" }} />
         <YAxis tick={{ fill: "var(--text-muted)", fontSize: 11 }} domain={[0, "auto"]} />
         <Tooltip
           contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12 }}

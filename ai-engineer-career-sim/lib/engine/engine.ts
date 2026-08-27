@@ -17,7 +17,9 @@ import { ACHIEVEMENTS } from "../data/achievements";
 import { titleForReputation } from "../data/titles";
 import { focusForStep, pickFlavor } from "../data/interviewFlavor";
 import { pickMission } from "../data/missions";
-import { addLog, chance, clamp, gainReputation, rand } from "./helpers";
+import { addLog, chance, clamp, gainReputation, playerAge, rand } from "./helpers";
+
+export { playerAge };
 
 export type GameMsg =
   | { type: "DO_ACTION"; actionId: string; choiceId?: string }
@@ -30,13 +32,34 @@ export type GameMsg =
   | { type: "ACCEPT_OFFER"; offerId: string }
   | { type: "DECLINE_OFFER"; offerId: string }
   | { type: "RESOLVE_STAY"; stay: boolean }
-  | { type: "SPEND_ON_HOBBY" }
+  | { type: "SPEND_ON_HOBBY"; itemId: string }
   | { type: "RETIRE" }
   | { type: "GOTO_SCREEN"; screen: Screen };
 
-export const HOBBY_COST = 15; // 万円
-
 const MAX_PROJECTS = 8;
+
+// 個人貯金でできる買い物のカタログ（プライベートの充実＝買えるものの幅を増やす）
+export interface HobbyItem {
+  id: string;
+  emoji: string;
+  label: string;
+  cost: number; // 万円
+  motivationGain: number;
+  fatigueChange: number; // マイナスで疲労回復
+  techGain?: number;
+  oneTime?: boolean; // 一度買えば十分なもの（車など）
+  ownedFlag?: "ownsCar";
+  log: string;
+}
+
+export const HOBBY_ITEMS: HobbyItem[] = [
+  { id: "treat", emoji: "☕", label: "ちょっと贅沢する（外食・カフェ）", cost: 8, motivationGain: 5, fatigueChange: 0, log: "ちょっとした贅沢でリフレッシュした。" },
+  { id: "hobby_gear", emoji: "🎨", label: "趣味の道具を買う", cost: 15, motivationGain: 10, fatigueChange: 0, log: "趣味の道具を買ってリフレッシュした。モチベーションが上がった。" },
+  { id: "gadget", emoji: "🎮", label: "最新ガジェットを買う", cost: 25, motivationGain: 12, fatigueChange: 0, techGain: 2, log: "最新ガジェットを手に入れた。仕事にも良い刺激になりそうだ。" },
+  { id: "short_trip", emoji: "✈️", label: "小旅行に行く", cost: 40, motivationGain: 18, fatigueChange: -15, log: "小旅行でしっかりリフレッシュした。" },
+  { id: "big_trip", emoji: "🎉", label: "豪華な旅行に行く", cost: 90, motivationGain: 30, fatigueChange: -30, log: "豪華な旅行で心身ともに生まれ変わった気分だ。" },
+  { id: "car", emoji: "🚗", label: "車を買う（一度きり）", cost: 250, motivationGain: 20, fatigueChange: -5, oneTime: true, ownedFlag: "ownsCar", log: "念願の車を購入した！行動範囲が広がった。" },
+];
 
 // ============ 選考の合否判定（クイズではなく実力の数値で決める） ============
 const TIER_BASE_THRESHOLD: Record<number, number> = { 1: 12, 2: 30, 3: 55, 4: 85, 5: 125 };
@@ -106,9 +129,12 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     salary: STARTING_COMPANY.baseSalary,
     personalSavings: 30,
     motivation: 50,
-    hobbySpentThisWeek: false,
+    hobbySpentThisMonth: false,
     boughtHouse: false,
+    ownsCar: false,
     married: false,
+    hasChild: false,
+    hasPet: false,
     currentCompany: STARTING_COMPANY,
     familiarity: 100,
     jobHistory: [],
@@ -437,7 +463,7 @@ function endGame(state: GameState): GameState {
   return { ...s, log: addLog(s, `🏁 ${ending.title}`) };
 }
 
-// ============ 週の締め処理 ============
+// ============ 月の締め処理 ============
 function settleAfterEvent(state: GameState): GameState {
   let s = state;
   if (s.weeksLeft <= 0 && !s.gameOver) {
@@ -450,13 +476,14 @@ function settleAfterEvent(state: GameState): GameState {
   return s;
 }
 
-const WEEKLY_LIVING_COST = 8; // 万円。家賃・食費などの生活費（給料から毎週差し引かれる）
+const MONTHLY_LIVING_COST = 30; // 万円。家賃・食費などの生活費（給料から毎月差し引かれる）
 
 function endWeek(state: GameState): GameState {
   if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
-  const weeklyIncome = Math.round(state.salary / 52);
+  const monthlyIncome = Math.round(state.salary / 12);
   // 趣味でプライベートが充実しているほど疲れにくい。マイホームがあると生活が安定し、さらに回復しやすい
   const fatigueRecovery = 6 + Math.round(state.motivation / 25) + (state.boughtHouse ? 2 : 0);
+  const ageBefore = playerAge(state);
   let s: GameState = {
     ...state,
     week: state.week + 1,
@@ -467,11 +494,14 @@ function endWeek(state: GameState): GameState {
     riskLevel: state.fatigue > 80 ? clamp(state.riskLevel + 5, 0, 100) : state.riskLevel,
     studiedInARow: state.lastActionLabel === "study" ? state.studiedInARow : 0,
     lastActionLabel: null,
-    personalSavings: state.personalSavings + weeklyIncome - WEEKLY_LIVING_COST,
+    personalSavings: state.personalSavings + monthlyIncome - MONTHLY_LIVING_COST,
     motivation: clamp(state.motivation - 2),
-    hobbySpentThisWeek: false,
+    hobbySpentThisMonth: false,
     reputation: state.motivation >= 80 ? gainReputation(state, 1) : state.reputation,
   };
+  if (playerAge(s) > ageBefore) {
+    s = { ...s, log: addLog(s, `🎂 ${playerAge(s)}歳の誕生日を迎えた。`) };
+  }
   s = pushHistory(s);
   const ev = rollEvent(s);
   if (ev) {
@@ -573,15 +603,21 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
     }
     case "SPEND_ON_HOBBY": {
       if (state.activeEvent || state.interview || state.pendingScout || state.stayPrompt || state.gameOver) return state;
-      if (state.hobbySpentThisWeek) return { ...state, log: addLog(state, "⏳ 趣味に使えるのは週1回まで。") };
-      if (state.personalSavings < HOBBY_COST) return { ...state, log: addLog(state, "⚠️ 貯金が足りない。") };
+      const item = HOBBY_ITEMS.find((i) => i.id === msg.itemId);
+      if (!item) return state;
+      if (state.hobbySpentThisMonth) return { ...state, log: addLog(state, "⏳ 買い物ができるのは月1回まで。") };
+      if (item.oneTime && item.ownedFlag && state[item.ownedFlag]) return { ...state, log: addLog(state, "すでに持っている。") };
+      if (state.personalSavings < item.cost) return { ...state, log: addLog(state, "⚠️ 貯金が足りない。") };
       let s: GameState = {
         ...state,
-        personalSavings: state.personalSavings - HOBBY_COST,
-        motivation: clamp(state.motivation + 10),
-        hobbySpentThisWeek: true,
-        log: addLog(state, "🎨 貯金を趣味に使ってリフレッシュした。モチベーションが上がった。"),
+        personalSavings: state.personalSavings - item.cost,
+        motivation: clamp(state.motivation + item.motivationGain),
+        fatigue: clamp(state.fatigue + item.fatigueChange),
+        techScore: state.techScore + (item.techGain ?? 0),
+        hobbySpentThisMonth: true,
+        log: addLog(state, `${item.emoji} ${item.log}`),
       };
+      if (item.ownedFlag === "ownsCar") s = { ...s, ownsCar: true };
       s = applyAchievements(s, {});
       return s;
     }

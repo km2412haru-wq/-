@@ -69,8 +69,8 @@ export default function SetupScreen({
           <label className="card" style={{ display: "flex", alignItems: "center", gap: 10, padding: 12, cursor: "pointer" }}>
             <input type="checkbox" checked={shortSprint} onChange={(e) => setShortSprint(e.target.checked)} />
             <div>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>⏱️ 1週間クリア縛り</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>最初のプロジェクトの納期がわずか1週間になる。</div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>⏱️ 1ヶ月クリア縛り</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>最初のプロジェクトの納期がわずか1ヶ月になる。</div>
             </div>
           </label>
         </div>

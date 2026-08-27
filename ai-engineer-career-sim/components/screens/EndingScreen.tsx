@@ -1,7 +1,7 @@
 "use client";
 
 import { GameState } from "@/lib/types";
-import { computeEndingType } from "@/lib/engine/engine";
+import { computeEndingType, playerAge } from "@/lib/engine/engine";
 import { titleForReputation } from "@/lib/data/titles";
 
 export default function EndingScreen({ state, onRestart, onTitle }: { state: GameState; onRestart: () => void; onTitle: () => void }) {
@@ -17,6 +17,7 @@ export default function EndingScreen({ state, onRestart, onTitle }: { state: Gam
       <div className="card" style={{ padding: 18, textAlign: "left", marginBottom: 16 }}>
         <div style={{ fontWeight: 800, marginBottom: 10 }}>👑 最終称号：{title.name}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 13 }}>
+          <div>現在の年齢：{playerAge(state)}歳</div>
           <div>評価スコア：{state.reputation}</div>
           <div>転職回数：{state.jobChangeCount}回</div>
           <div>最終年収：約{state.salary}万円</div>
@@ -35,7 +36,7 @@ export default function EndingScreen({ state, onRestart, onTitle }: { state: Gam
             {[...state.jobHistory, { companyId: state.currentCompany.id, name: state.currentCompany.name, emoji: state.currentCompany.emoji, weeksWorked: state.week, culture: state.currentCompany.culture }].map(
               (j, i) => (
                 <div key={i}>
-                  {j.emoji} {j.name}（在籍{j.weeksWorked}週）
+                  {j.emoji} {j.name}（在籍{j.weeksWorked}ヶ月）
                 </div>
               )
             )}

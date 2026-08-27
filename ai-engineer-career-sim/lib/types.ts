@@ -159,7 +159,7 @@ export interface AchievementCtx {
 
 export interface ChallengeFlags {
   halfBudget: boolean;
-  shortSprint: boolean; // 1週間クリア縛り(納期を大幅短縮)
+  shortSprint: boolean; // 1ヶ月クリア縛り(納期を大幅短縮)
   priceHike?: boolean; // API価格高騰(NG+由来。createInitialStateが自動算出する)
 }
 
@@ -212,8 +212,8 @@ export interface GameState {
   ngPlusLevel: number;
   challenge: ChallengeFlags;
 
-  week: number; // 累計経過週
-  weeksLeft: number; // 現プロジェクトの残り納期
+  week: number; // 累計経過月数（1ターン=1ヶ月）
+  weeksLeft: number; // 現プロジェクトの残り納期（ヶ月）
   projectTotalWeeks: number;
   projectIndex: number; // 現職での何個目のプロジェクトか
   currentMission: Mission; // 今のプロジェクトのミッション（案件ごとに変わる）
@@ -236,11 +236,14 @@ export interface GameState {
   scoreMultiplier: number;
 
   salary: number; // 万円/年
-  personalSavings: number; // 万円。会社の予算とは別の、個人の貯金（給料-生活費が毎週積み上がる）
-  motivation: number; // 0-100。プライベートの充実度。趣味に貯金を使うと上がり、放っておくと少しずつ下がる
-  hobbySpentThisWeek: boolean; // 今週すでに趣味にお金を使ったか（週1回まで）
+  personalSavings: number; // 万円。会社の予算とは別の、個人の貯金（給料-生活費が毎月積み上がる）
+  motivation: number; // 0-100。プライベートの充実度。買い物に貯金を使うと上がり、放っておくと少しずつ下がる
+  hobbySpentThisMonth: boolean; // 今月すでに買い物をしたか（月1回まで）
   boughtHouse: boolean; // マイホームを購入したか
+  ownsCar: boolean; // 車を購入したか
   married: boolean; // 結婚したか
+  hasChild: boolean; // 子供が生まれたか
+  hasPet: boolean; // ペットを飼っているか
   currentCompany: Company;
   familiarity: number; // 0-100 馴染み度
   jobHistory: JobHistoryEntry[];

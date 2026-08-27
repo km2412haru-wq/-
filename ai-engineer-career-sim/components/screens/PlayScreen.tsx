@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GameAction, GameState } from "@/lib/types";
-import { GameMsg } from "@/lib/engine/engine";
+import { GameMsg, playerAge } from "@/lib/engine/engine";
 import { ACTIONS } from "@/lib/data/actions";
 import { titleForReputation, nextTitle } from "@/lib/data/titles";
 import Gauge from "../ui/Gauge";
@@ -15,11 +15,13 @@ import InterviewModal from "../modals/InterviewModal";
 import StayPromptModal from "../modals/StayPromptModal";
 import ApplyModal from "../modals/ApplyModal";
 import OfferCompareModal from "../modals/OfferCompareModal";
+import BuyModal from "../modals/BuyModal";
 
 export default function PlayScreen({ state, send, onNav }: { state: GameState; send: (msg: GameMsg) => void; onNav: (screen: "achievements" | "codex" | "ranking") => void }) {
   const [choiceAction, setChoiceAction] = useState<GameAction | null>(null);
   const [showApply, setShowApply] = useState(false);
   const [showOffers, setShowOffers] = useState(false);
+  const [showBuy, setShowBuy] = useState(false);
 
   const title = titleForReputation(state.reputation);
   const next = nextTitle(state.reputation);
@@ -30,7 +32,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
         <div>
           <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-            {state.currentCompany.emoji} {state.currentCompany.name} ・ 第{state.week}週
+            {state.currentCompany.emoji} {state.currentCompany.name} ・ {playerAge(state)}歳 ・ キャリア{state.week}ヶ月目
           </div>
           <div style={{ fontSize: 20, fontWeight: 800, marginTop: 2 }}>
             👑 {title.name}
@@ -105,8 +107,8 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
         <Gauge label="予算（会社のお金）" value={Math.max(0, state.budget)} max={state.budgetMax} color="var(--good)" emoji="💰" suffix="万円" />
-        <Gauge label="残り納期" value={state.weeksLeft} max={state.projectTotalWeeks} color="var(--warn)" emoji="⏳" suffix="週" />
-        <Gauge label="AP（今週の行動回数）" value={state.ap} max={state.apMax} color="var(--accent)" emoji="⚡" />
+        <Gauge label="残り納期" value={state.weeksLeft} max={state.projectTotalWeeks} color="var(--warn)" emoji="⏳" suffix="ヶ月" />
+        <Gauge label="AP（今月の行動回数）" value={state.ap} max={state.apMax} color="var(--accent)" emoji="⚡" />
         <Gauge label="進捗" value={state.progress} max={100} color="#0891b2" emoji="📈" />
         <Gauge label="精度" value={state.quality} max={100} color="var(--accent)" emoji="🎯" />
         <Gauge label="満足度" value={state.satisfaction} max={100} color="var(--good)" emoji="😊" />
@@ -119,13 +121,16 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           🏡 プライベート
           {state.boughtHouse && <span className="tag">🏠 マイホーム</span>}
           {state.married && <span className="tag">💍 既婚</span>}
+          {state.hasChild && <span className="tag">👶 子育て中</span>}
+          {state.ownsCar && <span className="tag">🚗 マイカー</span>}
+          {state.hasPet && <span className="tag">🐾 ペット</span>}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-muted)" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 🏦 個人貯金
-                <InfoTip text="会社のプロジェクト予算とは別の、自分自身の貯金。毎週の給料から生活費(8万円)を差し引いた分が積み上がっていく。マイナスになることもある。趣味に使ったり、マイホーム購入・結婚の資金になったりする。" />
+                <InfoTip text="会社のプロジェクト予算とは別の、自分自身の貯金。毎月の給料から生活費(30万円)を差し引いた分が積み上がっていく。マイナスになることもある。買い物に使ったり、マイホーム購入・結婚・出産の資金になったりする。" />
               </span>
               <span style={{ fontWeight: 700, color: state.personalSavings < 0 ? "var(--bad)" : "var(--text)" }}>{state.personalSavings}万円</span>
             </div>
@@ -149,14 +154,14 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
         </div>
         <button
           className="btn"
-          disabled={blocked || state.hobbySpentThisWeek || state.personalSavings < 15}
-          onClick={() => send({ type: "SPEND_ON_HOBBY" })}
+          disabled={blocked || state.hobbySpentThisMonth || state.personalSavings < 8}
+          onClick={() => setShowBuy(true)}
           style={{ fontSize: 12.5 }}
         >
-          🎨 趣味に貯金を使う（-15万円・週1回まで／モチベ+10）
+          🛍️ 貯金で買い物をする（1ヶ月に1回まで）
         </button>
         <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "8px 0 0", lineHeight: 1.6 }}>
-          モチベーションが高いほど週の疲労回復が良くなり、80以上を保つと評価スコアも少しずつ増える。放っておくと少しずつ下がる。貯金が貯まるとマイホーム購入や結婚のイベントが訪れることも。
+          モチベーションが高いほど月々の疲労回復が良くなり、80以上を保つと評価スコアも少しずつ増える。放っておくと少しずつ下がる。貯金が貯まるとマイホーム購入・結婚・出産のイベントが訪れることも。
         </p>
       </div>
 
@@ -189,7 +194,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
         </button>
       </div>
 
-      <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px" }}>今週のアクション</h3>
+      <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px" }}>今月のアクション</h3>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 8, marginBottom: 18 }}>
         {ACTIONS.map((a) => {
           const isRecommended = state.currentMission.recommendedActionIds.includes(a.id);
@@ -240,7 +245,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
       </div>
 
       <button className="btn btn-primary btn-block" style={{ padding: 14, fontSize: 16, marginBottom: 22 }} disabled={blocked} onClick={() => send({ type: "END_WEEK" })}>
-        週を終える →
+        今月を終える →
       </button>
 
       <div className="card" style={{ padding: 14 }}>
@@ -294,6 +299,17 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           onApply={(companyId) => {
             send({ type: "APPLY_TO_COMPANY", companyId });
             setShowApply(false);
+          }}
+        />
+      )}
+
+      {showBuy && (
+        <BuyModal
+          state={state}
+          onClose={() => setShowBuy(false)}
+          onBuy={(itemId) => {
+            send({ type: "SPEND_ON_HOBBY", itemId });
+            setShowBuy(false);
           }}
         />
       )}

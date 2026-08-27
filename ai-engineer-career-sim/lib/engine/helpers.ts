@@ -40,3 +40,10 @@ export function gainReputation(state: GameState, amount: number): number {
 export function familiarityFactor(state: GameState): number {
   return 0.6 + (clamp(state.familiarity) / 100) * 0.4; // 0.6〜1.0
 }
+
+export const STARTING_AGE = 22; // プレイヤーは22歳（新卒）からキャリアをスタートする
+
+// 1ターン = 1ヶ月なので、12ターンごとに歳を取る
+export function playerAge(state: GameState): number {
+  return STARTING_AGE + Math.floor(state.week / 12);
+}

@@ -14,7 +14,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "combo_10", name: "ノリに乗ってる", desc: "10連続コンボを達成する", check: (s) => s.comboCount >= 10 },
   { id: "combo_20", name: "ゾーンに入った", desc: "20連続コンボを達成する", hidden: true, check: (s) => s.comboCount >= 20 },
   { id: "bookworm", name: "知の探求者", desc: "技術記事/論文を合計10本読む", check: (s) => s.articlesRead >= 10 },
-  { id: "study_streak", name: "インプット中毒", desc: "5週連続で技術記事/論文を読む", check: (s) => s.studiedInARow >= 5 },
+  { id: "study_streak", name: "インプット中毒", desc: "5ヶ月連続で技術記事/論文を読む", check: (s) => s.studiedInARow >= 5 },
   { id: "legendary_cto", name: "伝説の称号", desc: "「伝説のCTO」の称号に到達する", check: (s) => s.reputation >= 800 },
   { id: "hall_of_fame", name: "生き字引", desc: "「AI業界の生き字引」の称号に到達する", hidden: true, check: (s) => s.reputation >= 1200 },
   { id: "ng_plus_challenger", name: "もう一周", desc: "2周目（NG+）に挑戦する", check: (s) => s.ngPlusLevel >= 1 },
@@ -50,6 +50,10 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "homeowner", name: "マイホームの主", desc: "マイホームを購入する", check: (s) => s.boughtHouse },
   { id: "married_life", name: "ふたり暮らし", desc: "結婚する", check: (s) => s.married },
   { id: "work_life_balance", name: "ワークライフバランスの鑑", desc: "モチベーション90以上を保つ", check: (s) => s.motivation >= 90 },
+  { id: "car_owner", name: "マイカーオーナー", desc: "車を買う", check: (s) => s.ownsCar },
+  { id: "pet_owner", name: "もふもふライフ", desc: "ペットを飼う", hidden: true, check: (s) => s.hasPet },
+  { id: "new_parent", name: "新米パパ・ママ", desc: "子供が生まれる", check: (s) => s.hasChild },
+  { id: "full_house", name: "人生の勝ち組", desc: "マイホーム・結婚・子供・車をすべて達成する", hidden: true, check: (s) => s.boughtHouse && s.married && s.hasChild && s.ownsCar },
 ];
 
 export const TOTAL_ACHIEVEMENTS = ACHIEVEMENTS.length;
