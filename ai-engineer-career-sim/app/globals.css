@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #f5f6fa;
   --bg-elevated: #ffffff;
   --bg-sunken: #ececf3;
@@ -21,6 +22,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
     --bg: #0f0f14;
     --bg-elevated: #1a1a22;
     --bg-sunken: #14141a;
@@ -61,6 +63,7 @@ body {
 
 button {
   font-family: inherit;
+  color: inherit;
 }
 
 a {
