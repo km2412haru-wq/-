@@ -6,7 +6,9 @@ import {
   GameEvent,
   GameState,
   Industry,
+  Mission,
   Offer,
+  Phase,
   Residence,
   RouteType,
   Screen,
@@ -173,6 +175,35 @@ export function nextResidence(current: Residence): Residence | null {
   return idx >= 0 && idx < RESIDENCE_ORDER.length - 1 ? RESIDENCE_ORDER[idx + 1] : null;
 }
 
+// ============ プロジェクトフェーズ（実際のAIエンジニアの業務工程になぞらえた4段階） ============
+export const PHASE_ORDER: Phase[] = ["data", "model", "implementation", "operation"];
+
+export const PHASE_LABEL: Record<Phase, { emoji: string; label: string; desc: string }> = {
+  data: { emoji: "🗂️", label: "データ収集・分析", desc: "AIモデルの土台となるデータを集め、扱いやすい形に整える工程。" },
+  model: { emoji: "🧬", label: "AIモデル開発", desc: "集めたデータをもとに、分類や予測を行うAIモデルを構築する工程。" },
+  implementation: { emoji: "🔌", label: "システムへの実装", desc: "開発したAIモデルを実際の業務システムに組み込み、動く形にする工程。" },
+  operation: { emoji: "🔄", label: "運用・改善", desc: "実装後も精度を確認し続け、必要に応じて再学習・改善を行う工程。" },
+};
+
+// 進捗（mission.successProgressに対する割合）でフェーズを判定する。
+// 案件ごとに難易度が違っても、常に同じ4段階の工程を踏むようにするための正規化
+export function computePhase(mission: Mission, progress: number): Phase {
+  const target = mission.successProgress > 0 ? mission.successProgress : 100;
+  const ratio = progress / target;
+  if (ratio < 0.25) return "data";
+  if (ratio < 0.5) return "model";
+  if (ratio < 0.75) return "implementation";
+  return "operation";
+}
+
+// アクションやターン経過で進捗が変わった後に呼び、フェーズが進んでいたらログを残す
+function updatePhase(state: GameState): GameState {
+  const next = computePhase(state.currentMission, state.progress);
+  if (next === state.phase) return state;
+  const info = PHASE_LABEL[next];
+  return { ...state, phase: next, log: addLog(state, `${info.emoji} フェーズが「${info.label}」に進んだ。${info.desc}`) };
+}
+
 export function createInitialState(route: RouteType, challenge: ChallengeFlags, ngPlusLevel: number): GameState {
   const budgetMax = Math.round((challenge.halfBudget ? 260 : 520) * (1 - Math.min(0.4, 0.08 * ngPlusLevel)));
   const apMax = 4; // 1ターン=2ヶ月になった分、行動回数も少し多めにしてある
@@ -190,6 +221,7 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     projectIndex: 1,
     currentMission: mission,
     usedMissionIds: usedIds,
+    phase: "data",
     budget: budgetMax,
     budgetMax,
     ap: apMax,
@@ -332,6 +364,7 @@ function resolveProjectEnd(state: GameState): GameState {
     projectIndex: s.projectIndex + 1,
     currentMission: nextMission,
     usedMissionIds: usedIds,
+    phase: "data",
     weeksLeft: nextWeeks,
     projectTotalWeeks: nextWeeks,
     progress: 0,
@@ -501,6 +534,7 @@ function performJobChange(state: GameState, offer: Offer): GameState {
     projectIndex: 1,
     currentMission: nextMission,
     usedMissionIds: usedIds,
+    phase: "data",
     weeksLeft: nextWeeks,
     projectTotalWeeks: nextWeeks,
     ap: state.apMax,
@@ -616,12 +650,14 @@ export function gameReducer(state: GameState, msg: GameMsg): GameState {
       const action = ACTIONS.find((a) => a.id === msg.actionId);
       if (!action) return state;
       if (action.roleTagRequired && action.roleTagRequired !== state.currentMission.roleTag) return state;
+      if (action.phaseRequired && action.phaseRequired !== state.phase) return state;
       if (state.ap < action.apCost) return { ...state, log: addLog(state, "⚠️ APが足りない。") };
       const { state: applied } = actionApply(action, msg.choiceId, state);
       let s: GameState = { ...applied, ap: state.ap - action.apCost, lastActionLabel: action.id, dataChoiceHistory: state.dataChoiceHistory };
       if (action.id === "data_collect" && msg.choiceId) {
         s = { ...s, dataChoiceHistory: [...state.dataChoiceHistory, msg.choiceId as "quality" | "quantity"] };
       }
+      s = updatePhase(s);
       s = applyAchievements(s, {});
       return s;
     }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GameAction, GameState } from "@/lib/types";
-import { commuteMood, GameMsg, playerAge, RESIDENCE_LABEL } from "@/lib/engine/engine";
+import { commuteMood, GameMsg, PHASE_LABEL, PHASE_ORDER, playerAge, RESIDENCE_LABEL } from "@/lib/engine/engine";
 import { budgetMood, fatigueMood, projectWeather, riskMood } from "@/lib/engine/mood";
 import { ACTIONS } from "@/lib/data/actions";
 import { titleForReputation, nextTitle } from "@/lib/data/titles";
@@ -83,6 +83,42 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           </div>
         </div>
         <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.7, margin: "0 0 10px" }}>{state.currentMission.brief}</p>
+
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ display: "flex", gap: 4 }}>
+            {PHASE_ORDER.map((p, i) => {
+              const currentIdx = PHASE_ORDER.indexOf(state.phase);
+              const done = i < currentIdx;
+              const active = i === currentIdx;
+              return (
+                <div key={p} style={{ flex: 1, textAlign: "center" }}>
+                  <div
+                    style={{
+                      height: 6,
+                      borderRadius: 4,
+                      background: done ? "var(--good)" : active ? "var(--accent)" : "var(--gauge-track)",
+                      marginBottom: 4,
+                    }}
+                  />
+                  <div
+                    style={{
+                      fontSize: 10.5,
+                      fontWeight: active ? 800 : 600,
+                      color: active ? "var(--accent)" : done ? "var(--good)" : "var(--text-muted)",
+                    }}
+                  >
+                    {PHASE_LABEL[p].emoji} {PHASE_LABEL[p].label}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0", lineHeight: 1.6, display: "flex", alignItems: "flex-start", gap: 4 }}>
+            <span>今は「{PHASE_LABEL[state.phase].label}」フェーズ：{PHASE_LABEL[state.phase].desc}</span>
+            <InfoTip text="実際のAIエンジニアの業務工程になぞらえた4段階。進捗が伸びるほど自動的に次のフェーズへ進み、フェーズごとに使えるアクションが変わる（データ収集・分析→AIモデル開発→システムへの実装→運用・改善）。" />
+          </p>
+        </div>
+
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
           <span className="tag" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
             🎯 目標：精度{state.currentMission.successQuality}以上・進捗{state.currentMission.successProgress}以上でリリース成功
@@ -222,16 +258,23 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
         </button>
       </div>
 
-      <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px" }}>
+      <h3 style={{ fontSize: 15, fontWeight: 800, margin: "0 0 8px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
         この2ヶ月のアクション
+        <span className="tag" style={{ background: "var(--accent-soft)", color: "var(--accent)", fontWeight: 700 }}>
+          {PHASE_LABEL[state.phase].emoji} {PHASE_LABEL[state.phase].label}フェーズ
+        </span>
         {ACTIONS.some((a) => a.roleTagRequired === state.currentMission.roleTag) && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: "var(--accent)", marginLeft: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "var(--good)" }}>
             ✨ 今回は「{state.currentMission.roleTag}」専用アクションが使える
           </span>
         )}
       </h3>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 8, marginBottom: 18 }}>
-        {ACTIONS.filter((a) => !a.roleTagRequired || a.roleTagRequired === state.currentMission.roleTag).map((a) => {
+        {ACTIONS.filter(
+          (a) =>
+            (!a.roleTagRequired || a.roleTagRequired === state.currentMission.roleTag) &&
+            (!a.phaseRequired || a.phaseRequired === state.phase)
+        ).map((a) => {
           const isRecommended = state.currentMission.recommendedActionIds.includes(a.id);
           return (
           <button
@@ -244,7 +287,13 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
               padding: 12,
               cursor: "pointer",
               opacity: blocked || state.ap < a.apCost ? 0.5 : 1,
-              border: isRecommended ? "2px solid var(--accent)" : a.roleTagRequired ? "2px solid var(--good)" : undefined,
+              border: isRecommended
+                ? "2px solid var(--accent)"
+                : a.roleTagRequired
+                ? "2px solid var(--good)"
+                : a.phaseRequired
+                ? "2px solid #0891b2"
+                : undefined,
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
@@ -257,6 +306,11 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
             </div>
             {a.roleTagRequired && (
               <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--good)", marginTop: 4 }}>✨ {a.roleTagRequired}専用アクション</div>
+            )}
+            {a.phaseRequired && (
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#0891b2", marginTop: 4 }}>
+                {PHASE_LABEL[a.phaseRequired].emoji} {PHASE_LABEL[a.phaseRequired].label}フェーズの一手
+              </div>
             )}
             {isRecommended && (
               <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--accent)", marginTop: 4 }}>🎯 このミッションに刺さる（評価2倍）</div>

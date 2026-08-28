@@ -5,6 +5,11 @@ export type RouteType = "consultant";
 // （マイホーム購入はboughtHouseフラグで別管理・最終形態）
 export type Residence = "share_house" | "apartment" | "mansion";
 
+// プロジェクトのフェーズ。実際のAIエンジニアの業務工程（データ収集・分析→AIモデル開発→
+// システムへの実装→運用・改善）になぞらえた4段階。進捗に応じて自動的に進み、
+// フェーズごとに解放されるアクションが変わる
+export type Phase = "data" | "model" | "implementation" | "operation";
+
 // 勤務地。企業の業界から自動的に決まる（郊外＝工場地帯が多い製造業、それ以外は都心）
 export type WorkLocation = "urban" | "suburb";
 
@@ -82,6 +87,7 @@ export interface GameAction {
   effects?: EffectHint[]; // 何にどう作用するか（choicesがある場合はchoice側に持たせる）
   term?: { name: string; desc: string }; // 用語解説
   roleTagRequired?: string; // 指定した案件の職種（roleTag）の時だけ出現する専用アクション
+  phaseRequired?: Phase; // 指定フェーズの時だけ出現する専用アクション
   choices?: ActionChoice[]; // 選択肢がある場合（この場合 apply は使わない）
   apply?: (s: GameState) => { state: GameState; log: string };
 }
@@ -241,6 +247,7 @@ export interface GameState {
   projectIndex: number; // 現職での何個目のプロジェクトか
   currentMission: Mission; // 今のプロジェクトのミッション（案件ごとに変わる）
   usedMissionIds: string[]; // 直近で使ったミッション（連続で同じ案件にならないようにする）
+  phase: Phase; // 現在のプロジェクトフェーズ（進捗に応じて自動的に進む）
 
   budget: number;
   budgetMax: number;
