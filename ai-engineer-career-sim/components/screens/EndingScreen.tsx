@@ -35,7 +35,7 @@ export default function EndingScreen({ state, onRestart, onTitle }: { state: Gam
         <div className="card" style={{ padding: 18, textAlign: "left", marginBottom: 24 }}>
           <div style={{ fontWeight: 800, marginBottom: 10 }}>🧳 キャリア履歴</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
-            {[...state.jobHistory, { companyId: state.currentCompany.id, name: state.currentCompany.name, emoji: state.currentCompany.emoji, weeksWorked: state.week, culture: state.currentCompany.culture }].map(
+            {[...state.jobHistory, { companyId: state.currentCompany.id, name: state.currentCompany.name, emoji: state.currentCompany.emoji, weeksWorked: state.week - state.companyStartWeek, culture: state.currentCompany.culture }].map(
               (j, i) => (
                 <div key={i}>
                   {j.emoji} {j.name}（在籍{j.weeksWorked}ヶ月）

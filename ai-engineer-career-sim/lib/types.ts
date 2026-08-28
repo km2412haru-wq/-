@@ -165,7 +165,7 @@ export interface JobHistoryEntry {
   companyId: string;
   name: string;
   emoji: string;
-  weeksWorked: number;
+  weeksWorked: number; // その会社に在籍していた月数（累計経過月数ではない）
   culture: CultureType;
 }
 
@@ -279,6 +279,7 @@ export interface GameState {
   certifications: string[]; // 取得した資格のid一覧
   certStudyProgress: Record<string, number>; // 勉強中の資格の習熟度（id→0-100、100で取得）
   currentCompany: Company;
+  companyStartWeek: number; // 現在の会社に転職した時点のweek（在籍月数の算出に使う）
   familiarity: number; // 0-100 馴染み度
   jobHistory: JobHistoryEntry[];
   jobChangeCount: number;

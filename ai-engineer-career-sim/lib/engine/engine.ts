@@ -252,6 +252,7 @@ export function createInitialState(route: RouteType, challenge: ChallengeFlags, 
     certifications: [],
     certStudyProgress: {},
     currentCompany: STARTING_COMPANY,
+    companyStartWeek: 0,
     familiarity: 100,
     jobHistory: [],
     jobChangeCount: 0,
@@ -516,7 +517,7 @@ function resolveInterviewChallenge(state: GameState): GameState {
 
 // ============ 転職 ============
 function performJobChange(state: GameState, offer: Offer): GameState {
-  const weeksWorked = state.week;
+  const weeksWorked = state.week - state.companyStartWeek; // その会社に在籍していた月数
   const nextWeeks = rand(8, 14);
   const { mission: nextMission, usedIds } = pickMission(state.usedMissionIds, offer.company.culture);
   const s: GameState = {
@@ -526,6 +527,7 @@ function performJobChange(state: GameState, offer: Offer): GameState {
       { companyId: state.currentCompany.id, name: state.currentCompany.name, emoji: state.currentCompany.emoji, weeksWorked, culture: state.currentCompany.culture },
     ],
     currentCompany: offer.company,
+    companyStartWeek: state.week,
     salary: offer.rolledSalary,
     familiarity: 25,
     jobChangeCount: state.jobChangeCount + 1,
