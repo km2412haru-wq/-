@@ -68,18 +68,21 @@ export const HOBBY_ITEMS: HobbyItem[] = [
 ];
 
 // ============ 選考の合否判定（クイズではなく実力の数値で決める） ============
-const TIER_BASE_THRESHOLD: Record<number, number> = { 1: 12, 2: 30, 3: 55, 4: 85, 5: 125 };
+// 難易度は上位ティアほど急激に上がる。三菱商事やGoogleのような最難関(tier5)は、
+// 何年も実力を積み上げてようやく手が届く「憧れの企業」であってほしいので、
+// 下位ティアとの差を大きく開けてある
+const TIER_BASE_THRESHOLD: Record<number, number> = { 1: 15, 2: 45, 3: 95, 4: 165, 5: 260 };
 
 // このステップで問われる力を重視して「実力スコア」を算出する
 export function interviewPower(state: GameState, focus: StepFocus): number {
   const { techScore, commScore, reputation } = state;
   const base =
     focus === "tech" ? techScore * 1.3 + commScore * 0.4 : focus === "comm" ? commScore * 1.3 + techScore * 0.4 : techScore * 0.85 + commScore * 0.85;
-  return base + reputation * 0.12;
+  return base + reputation * 0.08;
 }
 
 export function stepThreshold(company: Company, stepIdx: number): number {
-  return (TIER_BASE_THRESHOLD[company.tier] ?? 30) + stepIdx * 10;
+  return (TIER_BASE_THRESHOLD[company.tier] ?? 30) + stepIdx * 16;
 }
 
 // 業界の近さ（親和性）。同業界なら大きく有利、隣接業界なら少し有利、畑違いは不利になる。

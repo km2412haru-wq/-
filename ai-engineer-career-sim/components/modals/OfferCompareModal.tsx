@@ -19,7 +19,7 @@ export default function OfferCompareModal({
   const series = [
     {
       name: `現職：${state.currentCompany.name}`,
-      color: "#6b6d7c",
+      color: "var(--text-muted)",
       axes: {
         salary: Math.min(100, Math.round((state.salary / 1500) * 100)),
         discretion: state.currentCompany.axes.discretion,

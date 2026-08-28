@@ -33,7 +33,7 @@ export default function OfferRadar({
         {series.map((s) => (
           <Radar key={s.name} name={s.name} dataKey={s.name} stroke={s.color} fill={s.color} fillOpacity={0.22} strokeWidth={2} />
         ))}
-        <Legend wrapperStyle={{ fontSize: 12 }} />
+        <Legend wrapperStyle={{ fontSize: 12, color: "var(--text)" }} />
         <Tooltip
           contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12 }}
           labelStyle={{ color: "var(--text)" }}

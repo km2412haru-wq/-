@@ -4,7 +4,7 @@
   --bg-sunken: #ececf3;
   --border: #dfe1ea;
   --text: #16171f;
-  --text-muted: #6b6d7c;
+  --text-muted: #585a68;
   --accent: #4f46e5;
   --accent-soft: #eef0ff;
   --accent-text: #ffffff;
@@ -109,7 +109,7 @@ a {
   transform: translateY(0);
 }
 .btn:disabled {
-  opacity: 0.45;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 .btn-primary {

@@ -235,8 +235,8 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
           <InfoTip text="面接はクイズではなく、ここまでのアクションで積み上げた技術力・コミュ力の数値でそのまま合否が決まる。数値が高いほど難しい企業にも通りやすくなる。" />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <Gauge label="技術力" value={state.techScore} max={170} color="var(--accent)" emoji="🔧" />
-          <Gauge label="コミュ力" value={state.commScore} max={170} color="var(--good)" emoji="💬" />
+          <Gauge label="技術力" value={state.techScore} max={300} color="var(--accent)" emoji="🔧" />
+          <Gauge label="コミュ力" value={state.commScore} max={300} color="var(--good)" emoji="💬" />
         </div>
       </div>
 
@@ -286,7 +286,7 @@ export default function PlayScreen({ state, send, onNav }: { state: GameState; s
               textAlign: "left",
               padding: 12,
               cursor: "pointer",
-              opacity: blocked || state.ap < a.apCost ? 0.5 : 1,
+              opacity: blocked || state.ap < a.apCost ? 0.68 : 1,
               border: isRecommended
                 ? "2px solid var(--accent)"
                 : a.roleTagRequired

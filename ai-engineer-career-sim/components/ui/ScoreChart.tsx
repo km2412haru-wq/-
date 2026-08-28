@@ -14,7 +14,7 @@ export default function ScoreChart({ history }: { history: HistoryPoint[] }) {
           contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12 }}
           labelStyle={{ color: "var(--text)" }}
         />
-        <Legend wrapperStyle={{ fontSize: 12 }} />
+        <Legend wrapperStyle={{ fontSize: 12, color: "var(--text)" }} />
         <Line type="monotone" dataKey="quality" name="精度" stroke="#4f46e5" strokeWidth={2} dot={false} />
         <Line type="monotone" dataKey="satisfaction" name="満足度" stroke="#0f8a4a" strokeWidth={2} dot={false} />
         <Line type="monotone" dataKey="reputation" name="評価スコア" stroke="#d92d3f" strokeWidth={2} dot={false} />
