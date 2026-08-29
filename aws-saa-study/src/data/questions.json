@@ -1,6 +1,7 @@
 [
   {
     "id": "q101",
+    "exam": "SAA",
     "domain": 1,
     "services": ["IAM"],
     "question": "ある企業では、EC2インスタンス上で動作するアプリケーションからS3バケットにアクセスする必要があります。セキュリティのベストプラクティスに従って認証情報を管理する方法はどれですか？",
@@ -15,6 +16,7 @@
   },
   {
     "id": "q102",
+    "exam": "SAA",
     "domain": 1,
     "services": ["S3セキュリティ"],
     "question": "S3バケットに保存された機密データについて、意図しない公開設定によるデータ漏洩を防ぐために最も効果的な設定はどれですか？",
@@ -29,6 +31,7 @@
   },
   {
     "id": "q103",
+    "exam": "SAA",
     "domain": 1,
     "services": ["VPC"],
     "question": "プライベートサブネット内のEC2インスタンスが、インターネット上のソフトウェアリポジトリからパッケージをダウンロードできるようにしたいが、インターネットから直接インスタンスへ到達できないようにしたい場合、何を使いますか？",
@@ -43,6 +46,7 @@
   },
   {
     "id": "q104",
+    "exam": "SAA",
     "domain": 1,
     "services": ["KMS"],
     "question": "コンプライアンス要件により、暗号化キーの生成・管理を専有のハードウェアセキュリティモジュール上で行う必要があります。適切なサービスはどれですか？",
@@ -57,6 +61,7 @@
   },
   {
     "id": "q105",
+    "exam": "SAA",
     "domain": 1,
     "services": ["セキュリティグループ / ネットワークACL"],
     "question": "特定のIPアドレスからの通信を明示的に拒否したい場合、どの設定を使う必要がありますか？",
@@ -71,6 +76,7 @@
   },
   {
     "id": "q201",
+    "exam": "SAA",
     "domain": 2,
     "services": ["Auto Scaling"],
     "question": "Webアプリケーションのトラフィックが時間帯によって大きく変動します。コストを抑えつつ需要変動に自動対応するための最適な構成はどれですか？",
@@ -85,6 +91,7 @@
   },
   {
     "id": "q202",
+    "exam": "SAA",
     "domain": 2,
     "services": ["ELB（ALB / NLB）"],
     "question": "URLのパスに応じて異なるバックエンドサービスにトラフィックをルーティングしたい場合、どのロードバランサーを使うべきですか？",
@@ -99,6 +106,7 @@
   },
   {
     "id": "q203",
+    "exam": "SAA",
     "domain": 2,
     "services": ["RDS（Multi-AZ / リードレプリカ）"],
     "question": "本番RDSデータベースの読み取りトラフィックが増加しパフォーマンスが低下しています。可用性ではなく読み取りスケーラビリティを改善するにはどうすべきですか？",
@@ -113,6 +121,7 @@
   },
   {
     "id": "q204",
+    "exam": "SAA",
     "domain": 2,
     "services": ["S3バージョニング / クロスリージョンレプリケーション"],
     "question": "S3バケットでクロスリージョンレプリケーション（CRR）を設定しようとしたところ、エラーが発生しました。考えられる原因はどれですか？",
@@ -127,6 +136,7 @@
   },
   {
     "id": "q205",
+    "exam": "SAA",
     "domain": 2,
     "services": ["Route 53（フェイルオーバールーティング）"],
     "question": "オンプレミスのプライマリサイトに障害が発生した場合に、自動的にAWS上のセカンダリサイトへトラフィックを切り替えるDR構成を実現するには何を使いますか？",
@@ -141,6 +151,7 @@
   },
   {
     "id": "q301",
+    "exam": "SAA",
     "domain": 3,
     "services": ["EC2インスタンスタイプ"],
     "question": "インメモリで大規模なデータセットを処理するアプリケーションに最適なEC2インスタンスファミリーはどれですか？",
@@ -155,6 +166,7 @@
   },
   {
     "id": "q302",
+    "exam": "SAA",
     "domain": 3,
     "services": ["DynamoDB"],
     "question": "DynamoDBテーブルへの読み取りアクセスをマイクロ秒単位まで高速化したい場合、何を導入すべきですか？",
@@ -169,6 +181,7 @@
   },
   {
     "id": "q303",
+    "exam": "SAA",
     "domain": 3,
     "services": ["ElastiCache"],
     "question": "高可用性のためのレプリケーションと自動フェイルオーバーが必要なキャッシュ用途に適したElastiCacheエンジンはどれですか？",
@@ -183,6 +196,7 @@
   },
   {
     "id": "q304",
+    "exam": "SAA",
     "domain": 3,
     "services": ["CloudFront"],
     "question": "S3バケットを非公開に保ちながら、世界中のユーザーに静的コンテンツを低レイテンシーで配信したい場合の構成として適切なのはどれですか？",
@@ -197,6 +211,7 @@
   },
   {
     "id": "q305",
+    "exam": "SAA",
     "domain": 3,
     "services": ["Lambda"],
     "question": "S3にファイルがアップロードされるたびに、サーバーを管理せず自動的に画像リサイズ処理を実行したい場合、何を使うべきですか？",
@@ -211,6 +226,7 @@
   },
   {
     "id": "q401",
+    "exam": "SAA",
     "domain": 4,
     "services": ["S3ストレージクラス / ライフサイクル"],
     "question": "アクセス頻度が予測できないデータを保存しており、コストを自動的に最適化したい場合に最適なS3ストレージクラスはどれですか？",
@@ -225,6 +241,7 @@
   },
   {
     "id": "q402",
+    "exam": "SAA",
     "domain": 4,
     "services": ["Reserved Instances / Savings Plans"],
     "question": "3年間安定して稼働し続けることが分かっているワークロード向けにEC2のコストを最も削減できる購入オプションはどれですか？",
@@ -239,6 +256,7 @@
   },
   {
     "id": "q403",
+    "exam": "SAA",
     "domain": 4,
     "services": ["Cost Explorer / Budgets"],
     "question": "特定のプロジェクトの月間AWS利用料金があらかじめ設定したしきい値を超えた際に、担当者にメールで通知したい場合、何を設定すべきですか？",
@@ -253,6 +271,7 @@
   },
   {
     "id": "q404",
+    "exam": "SAA",
     "domain": 4,
     "services": ["Trusted Advisor"],
     "question": "AWS環境全体をコスト最適化・セキュリティ・耐障害性・パフォーマンスの観点から包括的にチェックしたい場合、どのサービスが適していますか？",
@@ -267,6 +286,7 @@
   },
   {
     "id": "q405",
+    "exam": "SAA",
     "domain": 4,
     "services": ["Compute Optimizer"],
     "question": "現在稼働中のEC2インスタンスが実際の使用率に対して過剰なスペックになっていないか、機械学習を用いて分析し最適なサイズを推奨してもらいたい場合、何を使いますか？",
@@ -278,5 +298,305 @@
     ],
     "correctIndex": 0,
     "explanation": "Compute Optimizerは過去の使用率メトリクスを機械学習で分析し、EC2やLambda等の最適なサイズ・タイプを推奨します。"
+  },
+  {
+    "id": "c101",
+    "exam": "CLF",
+    "domain": 1,
+    "services": ["クラウドコンピューティングの利点"],
+    "question": "オンプレミスのデータセンター運用と比較した場合の、クラウドコンピューティングの主な利点として最も適切なものはどれですか？",
+    "choices": [
+      "将来の需要を正確に予測してあらかじめ大量のハードウェアを購入する必要がある",
+      "固定費（設備投資）を変動費（従量課金）に置き換えられる",
+      "データセンターの構築・運用は引き続き自社で行う必要がある",
+      "スケールする際は新しい物理サーバーの納品を待つ必要がある"
+    ],
+    "correctIndex": 1,
+    "explanation": "クラウドの代表的な利点の1つは、多額の初期投資（固定費）を、使った分だけ支払う変動費に置き換えられる点です。需要予測に基づく事前投資やハードウェア納品待ちが不要になります。"
+  },
+  {
+    "id": "c102",
+    "exam": "CLF",
+    "domain": 1,
+    "services": ["AWS Well-Architected Framework"],
+    "question": "AWS Well-Architected Frameworkの6つの柱に含まれないものはどれですか？",
+    "choices": [
+      "セキュリティ",
+      "コスト最適化",
+      "マーケティング",
+      "信頼性"
+    ],
+    "correctIndex": 2,
+    "explanation": "AWS Well-Architected Frameworkの6つの柱は、運用上の優秀性・セキュリティ・信頼性・パフォーマンス効率・コスト最適化・持続可能性です。マーケティングは含まれません。"
+  },
+  {
+    "id": "c103",
+    "exam": "CLF",
+    "domain": 1,
+    "services": ["デプロイモデルとサービスモデル"],
+    "question": "Amazon EC2のように、OS以上のレイヤーをユーザーが自分で管理する必要があるサービス提供形態は、次のうちどれに分類されますか？",
+    "choices": [
+      "SaaS（Software as a Service）",
+      "PaaS（Platform as a Service）",
+      "IaaS（Infrastructure as a Service）",
+      "オンプレミス"
+    ],
+    "correctIndex": 2,
+    "explanation": "EC2はインフラ（仮想サーバー）のみを提供し、OSやミドルウェア以上の管理はユーザーの責任となるIaaS（Infrastructure as a Service）に分類されます。"
+  },
+  {
+    "id": "c104",
+    "exam": "CLF",
+    "domain": 1,
+    "services": ["AWSグローバルインフラストラクチャ"],
+    "question": "高可用性を実現するために、AWSのアベイラビリティゾーン（AZ）について正しい説明はどれですか？",
+    "choices": [
+      "1つのリージョンには必ず1つのAZしか存在しない",
+      "AZは物理的に分離されたデータセンター（群）であり、同一リージョン内の複数AZにリソースを分散配置すると可用性が向上する",
+      "AZはエッジロケーションと同じものであり、CDNのキャッシュに使われる",
+      "AZ間は常にインターネットを経由して接続されている"
+    ],
+    "correctIndex": 1,
+    "explanation": "AZは同一リージョン内で物理的に分離されたデータセンター（群）です。複数のAZにリソースを分散配置することで、単一障害点を排除し可用性を高められます。"
+  },
+  {
+    "id": "c105",
+    "exam": "CLF",
+    "domain": 1,
+    "services": ["AWS Cloud Adoption Framework"],
+    "question": "ある企業が、クラウド移行を単なる技術的な作業としてではなく、組織のスキル・プロセス・ガバナンスも含めて計画的に進めたいと考えています。参考にすべきフレームワークはどれですか？",
+    "choices": [
+      "AWS Well-Architected Framework",
+      "AWS Cloud Adoption Framework（AWS CAF）",
+      "AWS Trusted Advisor",
+      "AWS Shared Responsibility Model"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS CAFは、ビジネス・ピープル・ガバナンスといった組織的な観点と、プラットフォーム・セキュリティ・オペレーションといった技術的な観点の両方を含む、組織全体のクラウド導入を支援するフレームワークです。"
+  },
+  {
+    "id": "c201",
+    "exam": "CLF",
+    "domain": 2,
+    "services": ["責任共有モデル"],
+    "question": "AWSの責任共有モデルにおいて、「クラウド内のセキュリティ（Security in the cloud）」として顧客が責任を持つ項目はどれですか？",
+    "choices": [
+      "AWSデータセンターの物理的なセキュリティ",
+      "AWSのグローバルネットワークインフラの保護",
+      "顧客が管理するIAMユーザー・ロールの権限設定",
+      "AWSが提供するハードウェアの保守・廃棄"
+    ],
+    "correctIndex": 2,
+    "explanation": "責任共有モデルでは、AWSは「クラウド自体（of the cloud）」の物理的セキュリティに責任を持ち、顧客は「クラウド内（in the cloud）」、すなわちIAM設定・データ・OSパッチ適用などに責任を持ちます。"
+  },
+  {
+    "id": "c202",
+    "exam": "CLF",
+    "domain": 2,
+    "services": ["IAM基礎"],
+    "question": "AWSアカウントを新規作成した直後のセキュリティ対策として、最も優先すべきものはどれですか？",
+    "choices": [
+      "ルートユーザーの認証情報を日常的な作業にそのまま使い続ける",
+      "ルートユーザーにMFA（多要素認証）を設定し、日常操作にはIAMユーザーを作成して使う",
+      "全メンバーにルートユーザーのパスワードを共有する",
+      "IAMユーザーを作成せず、常にルートユーザーで運用する"
+    ],
+    "correctIndex": 1,
+    "explanation": "ルートユーザーは全権限を持つため、MFAで保護したうえで日常操作には使わず、必要な権限のみを持つIAMユーザー・ロールを作成して利用するのがベストプラクティスです。"
+  },
+  {
+    "id": "c203",
+    "exam": "CLF",
+    "domain": 2,
+    "services": ["AWS Organizations"],
+    "question": "複数の部門ごとにAWSアカウントを分離して管理しつつ、請求だけは1つにまとめたいと考えています。どのサービス・機能を使うべきですか？",
+    "choices": [
+      "IAMのグループ機能",
+      "AWS Organizationsの一括請求（Consolidated Billing）",
+      "Amazon GuardDuty",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Organizationsを使うと、複数アカウントをまとめて管理でき、一括請求機能によって支払いを管理アカウントに一本化できます。"
+  },
+  {
+    "id": "c204",
+    "exam": "CLF",
+    "domain": 2,
+    "services": ["コンプライアンスとAWS Artifact"],
+    "question": "監査担当者からAWSのSOCレポートやISO認証に関する文書の提出を求められました。どのサービスからこれらの文書を入手できますか？",
+    "choices": [
+      "AWS Trusted Advisor",
+      "AWS Artifact",
+      "AWS Budgets",
+      "Amazon Inspector"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Artifactは、AWSが取得しているコンプライアンス関連の認証・監査レポートをオンデマンドでダウンロードできるセルフサービスポータルです。"
+  },
+  {
+    "id": "c205",
+    "exam": "CLF",
+    "domain": 2,
+    "services": ["主要セキュリティサービス"],
+    "question": "AWSアカウント内のAPI呼び出しやネットワークログを継続的に分析し、不審な挙動や既知の脅威を自動的に検知したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon GuardDuty",
+      "AWS Budgets",
+      "Amazon EFS",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon GuardDutyは、CloudTrail・VPCフローログ・DNSログなどを機械学習で継続的に分析し、不審な挙動や脅威を自動的に検知するマネージド型脅威検出サービスです。"
+  },
+  {
+    "id": "c301",
+    "exam": "CLF",
+    "domain": 3,
+    "services": ["コンピューティングサービス概要"],
+    "question": "コンテナ化されたアプリケーションを実行したいが、サーバーやクラスターのインフラ管理はしたくない場合、どのサービスの組み合わせが適していますか？",
+    "choices": [
+      "Amazon EC2単体",
+      "Amazon ECS/EKS ＋ AWS Fargate",
+      "Amazon RDS",
+      "Amazon S3"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon ECSまたはEKSでコンテナをオーケストレーションし、実行基盤としてAWS Fargateを使うことで、サーバーやクラスターのインフラ管理を行わずにコンテナを実行できます。"
+  },
+  {
+    "id": "c302",
+    "exam": "CLF",
+    "domain": 3,
+    "services": ["ストレージサービス概要"],
+    "question": "複数のAmazon EC2インスタンスから同時に同じファイルシステムをマウントして共有したい場合、最も適したストレージサービスはどれですか？",
+    "choices": [
+      "Amazon EBS",
+      "Amazon EFS",
+      "Amazon S3 Glacier",
+      "インスタンスストア"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon EFSは複数のEC2インスタンスから同時にマウントできるマネージド型ファイルストレージ（NFS）です。EBSは基本的に単一のインスタンスにのみアタッチされます。"
+  },
+  {
+    "id": "c303",
+    "exam": "CLF",
+    "domain": 3,
+    "services": ["データベースサービス概要"],
+    "question": "運用の手間を減らしながらリレーショナルデータベースを利用したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon RDS",
+      "Amazon S3",
+      "Amazon CloudFront",
+      "AWS Lambda単体"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon RDSは、パッチ適用・バックアップ・冗長化などの運用作業をAWSが代行するマネージド型のリレーショナルデータベースサービスです。"
+  },
+  {
+    "id": "c304",
+    "exam": "CLF",
+    "domain": 3,
+    "services": ["ネットワーキングサービス概要"],
+    "question": "オンプレミスのデータセンターとAWS環境を、インターネットを経由しない専用線で安定的に接続したい場合、どのサービスを使いますか？",
+    "choices": [
+      "AWS Direct Connect",
+      "Amazon CloudFront",
+      "AWS Lambda",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS Direct Connectは、オンプレミス環境とAWSを専用線で接続するサービスで、インターネットを経由する接続よりも安定した帯域と低いレイテンシーを実現します。"
+  },
+  {
+    "id": "c305",
+    "exam": "CLF",
+    "domain": 3,
+    "services": ["デプロイ・管理ツール"],
+    "question": "同じ構成のインフラ環境を、手作業のミスなく何度も再現性高く構築したい場合、どのサービスが適していますか？",
+    "choices": [
+      "AWS Management Console上での手動操作のみ",
+      "AWS CloudFormation（Infrastructure as Code）",
+      "AWS Artifact",
+      "AWS Budgets"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS CloudFormationはインフラ構成をコード（テンプレート）として定義し、そこから環境を自動構築できるサービスです。同じテンプレートから何度でも再現性高く環境を構築できます。"
+  },
+  {
+    "id": "c401",
+    "exam": "CLF",
+    "domain": 4,
+    "services": ["AWS料金モデル"],
+    "question": "中断されても問題ないバッチ処理のワークロードで、コストを最大限抑えたい場合に適した購入オプションはどれですか？",
+    "choices": [
+      "オンデマンドインスタンス",
+      "スポットインスタンス",
+      "3年の全前払いリザーブドインスタンス",
+      "AWS Marketplaceの有料AMI"
+    ],
+    "correctIndex": 1,
+    "explanation": "スポットインスタンスはAWSの余剰キャパシティを大幅な割引価格で利用できますが、AWSの都合で中断される可能性があるため、中断されても問題ないワークロードに向いています。"
+  },
+  {
+    "id": "c402",
+    "exam": "CLF",
+    "domain": 4,
+    "services": ["Pricing Calculator と Cost管理ツール"],
+    "question": "まだAWSアカウントを持っていない検討段階の企業が、想定する構成のおおよその月額費用を事前に見積もりたい場合、どのツールを使うべきですか？",
+    "choices": [
+      "AWS Cost Explorer",
+      "AWS Pricing Calculator",
+      "AWS Budgets",
+      "AWS Trusted Advisor"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Pricing Calculatorは、AWSアカウントがなくても利用予定の構成を入力して見積もりを作成できるツールです。Cost Explorerは既存アカウントの実績分析が目的のため、事前見積もりには使えません。"
+  },
+  {
+    "id": "c403",
+    "exam": "CLF",
+    "domain": 4,
+    "services": ["AWS Organizationsと一括請求"],
+    "question": "AWS Organizationsの一括請求（Consolidated Billing）の説明として正しいものはどれですか？",
+    "choices": [
+      "各メンバーアカウントの利用状況は一切確認できなくなる",
+      "組織内の全メンバーアカウントの請求が管理アカウントに一本化される",
+      "一括請求を使うとIAMユーザーの作成ができなくなる",
+      "一括請求は1つのAWSアカウントでのみ利用できる機能である"
+    ],
+    "correctIndex": 1,
+    "explanation": "一括請求では、組織内の複数のメンバーアカウントの利用料金がすべて管理アカウントにまとめて請求されます。各メンバーアカウントの利用状況は引き続き個別に確認できます。"
+  },
+  {
+    "id": "c404",
+    "exam": "CLF",
+    "domain": 4,
+    "services": ["AWSサポートプラン"],
+    "question": "本番環境を24時間365日運用しており、緊急時にはすぐにAWSサポートへ問い合わせたい企業が選ぶべき最低限のサポートプランはどれですか？",
+    "choices": [
+      "Basic",
+      "Developer",
+      "Business",
+      "サポートプランへの加入は不要"
+    ],
+    "correctIndex": 2,
+    "explanation": "Businessプラン以上で24時間365日の技術サポートが提供されます。Basicは基本的な情報提供のみ、Developerは営業時間内のメールサポート中心のため、本番運用には不十分です。"
+  },
+  {
+    "id": "c405",
+    "exam": "CLF",
+    "domain": 4,
+    "services": ["AWS Marketplace"],
+    "question": "サードパーティ製のセキュリティソフトウェアをAWS環境に導入したいが、ベンダーと個別に契約・請求処理をする手間は省きたい場合、どこから購入するのが適切ですか？",
+    "choices": [
+      "AWS Marketplace",
+      "AWS Artifact",
+      "AWS Trusted Advisor",
+      "Amazon S3"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS Marketplaceでは、サードパーティ製ソフトウェアを購入・デプロイでき、利用料金はAWSの請求に統合されるため、ベンダーとの個別契約・請求処理の手間を省けます。"
   }
 ]

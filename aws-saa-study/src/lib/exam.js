@@ -1,8 +1,5 @@
 import questions from '../data/questions.json'
-import { DOMAINS } from '../data/domains.js'
-
-export const EXAM_LENGTH = 20
-export const EXAM_DURATION_SEC = 40 * 60 // 40分（本番は65問130分だが短縮ミニ模試）
+import { getExam } from '../data/exams.js'
 
 function shuffle(arr) {
   const a = [...arr]
@@ -13,19 +10,23 @@ function shuffle(arr) {
   return a
 }
 
-// ドメインの出題比率に応じてバランスよく問題を抽出する。
+// 指定した資格試験の出題比率に応じてバランスよく問題を抽出する。
 // 各ドメインの問題数が不足している場合は他ドメインから補う。
-export function pickExamQuestions(length = EXAM_LENGTH) {
+export function pickExamQuestions(examId) {
+  const exam = getExam(examId)
+  const length = exam.examLength
+  const examQuestions = questions.filter((q) => q.exam === examId)
+
   const pools = {}
-  for (const d of DOMAINS) {
-    pools[d.id] = shuffle(questions.filter((q) => q.domain === d.id))
+  for (const d of exam.domains) {
+    pools[d.id] = shuffle(examQuestions.filter((q) => q.domain === d.id))
   }
 
-  const totalWeight = DOMAINS.reduce((sum, d) => sum + d.weight, 0)
+  const totalWeight = exam.domains.reduce((sum, d) => sum + d.weight, 0)
   const picked = []
   const leftovers = []
 
-  for (const d of DOMAINS) {
+  for (const d of exam.domains) {
     const quota = Math.round((d.weight / totalWeight) * length)
     const take = pools[d.id].splice(0, quota)
     picked.push(...take)

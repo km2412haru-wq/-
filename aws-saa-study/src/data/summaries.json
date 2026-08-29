@@ -1,7 +1,9 @@
 [
   {
+    "exam": "SAA",
     "domain": 1,
     "service": "IAM",
+    "fullName": "AWS Identity and Access Management (IAM)",
     "overview": "AWSリソースへのアクセスを制御する認証・認可サービス。ユーザー・グループ・ロール・ポリシーを組み合わせて権限管理を行う。",
     "keyPoints": [
       "ユーザー、グループ、ロール、ポリシー（JSON形式）の4要素で構成される",
@@ -13,8 +15,10 @@
     "examTips": "「アクセスキーの埋め込みではなくIAMロールを使うべき」という選択肢が正解になるパターンが頻出。クロスアカウントアクセスにはIAMロール＋AssumeRoleを使う設問も定番。"
   },
   {
+    "exam": "SAA",
     "domain": 1,
     "service": "S3セキュリティ",
+    "fullName": "Amazon Simple Storage Service (Amazon S3) Security Features",
     "overview": "S3バケット・オブジェクトへのアクセス制御と暗号化の仕組み。バケットポリシー、ACL、ブロックパブリックアクセスなどで保護する。",
     "keyPoints": [
       "バケットポリシー（リソースベース）とIAMポリシー（アイデンティティベース）を併用できる",
@@ -26,8 +30,10 @@
     "examTips": "「意図せず公開されたS3バケット」を防ぐ設問ではブロックパブリックアクセスが正解になりやすい。暗号化方式（SSE-S3 vs SSE-KMS vs SSE-C）の使い分けが問われる。"
   },
   {
+    "exam": "SAA",
     "domain": 1,
     "service": "VPC",
+    "fullName": "Amazon Virtual Private Cloud (Amazon VPC)",
     "overview": "AWS上に論理的に分離された仮想ネットワークを構築するサービス。サブネット、ルートテーブル、ゲートウェイ等で構成する。",
     "keyPoints": [
       "パブリックサブネットはインターネットゲートウェイ（IGW）経由のルートを持つ",
@@ -39,8 +45,10 @@
     "examTips": "「プライベートサブネットのEC2からインターネット上のパッケージを取得したい」→NATゲートウェイが正解になる定番パターン。VPCピアリングは推移的接続ができない点に注意。"
   },
   {
+    "exam": "SAA",
     "domain": 1,
     "service": "KMS",
+    "fullName": "AWS Key Management Service (AWS KMS)",
     "overview": "暗号化キーの作成・管理を行うマネージドサービス。他の多くのAWSサービスの暗号化機能と統合されている。",
     "keyPoints": [
       "カスタマーマネージドキー（自分で管理）とAWSマネージドキー（AWS管理）がある",
@@ -52,8 +60,10 @@
     "examTips": "「独自の監査要件があり、暗号化キーの生成元を厳格に管理したい」といった設問ではCloudHSMとの使い分けが問われることがある。KMSはマネージド、CloudHSMは専有ハードウェアという違いを押さえる。"
   },
   {
+    "exam": "SAA",
     "domain": 1,
     "service": "セキュリティグループ / ネットワークACL",
+    "fullName": "Security Groups & Network ACLs (Amazon VPC)",
     "overview": "VPC内の通信を制御する2種類のファイアウォール。セキュリティグループはインスタンスレベル、ネットワークACL（NACL）はサブネットレベルで動作する。",
     "keyPoints": [
       "セキュリティグループはステートフル（戻り通信は自動許可）",
@@ -65,8 +75,10 @@
     "examTips": "ステートフル（SG）とステートレス（NACL）の違いは頻出。「特定のIPアドレスを明示的に拒否したい」→ セキュリティグループでは不可、NACLを使う、という設問パターンが定番。"
   },
   {
+    "exam": "SAA",
     "domain": 2,
     "service": "Auto Scaling",
+    "fullName": "Amazon EC2 Auto Scaling",
     "overview": "需要に応じてEC2インスタンス数を自動的に増減させるサービス。可用性とコスト効率を両立させる。",
     "keyPoints": [
       "起動テンプレート（Launch Template）でインスタンス設定を定義する",
@@ -78,8 +90,10 @@
     "examTips": "「トラフィックの急増に自動対応しつつコストも最適化したい」という設問でAuto Scaling＋ALBの組み合わせが正解になりやすい。複数AZへの分散配置は可用性向上の定番回答。"
   },
   {
+    "exam": "SAA",
     "domain": 2,
     "service": "ELB（ALB / NLB）",
+    "fullName": "Elastic Load Balancing (Application Load Balancer / Network Load Balancer)",
     "overview": "複数のターゲットにトラフィックを分散させるロードバランサー。ALBはL7（HTTP/HTTPS）、NLBはL4（TCP/UDP）で動作する。",
     "keyPoints": [
       "ALB（Application Load Balancer）はパスベース・ホストベースのルーティングが可能",
@@ -91,8 +105,10 @@
     "examTips": "「HTTPヘッダーの内容に応じてルーティングしたい」→ALB。「固定IPが必要」「超高速TCP処理が必要」→NLB、という使い分けが頻出。"
   },
   {
+    "exam": "SAA",
     "domain": 2,
     "service": "RDS（Multi-AZ / リードレプリカ）",
+    "fullName": "Amazon Relational Database Service (Amazon RDS)",
     "overview": "マネージド型リレーショナルデータベース。Multi-AZ配置で高可用性、リードレプリカで読み取りスケーリングを実現する。",
     "keyPoints": [
       "Multi-AZは同期レプリケーションによる待機系構成（障害時に自動フェイルオーバー）",
@@ -104,8 +120,10 @@
     "examTips": "「Multi-AZ＝可用性」「リードレプリカ＝読み取り性能のスケーリング」を混同させる設問が頻出。両方を組み合わせて使うことも可能な点も押さえる。"
   },
   {
+    "exam": "SAA",
     "domain": 2,
     "service": "S3バージョニング / クロスリージョンレプリケーション",
+    "fullName": "Amazon S3 Versioning & Cross-Region Replication (CRR)",
     "overview": "S3オブジェクトの誤削除・上書きからの保護（バージョニング）と、リージョン間での自動複製（CRR）による耐障害性向上機能。",
     "keyPoints": [
       "バージョニングを有効にすると上書き・削除時も過去バージョンが保持される",
@@ -117,8 +135,10 @@
     "examTips": "「誤って削除されたオブジェクトを復元したい」→バージョニングが正解。CRRの前提条件（バージョニング必須）を問う設問に注意。"
   },
   {
+    "exam": "SAA",
     "domain": 2,
     "service": "Route 53（フェイルオーバールーティング）",
+    "fullName": "Amazon Route 53",
     "overview": "マネージドDNSサービス。複数のルーティングポリシーによりトラフィック制御や障害時の切り替えを実現する。",
     "keyPoints": [
       "フェイルオーバールーティングはヘルスチェックと連携し、障害時に待機系へ自動切替",
@@ -130,8 +150,10 @@
     "examTips": "「オンプレミスとAWSでDR構成を組み、障害時に自動でAWS側に切り替えたい」→Route 53フェイルオーバールーティング＋ヘルスチェックが定番の正解パターン。"
   },
   {
+    "exam": "SAA",
     "domain": 3,
     "service": "EC2インスタンスタイプ",
+    "fullName": "Amazon Elastic Compute Cloud (Amazon EC2) Instance Types",
     "overview": "用途に応じて最適化されたインスタンスファミリーを選択することで、パフォーマンスとコストを両立させる。",
     "keyPoints": [
       "汎用（Mファミリー等）、コンピューティング最適化（Cファミリー等）、メモリ最適化（Rファミリー等）などがある",
@@ -143,8 +165,10 @@
     "examTips": "「メモリを大量に使うインメモリDB」→メモリ最適化、「機械学習の学習処理」→GPUインスタンス、といった用途とファミリーの対応関係が頻出。"
   },
   {
+    "exam": "SAA",
     "domain": 3,
     "service": "DynamoDB",
+    "fullName": "Amazon DynamoDB",
     "overview": "フルマネージドのNoSQL（キーバリュー/ドキュメント型）データベース。ミリ秒単位の低レイテンシーと高いスケーラビリティを持つ。",
     "keyPoints": [
       "プロビジョンドキャパシティとオンデマンドキャパシティの2つの課金モードがある",
@@ -156,8 +180,10 @@
     "examTips": "「予測不能なトラフィックに対応したい」→オンデマンドキャパシティ、「読み取りを極限まで高速化したい」→DAX、という組み合わせ問題が頻出。"
   },
   {
+    "exam": "SAA",
     "domain": 3,
     "service": "ElastiCache",
+    "fullName": "Amazon ElastiCache",
     "overview": "インメモリのキャッシュサービス。RedisまたはMemcachedエンジンを選択でき、データベースの負荷軽減と応答速度向上に使う。",
     "keyPoints": [
       "Redisはレプリケーション・永続化・複雑なデータ構造に対応（フェイルオーバーも可能）",
@@ -169,8 +195,10 @@
     "examTips": "「高可用性・自動フェイルオーバーが必要」→Redis、「シンプルなキャッシュでマルチスレッドを活かしたい」→Memcached、という使い分けが問われる。"
   },
   {
+    "exam": "SAA",
     "domain": 3,
     "service": "CloudFront",
+    "fullName": "Amazon CloudFront",
     "overview": "AWSのコンテンツデリバリーネットワーク（CDN）。エッジロケーションを通じてコンテンツ配信を高速化し、オリジンの負荷を軽減する。",
     "keyPoints": [
       "オリジンにはS3、EC2、ALB、オンプレミスサーバーなどを指定できる",
@@ -182,8 +210,10 @@
     "examTips": "「世界中のユーザーへの静的コンテンツ配信を高速化したい」→CloudFrontが定番の正解。S3を非公開にしOAC経由でのみアクセスさせる構成が頻出パターン。"
   },
   {
+    "exam": "SAA",
     "domain": 3,
     "service": "Lambda",
+    "fullName": "AWS Lambda",
     "overview": "サーバーを管理せずにコードを実行できるサーバーレスコンピューティングサービス。イベント駆動型のアーキテクチャで利用される。",
     "keyPoints": [
       "実行時間・メモリに応じた従量課金（実行時間の上限は要確認）",
@@ -195,8 +225,10 @@
     "examTips": "「サーバー管理をせずイベント駆動で処理を実行したい」という設問でLambdaが正解になりやすい。長時間実行や大規模並列処理にはFargate/EC2との使い分けが問われる。"
   },
   {
+    "exam": "SAA",
     "domain": 4,
     "service": "S3ストレージクラス / ライフサイクル",
+    "fullName": "Amazon S3 Storage Classes & Lifecycle Configuration",
     "overview": "アクセス頻度に応じて複数のストレージクラスを使い分け、ライフサイクルルールで自動的に移行・削除することでコストを最適化する。",
     "keyPoints": [
       "S3 Standardは高頻度アクセス向け、S3 Standard-IAは低頻度アクセス向け",
@@ -208,8 +240,10 @@
     "examTips": "「アクセスパターンが読めないデータのコストを最適化したい」→Intelligent-Tieringが定番の正解。頻出度の低いログ等は早期にGlacierへ移行する設計が問われる。"
   },
   {
+    "exam": "SAA",
     "domain": 4,
     "service": "Reserved Instances / Savings Plans",
+    "fullName": "Amazon EC2 Reserved Instances / AWS Savings Plans",
     "overview": "長期利用を前提にコミットすることでEC2やその他サービスの料金を割引く購入オプション。",
     "keyPoints": [
       "リザーブドインスタンス（RI）は特定のインスタンスファミリー・リージョン等を1年/3年単位でコミット",
@@ -221,8 +255,10 @@
     "examTips": "「安定した長期ワークロード」→RI/Savings Plans、「中断可能なバッチ処理」→スポットインスタンス、「短期・予測不能な負荷」→オンデマンド、という使い分けが頻出。"
   },
   {
+    "exam": "SAA",
     "domain": 4,
     "service": "Cost Explorer / Budgets",
+    "fullName": "AWS Cost Explorer / AWS Budgets",
     "overview": "AWSの利用コストを可視化・分析（Cost Explorer）し、予算を設定してアラートを受け取る（Budgets）ためのツール。",
     "keyPoints": [
       "Cost Explorerは過去のコスト推移をグラフで可視化し、将来コストの予測も表示できる",
@@ -234,8 +270,10 @@
     "examTips": "「特定のプロジェクトごとの支出上限を超えたら通知したい」→AWS Budgetsが正解になる定番パターン。タグ付けによるコスト配分の設問も頻出。"
   },
   {
+    "exam": "SAA",
     "domain": 4,
     "service": "Trusted Advisor",
+    "fullName": "AWS Trusted Advisor",
     "overview": "AWS環境をコスト最適化・セキュリティ・耐障害性・パフォーマンス・サービスクォータの観点でチェックし、改善提案を行うツール。",
     "keyPoints": [
       "5つのカテゴリ（コスト最適化、パフォーマンス、セキュリティ、耐障害性、サービスの制限）でチェックを行う",
@@ -247,8 +285,10 @@
     "examTips": "「コスト最適化とセキュリティの両面から環境を診断したい」→Trusted Advisorが定番の正解。無料枠と有料枠でチェック項目数が異なる点に注意（詳細要確認）。"
   },
   {
+    "exam": "SAA",
     "domain": 4,
     "service": "Compute Optimizer",
+    "fullName": "AWS Compute Optimizer",
     "overview": "機械学習を用いてEC2・Lambda・EBS等のリソース使用状況を分析し、最適なインスタンスタイプやサイズを推奨するサービス。",
     "keyPoints": [
       "過去の使用率メトリクスを分析し、オーバープロビジョニング・アンダープロビジョニングを検出する",
@@ -258,5 +298,301 @@
       "無料で利用できる（詳細な料金体系は要確認）"
     ],
     "examTips": "「現在のインスタンスサイズが過剰/不足しているか機械学習で分析したい」という設問でCompute Optimizerが正解になるパターンが出やすい。Trusted Advisorとの役割の違いが問われることがある。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "クラウドコンピューティングの利点",
+    "fullName": "Benefits of Cloud Computing",
+    "overview": "オンプレミスに対してクラウドコンピューティングが持つ経済的・運用的なメリットの全体像。CLF試験全体を通じて土台となる考え方。",
+    "keyPoints": [
+      "初期投資（固定費）を変動費に変える（Capital Expense → Operational Expense）",
+      "必要な分だけリソースを使い、需要に応じて即座にスケールできる（俊敏性・弾力性）",
+      "スケールメリットにより、AWS全体の利用が増えるほど従量課金コストが下がる傾向がある",
+      "データセンターの構築・運用コストや推測に基づく容量計画が不要になる",
+      "グローバルに数分でデプロイでき、世界中のユーザーに低レイテンシーで提供できる"
+    ],
+    "examTips": "「6つの利点」（固定費の変動費化、スケールメリット、キャパシティ予測が不要、速度と俊敏性の向上、データセンター運用コストの削減、グローバル展開の容易さ）はそのまま出題されることがある頻出テーマ。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "AWS Well-Architected Framework",
+    "fullName": "AWS Well-Architected Framework",
+    "overview": "クラウドアーキテクチャを評価・改善するためのベストプラクティス集。6つの柱（Pillar）で構成される。",
+    "keyPoints": [
+      "運用上の優秀性（Operational Excellence）",
+      "セキュリティ（Security）",
+      "信頼性（Reliability）",
+      "パフォーマンス効率（Performance Efficiency）",
+      "コスト最適化（Cost Optimization）と持続可能性（Sustainability）の2本柱も含む合計6つの柱"
+    ],
+    "examTips": "6つの柱の名称と大まかな意味を問う設問が定番。「コストを抑えつつ信頼性も確保したい」といったシナリオでどの柱が関係するかを選ばせる出題がある。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "デプロイモデルとサービスモデル",
+    "fullName": "Cloud Deployment & Service Models (IaaS / PaaS / SaaS)",
+    "overview": "クラウドの提供形態（デプロイモデル）と、責任範囲の違い（サービスモデル）についての基礎知識。",
+    "keyPoints": [
+      "デプロイモデル：パブリッククラウド、プライベートクラウド、ハイブリッドクラウド",
+      "IaaS（Infrastructure as a Service）：EC2など、インフラのみ提供しOS以上はユーザー管理",
+      "PaaS（Platform as a Service）：Elastic Beanstalkなど、実行環境まで提供されアプリ開発に集中できる",
+      "SaaS（Software as a Service）：完成されたアプリケーションをそのまま利用する形態",
+      "AWSはIaaS・PaaS・SaaS的な性質を持つサービスを幅広く提供している"
+    ],
+    "examTips": "具体的なサービス名（EC2、Elastic Beanstalk、Amazon Chimeなど）を挙げて「これはIaaS/PaaS/SaaSのどれか」を問う設問が定番。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "AWSグローバルインフラストラクチャ",
+    "fullName": "AWS Global Infrastructure (Regions, Availability Zones, Edge Locations)",
+    "overview": "AWSの物理的なインフラ構成。リージョン、アベイラビリティゾーン（AZ）、エッジロケーションの3階層で構成される。",
+    "keyPoints": [
+      "リージョンは地理的に離れた独立したエリア（例：東京リージョン）",
+      "各リージョンは複数のアベイラビリティゾーン（AZ、物理的に分離されたデータセンター群）で構成される",
+      "AZを複数使うことで単一障害点を排除し高可用性を実現できる",
+      "エッジロケーションはCloudFrontなどのCDNキャッシュに使われるユーザーに近い拠点",
+      "リージョン選択の基準には、レイテンシー、料金、利用可能なサービス、コンプライアンス要件がある"
+    ],
+    "examTips": "「AZを最低いくつ使うべきか」「リージョン選択の基準」といった設問が頻出。AZ数はリージョンによって異なる点にも注意。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "AWS Cloud Adoption Framework",
+    "fullName": "AWS Cloud Adoption Framework (AWS CAF)",
+    "overview": "企業がクラウド導入を進める際の組織的な観点を整理したフレームワーク。技術面だけでなく、ビジネス・組織面の観点も含む。",
+    "keyPoints": [
+      "ビジネス、ピープル、ガバナンス、プラットフォーム、セキュリティ、オペレーションの6つの視点（Perspective）で構成される",
+      "技術的な観点（プラットフォーム・セキュリティ・オペレーション）と、ビジネス的な観点（ビジネス・ピープル・ガバナンス）に大別される",
+      "組織のクラウド導入の準備状況を評価するために使われる",
+      "単なる技術移行ではなく、組織文化・スキル・プロセスの変革も含む点がポイント"
+    ],
+    "examTips": "「クラウド導入は技術だけの問題ではない」という文脈でAWS CAFが正解になる設問が出やすい。6つの視点の名称までは覚えなくても、技術面とビジネス面の両方をカバーする点を押さえておく。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "責任共有モデル",
+    "fullName": "AWS Shared Responsibility Model",
+    "overview": "セキュリティに関する責任をAWSと顧客の間で分担する考え方。CLF試験のセキュリティ領域で最も重要な概念。",
+    "keyPoints": [
+      "AWSは「クラウド自体のセキュリティ」に責任を持つ（ハードウェア、データセンター、物理的なネットワーク等）",
+      "顧客は「クラウド内のセキュリティ」に責任を持つ（データ、IAM設定、OS/アプリのパッチ適用、ネットワーク設定等）",
+      "マネージドサービス（RDSなど）ほどAWSの責任範囲が広がり、顧客の運用負担は減る",
+      "EC2のようなIaaSでは、ゲストOS以上の管理は顧客の責任範囲になる",
+      "責任範囲はサービスの種類（IaaS/PaaS/SaaS的性質）によって変わる"
+    ],
+    "examTips": "「〇〇の設定ミスによるデータ漏洩は誰の責任か」という形式の設問が非常に多い。「AWSは“of”the cloud、顧客は“in”the cloudの責任を持つ」という表現で覚えるのが定番。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "IAM基礎",
+    "fullName": "AWS Identity and Access Management (IAM) Basics",
+    "overview": "誰が（認証）、何に（認可）アクセスできるかを管理する仕組み。CLFレベルでは基本用語と多要素認証の重要性を理解しておく。",
+    "keyPoints": [
+      "ルートユーザーは全権限を持つため、日常操作には使わずIAMユーザー/ロールを使うべき",
+      "IAMユーザーはAWSを利用する人・アプリケーションに対応する個別のアカウント",
+      "IAMグループでユーザーをまとめて同じ権限を付与できる",
+      "IAMロールはAWSサービス同士や一時的なアクセスに使う（長期的な認証情報を持たない）",
+      "MFA（多要素認証）は特にルートユーザーで有効化することが強く推奨される"
+    ],
+    "examTips": "「ルートユーザーの認証情報はどう扱うべきか」「日常業務にはIAMユーザーを使うべき」という趣旨の設問が頻出。MFAの重要性を問う設問も定番。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "AWS Organizations",
+    "fullName": "AWS Organizations",
+    "overview": "複数のAWSアカウントを一元管理するサービス。ガバナンス強化と請求の一本化（一括請求）に利用される。",
+    "keyPoints": [
+      "組織単位（OU）でアカウントをグループ化し、まとめてポリシーを適用できる",
+      "サービスコントロールポリシー（SCP）でアカウントが利用できるサービス・操作の上限を制御できる",
+      "一括請求（Consolidated Billing）により、複数アカウントの請求を1つにまとめられる",
+      "ボリュームディスカウントを組織全体で共有できる場合がある（詳細は要確認）",
+      "本番環境・開発環境などをアカウント単位で分離するマルチアカウント戦略の基盤になる"
+    ],
+    "examTips": "「複数部門・環境でアカウントを分離しつつ、請求だけはまとめたい」という設問でAWS Organizationsが正解になりやすい。SCPは「許可を追加するものではなく、上限を制限するもの」という点に注意。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "コンプライアンスとAWS Artifact",
+    "fullName": "AWS Artifact & Compliance Programs",
+    "overview": "AWSが取得している認証・コンプライアンスレポート（監査資料）に無料でアクセスできるセルフサービスポータル。",
+    "keyPoints": [
+      "ISO認証やSOCレポートなど、AWSのコンプライアンス関連文書をオンデマンドでダウンロードできる",
+      "AWSとの契約書（NDA等を含むアグリーメント）の確認・受諾にも利用される",
+      "監査対応や社内のコンプライアンス確認の際に参照されることが多い",
+      "AWS自体の認証状況を示すものであり、顧客自身のワークロードの認証を代行するものではない点に注意"
+    ],
+    "examTips": "「監査人からAWSのSOCレポートを求められた」という設問でAWS Artifactが正解になる定番パターン。責任共有モデルと絡めて「AWS側の証跡」という位置づけを理解しておく。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "主要セキュリティサービス",
+    "fullName": "Key AWS Security Services (Amazon GuardDuty, Amazon Inspector, AWS Shield, AWS WAF)",
+    "overview": "AWS環境の脅威検知・脆弱性診断・DDoS対策・Webアプリ保護を行う主要なセキュリティサービス群の概要。",
+    "keyPoints": [
+      "Amazon GuardDutyは、ログを分析して不審な挙動や脅威を検知するマネージド型脅威検出サービス",
+      "Amazon Inspectorは、EC2やコンテナイメージの脆弱性を自動的にスキャンする",
+      "AWS Shieldは、DDoS攻撃からの保護を提供する（Standardは無料で自動適用、Advancedは有料）",
+      "AWS WAFは、SQLインジェクションやXSSなどからWebアプリケーションを保護するファイアウォール",
+      "これらはいずれもマネージドサービスであり、自前で同等の仕組みを構築する運用負担を軽減する"
+    ],
+    "examTips": "「不審なAPIコールを自動検知したい」→GuardDuty、「EC2の脆弱性を診断したい」→Inspector、「Webアプリへの攻撃を防ぎたい」→WAF、「DDoS対策をしたい」→Shieldという対応関係が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "コンピューティングサービス概要",
+    "fullName": "Core Compute Services (Amazon EC2, AWS Lambda, Amazon ECS/Fargate)",
+    "overview": "AWSの代表的なコンピューティングサービスの全体像。仮想サーバー、サーバーレス、コンテナの3系統を押さえる。",
+    "keyPoints": [
+      "Amazon EC2は仮想サーバー（インスタンス）を提供するIaaS的サービス",
+      "AWS Lambdaはサーバー管理不要のサーバーレスコンピューティング（実行した分だけ課金）",
+      "Amazon ECS/EKSはコンテナオーケストレーションサービス、AWS Fargateはサーバー管理不要のコンテナ実行環境",
+      "AWS Elastic Beanstalkはアプリケーションのデプロイ・運用を簡素化するPaaS的サービス",
+      "ワークロードの性質（常時稼働か、イベント駆動か、コンテナ化されているか）に応じて使い分ける"
+    ],
+    "examTips": "「サーバー管理をしたくない」→Lambda、「コンテナだがインフラ管理はしたくない」→Fargate、といった要件と選択肢の対応関係が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "ストレージサービス概要",
+    "fullName": "Core Storage Services (Amazon S3, Amazon EBS, Amazon EFS)",
+    "overview": "AWSの代表的なストレージサービスの全体像。オブジェクトストレージ、ブロックストレージ、ファイルストレージの違いを理解する。",
+    "keyPoints": [
+      "Amazon S3はオブジェクトストレージで、ほぼ無制限にスケールしWeb経由でアクセスする",
+      "Amazon EBSはEC2にアタッチするブロックストレージで、OSやデータベースのボリュームに使う",
+      "Amazon EFSは複数のEC2から同時にマウントできるマネージド型ファイルストレージ（NFS）",
+      "Amazon S3 Glacierはアーカイブ用途の低コストストレージ",
+      "用途に応じてオブジェクト/ブロック/ファイルストレージを使い分けることが重要"
+    ],
+    "examTips": "「複数のEC2インスタンスから同時に同じファイルシステムを共有したい」→EFSが正解になる定番パターン。EBSは基本的に1つのインスタンスにのみアタッチされる点との対比が問われる。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "データベースサービス概要",
+    "fullName": "Core Database Services (Amazon RDS, Amazon DynamoDB)",
+    "overview": "AWSの代表的なマネージド型データベースサービス。リレーショナルとNoSQLの違いを理解する。",
+    "keyPoints": [
+      "Amazon RDSはMySQL、PostgreSQLなどのリレーショナルデータベースをマネージドで提供",
+      "Amazon Auroraは高い性能と可用性を持つAWS独自のRDS互換エンジン",
+      "Amazon DynamoDBはNoSQL（キーバリュー型）データベースで、大規模・低レイテンシーな用途に強い",
+      "マネージドサービスのため、パッチ適用・バックアップ・冗長化などの運用負担が軽減される",
+      "構造化データで複雑なクエリが必要ならRDS系、シンプルなアクセスパターンで大規模スケールが必要ならDynamoDBが向く"
+    ],
+    "examTips": "「運用負担を減らしつつリレーショナルDBを使いたい」→RDS、「大規模でスキーマが柔軟なNoSQLが欲しい」→DynamoDBという使い分けが頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "ネットワーキングサービス概要",
+    "fullName": "Core Networking Services (Amazon VPC, Amazon CloudFront, Amazon Route 53)",
+    "overview": "AWS上でのネットワーク構築・コンテンツ配信・DNS管理を担う代表的なサービスの全体像。",
+    "keyPoints": [
+      "Amazon VPCは自分専用の仮想ネットワーク環境を構築するサービス",
+      "Amazon CloudFrontはエッジロケーションを使ったコンテンツ配信ネットワーク（CDN）",
+      "Amazon Route 53はドメイン名の登録・DNS管理を行うマネージドDNSサービス",
+      "AWS Direct Connectはオンプレミスとの専用線接続、AWS VPNは暗号化された接続を提供",
+      "これらを組み合わせることで、安全かつ高速なネットワーク構成を実現できる"
+    ],
+    "examTips": "「オンプレミスとAWSを安定した専用線で接続したい」→Direct Connect、「安価かつ迅速に暗号化接続したい」→VPNという対比が問われることがある。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "デプロイ・管理ツール",
+    "fullName": "Deployment & Management Tools (AWS Management Console, AWS CLI, AWS CloudFormation)",
+    "overview": "AWSリソースを操作・自動化するための代表的なインターフェースとツール群。",
+    "keyPoints": [
+      "AWS Management ConsoleはWebブラウザからGUIでリソースを操作するインターフェース",
+      "AWS CLI（コマンドラインインターフェース）はスクリプトによる自動化操作に向く",
+      "AWS SDKはプログラムからAWSサービスを操作するための各言語向けライブラリ",
+      "AWS CloudFormationはインフラをコードとして定義・自動構築する（Infrastructure as Code）",
+      "IaCにより環境構築の再現性が高まり、手作業によるミスを削減できる"
+    ],
+    "examTips": "「同じ構成の環境を何度も再現性高く構築したい」→CloudFormation（IaC）が正解になる定番パターン。GUI操作とCLI/SDK/IaCの向き不向きの違いが問われる。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "AWS料金モデル",
+    "fullName": "AWS Pricing Models (On-Demand, Reserved, Spot, Savings Plans)",
+    "overview": "AWSの基本的な料金体系と、EC2の主要な購入オプションの全体像。",
+    "keyPoints": [
+      "基本原則は「使った分だけ支払う」従量課金（Pay-as-you-go）",
+      "オンデマンドは最も柔軟だが単価は高め、短期・予測不能な用途向け",
+      "リザーブドインスタンス/Savings Plansは長期利用を前提にコミットして割引を受ける",
+      "スポットインスタンスは余剰キャパシティを大幅割引で利用できるが中断されるリスクがある",
+      "具体的な料金・割引率はサービス・リージョン・時期により変動するため要確認"
+    ],
+    "examTips": "コスト最適化の3原則（右のサイジング、柔軟性の活用、需要に応じた購入オプションの選択）とあわせて、用途と購入オプションの対応関係を問う設問が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "Pricing Calculator と Cost管理ツール",
+    "fullName": "AWS Pricing Calculator, AWS Cost Explorer & AWS Budgets",
+    "overview": "利用前のコスト見積もりと、利用後のコスト可視化・予算管理を行うためのツール群。",
+    "keyPoints": [
+      "AWS Pricing Calculatorは、AWSアカウントなしでも利用予定の構成の見積もりを作成できるツール",
+      "AWS Cost Explorerは過去の利用実績のコストを可視化・分析し、将来のコストを予測する",
+      "AWS Budgetsは予算のしきい値を設定し、超過（または超過予測）時にアラートを送る",
+      "AWS Cost and Usage Report（CUR）は最も詳細なコストデータをエクスポートできるレポート",
+      "見積もり（導入前）と実績管理（導入後）の両方のフェーズでツールが用意されている点がポイント"
+    ],
+    "examTips": "「導入前にどれくらいコストがかかるか事前に把握したい」→Pricing Calculator、「導入後の実際のコストを分析したい」→Cost Explorerという時系列の使い分けが問われる。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "AWS Organizationsと一括請求",
+    "fullName": "Consolidated Billing (AWS Organizations)",
+    "overview": "AWS Organizationsの一機能で、複数アカウントの請求を管理アカウントに一本化する仕組み。",
+    "keyPoints": [
+      "組織内の全メンバーアカウントの利用料金が管理アカウントに一本化して請求される",
+      "アカウントをまたいでボリュームディスカウントの恩恵を受けられる場合がある（詳細は要確認）",
+      "各メンバーアカウントごとの利用状況もCost Explorer等で個別に確認できる",
+      "部門・プロジェクトごとにアカウントを分離しつつ、経理処理は一本化したい場合に有効"
+    ],
+    "examTips": "「複数部門でアカウントを分けたいが、支払いは1つにまとめたい」という設問で一括請求（Consolidated Billing）が正解になりやすい。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "AWSサポートプラン",
+    "fullName": "AWS Support Plans (Basic / Developer / Business / Enterprise)",
+    "overview": "技術サポートやアーキテクチャ相談などのレベルが異なる、AWSの4段階のサポートプラン。",
+    "keyPoints": [
+      "Basicは全アカウントに無料で付帯し、ドキュメント・フォーラム・基本的なチェックのみ",
+      "Developerは開発・テスト環境向けで、営業時間内のメールサポート等が含まれる",
+      "Businessは本番ワークロード向けで、24時間365日のサポートとTrusted Advisorのフルチェックが含まれる",
+      "Enterpriseは大規模な事業向けで、専任のTAM（Technical Account Manager）が付く最上位プラン",
+      "各プランの正確な料金・SLAは変更される可能性があるため要確認"
+    ],
+    "examTips": "「本番環境で24時間365日のサポートが必要」→Business以上、「専任担当者による戦略的なサポートが欲しい」→Enterprise、という要件と選択肢の対応関係が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "AWS Marketplace",
+    "fullName": "AWS Marketplace",
+    "overview": "サードパーティ製のソフトウェア・データ・サービスを検索・購入し、AWS環境にデプロイできるデジタルカタログ。",
+    "keyPoints": [
+      "セキュリティソフトウェア、OSイメージ、SaaSアプリケーションなど幅広い製品が出品されている",
+      "購入した製品の利用料金はAWSの請求に統合される（AWSアカウントの請求書に合算）",
+      "多くの製品でAMI（Amazon Machine Image）としてすぐにデプロイできる",
+      "個別にベンダーと契約・請求処理をする手間を省ける点がメリット"
+    ],
+    "examTips": "「サードパーティ製品を導入したいが、請求はAWSにまとめたい」という設問でAWS Marketplaceが正解になりやすい。"
   }
 ]

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import questions from '../data/questions.json'
-import { DOMAINS, domainName } from '../data/domains.js'
+import { useExam } from '../context/ExamContext.jsx'
+import { domainName } from '../data/exams.js'
 import { recordQuizAnswer, getDueReviewQuestionIds } from '../lib/storage.js'
 
 function shuffle(arr) {
@@ -14,6 +15,7 @@ function shuffle(arr) {
 }
 
 export default function Quiz() {
+  const { examId, exam } = useExam()
   const [searchParams] = useSearchParams()
   const reviewMode = searchParams.get('mode') === 'review'
 
@@ -24,14 +26,22 @@ export default function Quiz() {
   const [answered, setAnswered] = useState(false)
   const [score, setScore] = useState(0)
 
-  const dueReviewIds = useMemo(() => getDueReviewQuestionIds(), [])
+  const examQuestions = useMemo(() => questions.filter((q) => q.exam === examId), [examId])
+
+  const dueReviewIds = useMemo(() => {
+    const examQuestionIds = new Set(examQuestions.map((q) => q.id))
+    return getDueReviewQuestionIds().filter((id) => examQuestionIds.has(id))
+  }, [examQuestions])
 
   function startQuiz(useReview) {
     let pool
     if (useReview) {
-      pool = questions.filter((q) => dueReviewIds.includes(q.id))
+      pool = examQuestions.filter((q) => dueReviewIds.includes(q.id))
     } else {
-      pool = domainFilter === 'all' ? questions : questions.filter((q) => String(q.domain) === domainFilter)
+      pool =
+        domainFilter === 'all'
+          ? examQuestions
+          : examQuestions.filter((q) => String(q.domain) === domainFilter)
     }
     setQueue(shuffle(pool))
     setIndex(0)
@@ -60,7 +70,7 @@ export default function Quiz() {
   if (!queue) {
     return (
       <div className="mx-auto max-w-xl space-y-6">
-        <h1 className="text-2xl font-bold">② クイズ演習</h1>
+        <h1 className="text-2xl font-bold">② クイズ演習（{exam.code}）</h1>
 
         {reviewMode && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 p-4">
@@ -87,7 +97,7 @@ export default function Quiz() {
             className="mb-4 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           >
             <option value="all">すべてのドメイン</option>
-            {DOMAINS.map((d) => (
+            {exam.domains.map((d) => (
               <option key={d.id} value={d.id}>
                 ドメイン{d.id}: {d.name}
               </option>
@@ -147,7 +157,7 @@ export default function Quiz() {
           問題 {index + 1} / {queue.length}
         </span>
         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">
-          ドメイン{q.domain}: {domainName(q.domain)}
+          ドメイン{q.domain}: {domainName(examId, q.domain)}
         </span>
       </div>
 

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import summaries from '../data/summaries.json'
-import { DOMAINS, domainColor } from '../data/domains.js'
+import { useExam } from '../context/ExamContext.jsx'
 import { isSummaryRead, setSummaryRead } from '../lib/storage.js'
 
 export default function Study() {
+  const { examId, exam } = useExam()
   const { domain, service } = useParams()
   const navigate = useNavigate()
   const [tick, setTick] = useState(0)
@@ -12,12 +13,16 @@ export default function Study() {
 
   const byDomain = useMemo(() => {
     const map = {}
-    for (const d of DOMAINS) map[d.id] = summaries.filter((s) => s.domain === d.id)
+    for (const d of exam.domains) {
+      map[d.id] = summaries.filter((s) => s.exam === examId && s.domain === d.id)
+    }
     return map
-  }, [])
+  }, [exam, examId])
 
   const current =
-    summaries.find((s) => String(s.domain) === domain && s.service === service) ?? null
+    summaries.find(
+      (s) => s.exam === examId && String(s.domain) === domain && s.service === service,
+    ) ?? null
 
   function selectService(d, s) {
     navigate(`/study/${d}/${encodeURIComponent(s)}`)
@@ -38,8 +43,10 @@ export default function Study() {
           sidebarOpen ? 'block' : 'hidden'
         }`}
       >
-        <h2 className="text-sm font-bold text-slate-500">① 体系的インプット</h2>
-        {DOMAINS.map((d) => (
+        <h2 className="text-sm font-bold text-slate-500">
+          ① 体系的インプット（{exam.code}）
+        </h2>
+        {exam.domains.map((d) => (
           <div key={d.id}>
             <p className="mb-1 text-xs font-semibold" style={{ color: d.color }}>
               ドメイン{d.id}（{d.weight}%）: {d.name}
@@ -47,7 +54,7 @@ export default function Study() {
             <ul className="space-y-0.5">
               {byDomain[d.id].map((s) => {
                 const active = String(d.id) === domain && s.service === service
-                const read = isSummaryRead(d.id, s.service)
+                const read = isSummaryRead(examId, d.id, s.service)
                 return (
                   <li key={s.service}>
                     <button
@@ -78,17 +85,23 @@ export default function Study() {
           <article className="rounded-lg border border-slate-200 bg-white p-6">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold" style={{ color: domainColor(current.domain) }}>
-                  ドメイン{current.domain}: {DOMAINS.find((d) => d.id === current.domain)?.name}
+                <p
+                  className="text-xs font-semibold"
+                  style={{ color: exam.domains.find((d) => d.id === current.domain)?.color }}
+                >
+                  ドメイン{current.domain}: {exam.domains.find((d) => d.id === current.domain)?.name}
                 </p>
                 <h1 className="text-2xl font-bold">{current.service}</h1>
+                {current.fullName && (
+                  <p className="text-sm text-slate-500">{current.fullName}</p>
+                )}
               </div>
               <label className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm">
                 <input
                   type="checkbox"
-                  checked={isSummaryRead(current.domain, current.service)}
+                  checked={isSummaryRead(examId, current.domain, current.service)}
                   onChange={(e) => {
-                    setSummaryRead(current.domain, current.service, e.target.checked)
+                    setSummaryRead(examId, current.domain, current.service, e.target.checked)
                     setTick((t) => t + 1)
                   }}
                 />

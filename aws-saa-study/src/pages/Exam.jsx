@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { EXAM_DURATION_SEC, EXAM_LENGTH, pickExamQuestions } from '../lib/exam.js'
+import { pickExamQuestions } from '../lib/exam.js'
 import { saveExamResult } from '../lib/storage.js'
-import { DOMAINS } from '../data/domains.js'
+import { useExam } from '../context/ExamContext.jsx'
 
 function formatTime(sec) {
   const m = Math.floor(sec / 60)
@@ -11,12 +11,13 @@ function formatTime(sec) {
 }
 
 export default function Exam() {
+  const { examId, exam } = useExam()
   const navigate = useNavigate()
   const [started, setStarted] = useState(false)
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState([]) // index === correctIndex or null
   const [current, setCurrent] = useState(0)
-  const [remaining, setRemaining] = useState(EXAM_DURATION_SEC)
+  const [remaining, setRemaining] = useState(exam.examDurationSec)
   const timerRef = useRef(null)
 
   useEffect(() => {
@@ -41,11 +42,11 @@ export default function Exam() {
   }, [remaining, started])
 
   function startExam() {
-    const qs = pickExamQuestions(EXAM_LENGTH)
+    const qs = pickExamQuestions(examId)
     setQuestions(qs)
     setAnswers(new Array(qs.length).fill(null))
     setCurrent(0)
-    setRemaining(EXAM_DURATION_SEC)
+    setRemaining(exam.examDurationSec)
     setStarted(true)
   }
 
@@ -61,7 +62,7 @@ export default function Exam() {
     clearInterval(timerRef.current)
     let score = 0
     const domainBreakdown = {}
-    for (const d of DOMAINS) domainBreakdown[d.id] = { correct: 0, total: 0 }
+    for (const d of exam.domains) domainBreakdown[d.id] = { correct: 0, total: 0 }
     const wrongIds = []
 
     questions.forEach((q, i) => {
@@ -75,6 +76,7 @@ export default function Exam() {
     })
 
     const result = {
+      examId,
       score,
       total: questions.length,
       domainBreakdown,
@@ -84,18 +86,20 @@ export default function Exam() {
     }
     saveExamResult(result)
     // 保存直後のexamHistoryから最新のidを取得してリザルト画面へ
-    const savedExamId = JSON.parse(localStorage.getItem('saa-study-data-v1')).examHistory.at(-1).id
+    const savedExamId = JSON.parse(localStorage.getItem('saa-study-data-v2')).examHistory.at(-1).id
     navigate(`/exam/result/${savedExamId}`)
   }
 
   if (!started) {
     return (
       <div className="mx-auto max-w-xl space-y-4 rounded-lg border border-slate-200 bg-white p-8 text-center">
-        <h1 className="text-2xl font-bold">③ 模擬試験（ミニ版）</h1>
+        <h1 className="text-2xl font-bold">
+          ③ 模擬試験（ミニ版）— {exam.code}
+        </h1>
         <p className="text-slate-600">
-          {EXAM_LENGTH}問・{EXAM_DURATION_SEC / 60}分のミニ模擬試験です。
+          {exam.examLength}問・{exam.examDurationSec / 60}分のミニ模擬試験です。
           <br />
-          本番のSAA-C03試験は65問130分ですが、まずは短縮版で腕試ししましょう。
+          {exam.realExamInfo}ですが、まずは短縮版で腕試ししましょう。
         </p>
         <ul className="mx-auto max-w-sm list-disc space-y-1 pl-5 text-left text-sm text-slate-500">
           <li>4ドメインからバランスよく出題されます</li>

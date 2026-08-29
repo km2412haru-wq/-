@@ -1,5 +1,6 @@
 // localStorage を使った永続化。サーバーは使わず、個人利用のみを想定。
-const STORAGE_KEY = 'saa-study-data-v1'
+// v2: 複数資格（SAA / CLF等）対応のため、読了状態のキーに資格IDを含めるよう変更。
+const STORAGE_KEY = 'saa-study-data-v2'
 
 const DEFAULT_DATA = {
   readSummaries: {}, // { "domain-service": true }
@@ -28,18 +29,18 @@ function save(data) {
 }
 
 // ---- サマリー既読管理 ----
-export function summaryKey(domain, service) {
-  return `${domain}-${service}`
+export function summaryKey(examId, domain, service) {
+  return `${examId}-${domain}-${service}`
 }
 
-export function isSummaryRead(domain, service) {
+export function isSummaryRead(examId, domain, service) {
   const data = load()
-  return Boolean(data.readSummaries[summaryKey(domain, service)])
+  return Boolean(data.readSummaries[summaryKey(examId, domain, service)])
 }
 
-export function setSummaryRead(domain, service, read) {
+export function setSummaryRead(examId, domain, service, read) {
   const data = load()
-  const key = summaryKey(domain, service)
+  const key = summaryKey(examId, domain, service)
   if (read) {
     data.readSummaries[key] = true
   } else {
