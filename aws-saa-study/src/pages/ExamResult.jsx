@@ -27,8 +27,20 @@ export default function ExamResult() {
 
   const exam = getExam(record.examId)
   const pct = Math.round((record.score / record.total) * 100)
-  const wrongQuestions = record.wrongIds
-    .map((id) => questions.find((q) => q.id === id))
+
+  // 出題順に「自分の解答・正解・解説」を並べる（問題データが差し替わっていても
+  // questionIdsから引けない問題はスキップする）
+  const reviewItems = record.questionIds
+    .map((id, i) => {
+      const q = questions.find((q) => q.id === id)
+      if (!q) return null
+      const selectedIndex = record.answers[i] ?? null
+      return {
+        question: q,
+        selectedIndex,
+        isCorrect: selectedIndex === q.correctIndex,
+      }
+    })
     .filter(Boolean)
 
   return (
@@ -41,6 +53,13 @@ export default function ExamResult() {
           {record.score} / {record.total}
         </p>
         <p className="text-slate-600">正答率 {pct}%</p>
+      </div>
+
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <p className="mb-1 font-semibold">📊 合格ラインの目安について</p>
+        <p>
+          AWS認定試験の合否は、素点の正答率ではなく1000点満点にスケーリングされたスコアで判定されます。この模擬試験の正答率はあくまで簡易的な目安としてご確認ください。現行の合格ラインの具体的な数値は、AWS公式サイトの該当資格の試験ガイドで最新情報を確認してください。
+        </p>
       </div>
 
       <section>
@@ -62,25 +81,47 @@ export default function ExamResult() {
         </div>
       </section>
 
-      {wrongQuestions.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">間違えた問題（{wrongQuestions.length}問）</h2>
-          <div className="space-y-3">
-            {wrongQuestions.map((q) => (
-              <div key={q.id} className="rounded-lg border border-rose-200 bg-rose-50/40 p-4">
-                <p className="mb-1 text-xs font-semibold text-rose-500">
-                  ドメイン{q.domain}: {domainName(record.examId, q.domain)}
+      <section>
+        <h2 className="mb-3 text-lg font-semibold">問題ごとの振り返り</h2>
+        <div className="space-y-3">
+          {reviewItems.map(({ question: q, selectedIndex, isCorrect }, i) => (
+            <div
+              key={q.id}
+              className={`rounded-lg border p-4 ${
+                isCorrect ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40'
+              }`}
+            >
+              <div className="mb-1 flex items-center justify-between">
+                <p className="text-xs font-semibold text-slate-500">
+                  問題{i + 1} ・ ドメイン{q.domain}: {domainName(record.examId, q.domain)}
                 </p>
-                <p className="mb-2 text-sm font-medium text-slate-900">{q.question}</p>
+                <span
+                  className={`text-xs font-bold ${isCorrect ? 'text-emerald-600' : 'text-rose-600'}`}
+                >
+                  {isCorrect ? '✅ 正解' : '❌ 不正解'}
+                </span>
+              </div>
+              <p className="mb-2 text-sm font-medium text-slate-900">{q.question}</p>
+              <p className="mb-1 text-sm text-slate-700">
+                あなたの解答:{' '}
+                {selectedIndex === null ? (
+                  <span className="font-semibold text-slate-500">未回答</span>
+                ) : (
+                  <span className={isCorrect ? 'font-semibold text-emerald-700' : 'font-semibold text-rose-700'}>
+                    {String.fromCharCode(65 + selectedIndex)}. {q.choices[selectedIndex]}
+                  </span>
+                )}
+              </p>
+              {!isCorrect && (
                 <p className="mb-1 text-sm text-emerald-700">
                   正解: {String.fromCharCode(65 + q.correctIndex)}. {q.choices[q.correctIndex]}
                 </p>
-                <p className="text-sm text-slate-600">{q.explanation}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+              )}
+              <p className="text-sm text-slate-600">{q.explanation}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="flex gap-3">
         <Link

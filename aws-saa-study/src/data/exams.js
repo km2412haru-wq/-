@@ -8,8 +8,9 @@ export const EXAMS = [
     name: 'AWS Certified Solutions Architect – Associate',
     shortLabel: 'SAA-C03: ソリューションアーキテクト',
     realExamInfo: '本番は65問130分',
-    examLength: 20,
-    examDurationSec: 40 * 60,
+    // 10分のミニ模試の問題数。本番の1問あたりの持ち時間（130分 / 65問 ≒ 2分/問）から逆算。
+    examLength: 5,
+    examDurationSec: 10 * 60,
     domains: [
       { id: 1, name: 'セキュアなアーキテクチャの設計', weight: 30, color: '#2563eb' },
       { id: 2, name: 'レジリエントアーキテクチャの設計', weight: 26, color: '#059669' },
@@ -24,8 +25,9 @@ export const EXAMS = [
     name: 'AWS Certified Cloud Practitioner',
     shortLabel: 'CLF-C02: クラウドプラクティショナー',
     realExamInfo: '本番は65問90分',
-    examLength: 20,
-    examDurationSec: 40 * 60,
+    // 10分のミニ模試の問題数。本番の1問あたりの持ち時間（90分 / 65問 ≒ 1.4分/問）から逆算。
+    examLength: 7,
+    examDurationSec: 10 * 60,
     domains: [
       { id: 1, name: 'クラウドの概念', weight: 24, color: '#2563eb' },
       { id: 2, name: 'セキュリティとコンプライアンス', weight: 30, color: '#059669' },
