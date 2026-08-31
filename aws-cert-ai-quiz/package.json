@@ -1,0 +1,24 @@
+{
+  "name": "aws-cert-ai-quiz",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AWS認定資格(CP/SAA)対策 — AIが公式試験ガイドに基づきその都度オリジナル問題を生成する学習ツール",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@google/genai": "2.19.0",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "typescript": "^5.7.2"
+  }
+}

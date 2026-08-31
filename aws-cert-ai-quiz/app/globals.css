@@ -1,0 +1,209 @@
+:root {
+  --bg: #f7f7f9;
+  --bg-elevated: #ffffff;
+  --border: #e3e3e8;
+  --text: #17171c;
+  --text-muted: #6b6b76;
+  --accent: #e8830b;
+  --accent-soft: #fdf1e2;
+  --correct-bg: #e6f9ee;
+  --correct-text: #0f8a4a;
+  --incorrect-bg: #fdecec;
+  --incorrect-text: #c0392b;
+  --shadow: 0 1px 2px rgba(20, 20, 30, 0.04), 0 4px 12px rgba(20, 20, 30, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101014;
+    --bg-elevated: #17171d;
+    --border: #2a2a32;
+    --text: #f1f1f4;
+    --text-muted: #9a9aa5;
+    --accent: #f3a63c;
+    --accent-soft: #3a2a10;
+    --correct-bg: #123626;
+    --correct-text: #5fdc9a;
+    --incorrect-bg: #3a1c1c;
+    --incorrect-text: #f28b7d;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.pageSubtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 24px;
+}
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.examSelector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.examSelector button {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.examSelector button[data-active="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.questionText {
+  font-size: 16px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  margin: 0 0 20px;
+}
+
+.choiceList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.choiceButton {
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.choiceButton:disabled {
+  cursor: default;
+}
+
+.choiceButton[data-state="correct"] {
+  background: var(--correct-bg);
+  border-color: var(--correct-text);
+  color: var(--correct-text);
+}
+
+.choiceButton[data-state="incorrect"] {
+  background: var(--incorrect-bg);
+  border-color: var(--incorrect-text);
+  color: var(--incorrect-text);
+}
+
+.explanationBlock {
+  margin-top: 6px;
+  padding-top: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.resultBanner {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.resultBanner[data-correct="true"] {
+  color: var(--correct-text);
+}
+
+.resultBanner[data-correct="false"] {
+  color: var(--incorrect-text);
+}
+
+.errorBox {
+  background: var(--incorrect-bg);
+  color: var(--incorrect-text);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  white-space: pre-wrap;
+}
+
+.loadingBox {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 24px 0;
+  text-align: center;
+}
