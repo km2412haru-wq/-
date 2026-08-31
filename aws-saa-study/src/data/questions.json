@@ -3,7 +3,9 @@
     "id": "q101",
     "exam": "SAA",
     "domain": 1,
-    "services": ["IAM"],
+    "services": [
+      "IAM"
+    ],
     "question": "ある企業では、EC2インスタンス上で動作するアプリケーションからS3バケットにアクセスする必要があります。セキュリティのベストプラクティスに従って認証情報を管理する方法はどれですか？",
     "choices": [
       "IAMユーザーのアクセスキーを作成し、EC2インスタンス内の設定ファイルに直接記述する",
@@ -18,7 +20,9 @@
     "id": "q102",
     "exam": "SAA",
     "domain": 1,
-    "services": ["S3セキュリティ"],
+    "services": [
+      "S3セキュリティ"
+    ],
     "question": "S3バケットに保存された機密データについて、意図しない公開設定によるデータ漏洩を防ぐために最も効果的な設定はどれですか？",
     "choices": [
       "バケット内のすべてのオブジェクトにランダムなキー名を付ける",
@@ -33,7 +37,9 @@
     "id": "q103",
     "exam": "SAA",
     "domain": 1,
-    "services": ["VPC"],
+    "services": [
+      "VPC"
+    ],
     "question": "プライベートサブネット内のEC2インスタンスが、インターネット上のソフトウェアリポジトリからパッケージをダウンロードできるようにしたいが、インターネットから直接インスタンスへ到達できないようにしたい場合、何を使いますか？",
     "choices": [
       "インターネットゲートウェイをプライベートサブネットのルートテーブルに追加する",
@@ -48,7 +54,9 @@
     "id": "q104",
     "exam": "SAA",
     "domain": 1,
-    "services": ["KMS"],
+    "services": [
+      "KMS"
+    ],
     "question": "コンプライアンス要件により、暗号化キーの生成・管理を専有のハードウェアセキュリティモジュール上で行う必要があります。適切なサービスはどれですか？",
     "choices": [
       "AWS KMS（AWSマネージドキー）",
@@ -63,7 +71,9 @@
     "id": "q105",
     "exam": "SAA",
     "domain": 1,
-    "services": ["セキュリティグループ / ネットワークACL"],
+    "services": [
+      "セキュリティグループ / ネットワークACL"
+    ],
     "question": "特定のIPアドレスからの通信を明示的に拒否したい場合、どの設定を使う必要がありますか？",
     "choices": [
       "セキュリティグループでそのIPアドレスへのDenyルールを追加する",
@@ -78,7 +88,9 @@
     "id": "q201",
     "exam": "SAA",
     "domain": 2,
-    "services": ["Auto Scaling"],
+    "services": [
+      "Auto Scaling"
+    ],
     "question": "Webアプリケーションのトラフィックが時間帯によって大きく変動します。コストを抑えつつ需要変動に自動対応するための最適な構成はどれですか？",
     "choices": [
       "常に最大トラフィックに対応できる台数のEC2インスタンスを固定で起動しておく",
@@ -93,7 +105,9 @@
     "id": "q202",
     "exam": "SAA",
     "domain": 2,
-    "services": ["ELB（ALB / NLB）"],
+    "services": [
+      "ELB（ALB / NLB）"
+    ],
     "question": "URLのパスに応じて異なるバックエンドサービスにトラフィックをルーティングしたい場合、どのロードバランサーを使うべきですか？",
     "choices": [
       "Network Load Balancer（NLB）",
@@ -108,7 +122,9 @@
     "id": "q203",
     "exam": "SAA",
     "domain": 2,
-    "services": ["RDS（Multi-AZ / リードレプリカ）"],
+    "services": [
+      "RDS（Multi-AZ / リードレプリカ）"
+    ],
     "question": "本番RDSデータベースの読み取りトラフィックが増加しパフォーマンスが低下しています。可用性ではなく読み取りスケーラビリティを改善するにはどうすべきですか？",
     "choices": [
       "Multi-AZ配置を有効にする",
@@ -123,7 +139,9 @@
     "id": "q204",
     "exam": "SAA",
     "domain": 2,
-    "services": ["S3バージョニング / クロスリージョンレプリケーション"],
+    "services": [
+      "S3バージョニング / クロスリージョンレプリケーション"
+    ],
     "question": "S3バケットでクロスリージョンレプリケーション（CRR）を設定しようとしたところ、エラーが発生しました。考えられる原因はどれですか？",
     "choices": [
       "バケットのバージョニングが有効になっていない",
@@ -138,7 +156,9 @@
     "id": "q205",
     "exam": "SAA",
     "domain": 2,
-    "services": ["Route 53（フェイルオーバールーティング）"],
+    "services": [
+      "Route 53（フェイルオーバールーティング）"
+    ],
     "question": "オンプレミスのプライマリサイトに障害が発生した場合に、自動的にAWS上のセカンダリサイトへトラフィックを切り替えるDR構成を実現するには何を使いますか？",
     "choices": [
       "Route 53の加重ルーティングポリシー",
@@ -153,7 +173,9 @@
     "id": "q301",
     "exam": "SAA",
     "domain": 3,
-    "services": ["EC2インスタンスタイプ"],
+    "services": [
+      "EC2インスタンスタイプ"
+    ],
     "question": "インメモリで大規模なデータセットを処理するアプリケーションに最適なEC2インスタンスファミリーはどれですか？",
     "choices": [
       "コンピューティング最適化インスタンス（Cファミリー等）",
@@ -168,7 +190,9 @@
     "id": "q302",
     "exam": "SAA",
     "domain": 3,
-    "services": ["DynamoDB"],
+    "services": [
+      "DynamoDB"
+    ],
     "question": "DynamoDBテーブルへの読み取りアクセスをマイクロ秒単位まで高速化したい場合、何を導入すべきですか？",
     "choices": [
       "DynamoDB Accelerator（DAX）",
@@ -183,7 +207,9 @@
     "id": "q303",
     "exam": "SAA",
     "domain": 3,
-    "services": ["ElastiCache"],
+    "services": [
+      "ElastiCache"
+    ],
     "question": "高可用性のためのレプリケーションと自動フェイルオーバーが必要なキャッシュ用途に適したElastiCacheエンジンはどれですか？",
     "choices": [
       "Memcached",
@@ -198,7 +224,9 @@
     "id": "q304",
     "exam": "SAA",
     "domain": 3,
-    "services": ["CloudFront"],
+    "services": [
+      "CloudFront"
+    ],
     "question": "S3バケットを非公開に保ちながら、世界中のユーザーに静的コンテンツを低レイテンシーで配信したい場合の構成として適切なのはどれですか？",
     "choices": [
       "S3バケットをパブリックに設定し、直接アクセスさせる",
@@ -213,7 +241,9 @@
     "id": "q305",
     "exam": "SAA",
     "domain": 3,
-    "services": ["Lambda"],
+    "services": [
+      "Lambda"
+    ],
     "question": "S3にファイルがアップロードされるたびに、サーバーを管理せず自動的に画像リサイズ処理を実行したい場合、何を使うべきですか？",
     "choices": [
       "常時起動のEC2インスタンスでポーリング処理を行う",
@@ -228,7 +258,9 @@
     "id": "q401",
     "exam": "SAA",
     "domain": 4,
-    "services": ["S3ストレージクラス / ライフサイクル"],
+    "services": [
+      "S3ストレージクラス / ライフサイクル"
+    ],
     "question": "アクセス頻度が予測できないデータを保存しており、コストを自動的に最適化したい場合に最適なS3ストレージクラスはどれですか？",
     "choices": [
       "S3 Standard",
@@ -243,7 +275,9 @@
     "id": "q402",
     "exam": "SAA",
     "domain": 4,
-    "services": ["Reserved Instances / Savings Plans"],
+    "services": [
+      "Reserved Instances / Savings Plans"
+    ],
     "question": "3年間安定して稼働し続けることが分かっているワークロード向けにEC2のコストを最も削減できる購入オプションはどれですか？",
     "choices": [
       "オンデマンドインスタンス",
@@ -258,7 +292,9 @@
     "id": "q403",
     "exam": "SAA",
     "domain": 4,
-    "services": ["Cost Explorer / Budgets"],
+    "services": [
+      "Cost Explorer / Budgets"
+    ],
     "question": "特定のプロジェクトの月間AWS利用料金があらかじめ設定したしきい値を超えた際に、担当者にメールで通知したい場合、何を設定すべきですか？",
     "choices": [
       "AWS Cost Explorerのグラフ表示設定",
@@ -273,7 +309,9 @@
     "id": "q404",
     "exam": "SAA",
     "domain": 4,
-    "services": ["Trusted Advisor"],
+    "services": [
+      "Trusted Advisor"
+    ],
     "question": "AWS環境全体をコスト最適化・セキュリティ・耐障害性・パフォーマンスの観点から包括的にチェックしたい場合、どのサービスが適していますか？",
     "choices": [
       "AWS Trusted Advisor",
@@ -288,7 +326,9 @@
     "id": "q405",
     "exam": "SAA",
     "domain": 4,
-    "services": ["Compute Optimizer"],
+    "services": [
+      "Compute Optimizer"
+    ],
     "question": "現在稼働中のEC2インスタンスが実際の使用率に対して過剰なスペックになっていないか、機械学習を用いて分析し最適なサイズを推奨してもらいたい場合、何を使いますか？",
     "choices": [
       "AWS Compute Optimizer",
@@ -303,7 +343,9 @@
     "id": "c101",
     "exam": "CLF",
     "domain": 1,
-    "services": ["クラウドコンピューティングの利点"],
+    "services": [
+      "クラウドコンピューティングの利点"
+    ],
     "question": "オンプレミスのデータセンター運用と比較した場合の、クラウドコンピューティングの主な利点として最も適切なものはどれですか？",
     "choices": [
       "将来の需要を正確に予測してあらかじめ大量のハードウェアを購入する必要がある",
@@ -318,7 +360,9 @@
     "id": "c102",
     "exam": "CLF",
     "domain": 1,
-    "services": ["AWS Well-Architected Framework"],
+    "services": [
+      "AWS Well-Architected Framework"
+    ],
     "question": "AWS Well-Architected Frameworkの6つの柱に含まれないものはどれですか？",
     "choices": [
       "セキュリティ",
@@ -333,7 +377,9 @@
     "id": "c103",
     "exam": "CLF",
     "domain": 1,
-    "services": ["デプロイモデルとサービスモデル"],
+    "services": [
+      "デプロイモデルとサービスモデル"
+    ],
     "question": "Amazon EC2のように、OS以上のレイヤーをユーザーが自分で管理する必要があるサービス提供形態は、次のうちどれに分類されますか？",
     "choices": [
       "SaaS（Software as a Service）",
@@ -348,7 +394,9 @@
     "id": "c104",
     "exam": "CLF",
     "domain": 1,
-    "services": ["AWSグローバルインフラストラクチャ"],
+    "services": [
+      "AWSグローバルインフラストラクチャ"
+    ],
     "question": "高可用性を実現するために、AWSのアベイラビリティゾーン（AZ）について正しい説明はどれですか？",
     "choices": [
       "1つのリージョンには必ず1つのAZしか存在しない",
@@ -363,7 +411,9 @@
     "id": "c105",
     "exam": "CLF",
     "domain": 1,
-    "services": ["AWS Cloud Adoption Framework"],
+    "services": [
+      "AWS Cloud Adoption Framework"
+    ],
     "question": "ある企業が、クラウド移行を単なる技術的な作業としてではなく、組織のスキル・プロセス・ガバナンスも含めて計画的に進めたいと考えています。参考にすべきフレームワークはどれですか？",
     "choices": [
       "AWS Well-Architected Framework",
@@ -378,7 +428,9 @@
     "id": "c201",
     "exam": "CLF",
     "domain": 2,
-    "services": ["責任共有モデル"],
+    "services": [
+      "責任共有モデル"
+    ],
     "question": "AWSの責任共有モデルにおいて、「クラウド内のセキュリティ（Security in the cloud）」として顧客が責任を持つ項目はどれですか？",
     "choices": [
       "AWSデータセンターの物理的なセキュリティ",
@@ -393,7 +445,9 @@
     "id": "c202",
     "exam": "CLF",
     "domain": 2,
-    "services": ["IAM基礎"],
+    "services": [
+      "IAM基礎"
+    ],
     "question": "AWSアカウントを新規作成した直後のセキュリティ対策として、最も優先すべきものはどれですか？",
     "choices": [
       "ルートユーザーの認証情報を日常的な作業にそのまま使い続ける",
@@ -408,7 +462,9 @@
     "id": "c203",
     "exam": "CLF",
     "domain": 2,
-    "services": ["AWS Organizations"],
+    "services": [
+      "AWS Organizations"
+    ],
     "question": "複数の部門ごとにAWSアカウントを分離して管理しつつ、請求だけは1つにまとめたいと考えています。どのサービス・機能を使うべきですか？",
     "choices": [
       "IAMのグループ機能",
@@ -423,7 +479,9 @@
     "id": "c204",
     "exam": "CLF",
     "domain": 2,
-    "services": ["コンプライアンスとAWS Artifact"],
+    "services": [
+      "コンプライアンスとAWS Artifact"
+    ],
     "question": "監査担当者からAWSのSOCレポートやISO認証に関する文書の提出を求められました。どのサービスからこれらの文書を入手できますか？",
     "choices": [
       "AWS Trusted Advisor",
@@ -438,7 +496,9 @@
     "id": "c205",
     "exam": "CLF",
     "domain": 2,
-    "services": ["主要セキュリティサービス"],
+    "services": [
+      "主要セキュリティサービス"
+    ],
     "question": "AWSアカウント内のAPI呼び出しやネットワークログを継続的に分析し、不審な挙動や既知の脅威を自動的に検知したい場合、どのサービスが適していますか？",
     "choices": [
       "Amazon GuardDuty",
@@ -453,7 +513,9 @@
     "id": "c301",
     "exam": "CLF",
     "domain": 3,
-    "services": ["コンピューティングサービス概要"],
+    "services": [
+      "コンピューティングサービス概要"
+    ],
     "question": "コンテナ化されたアプリケーションを実行したいが、サーバーやクラスターのインフラ管理はしたくない場合、どのサービスの組み合わせが適していますか？",
     "choices": [
       "Amazon EC2単体",
@@ -468,7 +530,9 @@
     "id": "c302",
     "exam": "CLF",
     "domain": 3,
-    "services": ["ストレージサービス概要"],
+    "services": [
+      "ストレージサービス概要"
+    ],
     "question": "複数のAmazon EC2インスタンスから同時に同じファイルシステムをマウントして共有したい場合、最も適したストレージサービスはどれですか？",
     "choices": [
       "Amazon EBS",
@@ -483,7 +547,9 @@
     "id": "c303",
     "exam": "CLF",
     "domain": 3,
-    "services": ["データベースサービス概要"],
+    "services": [
+      "データベースサービス概要"
+    ],
     "question": "運用の手間を減らしながらリレーショナルデータベースを利用したい場合、どのサービスが適していますか？",
     "choices": [
       "Amazon RDS",
@@ -498,7 +564,9 @@
     "id": "c304",
     "exam": "CLF",
     "domain": 3,
-    "services": ["ネットワーキングサービス概要"],
+    "services": [
+      "ネットワーキングサービス概要"
+    ],
     "question": "オンプレミスのデータセンターとAWS環境を、インターネットを経由しない専用線で安定的に接続したい場合、どのサービスを使いますか？",
     "choices": [
       "AWS Direct Connect",
@@ -513,7 +581,9 @@
     "id": "c305",
     "exam": "CLF",
     "domain": 3,
-    "services": ["デプロイ・管理ツール"],
+    "services": [
+      "デプロイ・管理ツール"
+    ],
     "question": "同じ構成のインフラ環境を、手作業のミスなく何度も再現性高く構築したい場合、どのサービスが適していますか？",
     "choices": [
       "AWS Management Console上での手動操作のみ",
@@ -528,7 +598,9 @@
     "id": "c401",
     "exam": "CLF",
     "domain": 4,
-    "services": ["AWS料金モデル"],
+    "services": [
+      "AWS料金モデル"
+    ],
     "question": "中断されても問題ないバッチ処理のワークロードで、コストを最大限抑えたい場合に適した購入オプションはどれですか？",
     "choices": [
       "オンデマンドインスタンス",
@@ -543,7 +615,9 @@
     "id": "c402",
     "exam": "CLF",
     "domain": 4,
-    "services": ["Pricing Calculator と Cost管理ツール"],
+    "services": [
+      "Pricing Calculator と Cost管理ツール"
+    ],
     "question": "まだAWSアカウントを持っていない検討段階の企業が、想定する構成のおおよその月額費用を事前に見積もりたい場合、どのツールを使うべきですか？",
     "choices": [
       "AWS Cost Explorer",
@@ -558,7 +632,9 @@
     "id": "c403",
     "exam": "CLF",
     "domain": 4,
-    "services": ["AWS Organizationsと一括請求"],
+    "services": [
+      "AWS Organizationsと一括請求"
+    ],
     "question": "AWS Organizationsの一括請求（Consolidated Billing）の説明として正しいものはどれですか？",
     "choices": [
       "各メンバーアカウントの利用状況は一切確認できなくなる",
@@ -573,7 +649,9 @@
     "id": "c404",
     "exam": "CLF",
     "domain": 4,
-    "services": ["AWSサポートプラン"],
+    "services": [
+      "AWSサポートプラン"
+    ],
     "question": "本番環境を24時間365日運用しており、緊急時にはすぐにAWSサポートへ問い合わせたい企業が選ぶべき最低限のサポートプランはどれですか？",
     "choices": [
       "Basic",
@@ -588,7 +666,9 @@
     "id": "c405",
     "exam": "CLF",
     "domain": 4,
-    "services": ["AWS Marketplace"],
+    "services": [
+      "AWS Marketplace"
+    ],
     "question": "サードパーティ製のセキュリティソフトウェアをAWS環境に導入したいが、ベンダーと個別に契約・請求処理をする手間は省きたい場合、どこから購入するのが適切ですか？",
     "choices": [
       "AWS Marketplace",
@@ -598,5 +678,430 @@
     ],
     "correctIndex": 0,
     "explanation": "AWS Marketplaceでは、サードパーティ製ソフトウェアを購入・デプロイでき、利用料金はAWSの請求に統合されるため、ベンダーとの個別契約・請求処理の手間を省けます。"
+  },
+  {
+    "id": "a101",
+    "exam": "AIF",
+    "domain": 1,
+    "services": [
+      "AI・ML・DLの基礎用語"
+    ],
+    "question": "AI（人工知能）、機械学習（ML）、深層学習（DL）の関係を正しく説明しているものはどれですか？",
+    "choices": [
+      "MLはAIの一部であり、DLはさらにMLの一部である",
+      "DLはAIの一部であり、MLはさらにDLの一部である",
+      "AI・ML・DLはそれぞれ独立した無関係の分野である",
+      "MLはDLの一部であり、AIはさらにMLの一部である"
+    ],
+    "correctIndex": 0,
+    "explanation": "最も広い概念がAIであり、その中にMLが含まれ、MLの中でもニューラルネットワークを用いる手法であるDLがさらに包含される、という包含関係が正しい理解です。"
+  },
+  {
+    "id": "a102",
+    "exam": "AIF",
+    "domain": 1,
+    "services": [
+      "機械学習の学習方式"
+    ],
+    "question": "過去の購買履歴に基づき、顧客をいくつかのグループに自動的に分けたい（正解ラベルとなるグループ名は事前にない）場合、どの学習方式が適していますか？",
+    "choices": [
+      "教師あり学習（分類）",
+      "教師なし学習（クラスタリング）",
+      "強化学習",
+      "教師あり学習（回帰）"
+    ],
+    "correctIndex": 1,
+    "explanation": "正解ラベルが存在しないデータからパターン・グループを発見するタスクは教師なし学習のクラスタリングに該当します。教師あり学習は事前にラベル付きデータが必要です。"
+  },
+  {
+    "id": "a103",
+    "exam": "AIF",
+    "domain": 1,
+    "services": [
+      "MLの開発ライフサイクル"
+    ],
+    "question": "機械学習モデルを本番デプロイした後に行うべきこととして、最も適切なものはどれですか？",
+    "choices": [
+      "一度デプロイしたら二度と手を加えず放置する",
+      "データドリフトやモデル精度の低下を継続的にモニタリングする",
+      "学習データを完全に削除する",
+      "モデルの評価指標の記録をすべて破棄する"
+    ],
+    "correctIndex": 1,
+    "explanation": "本番環境のデータ分布は時間とともに変化しうるため（データドリフト）、デプロイ後もモデルの精度を継続的にモニタリングし、必要に応じて再学習することが重要です。"
+  },
+  {
+    "id": "a104",
+    "exam": "AIF",
+    "domain": 1,
+    "services": [
+      "Amazon SageMaker"
+    ],
+    "question": "機械学習のコーディング経験が少ないチームが、データを準備するだけでアルゴリズム選定やチューニングを自動化したい場合、SageMakerのどの機能が適していますか？",
+    "choices": [
+      "SageMaker Ground Truth",
+      "SageMaker Autopilot",
+      "SageMaker Model Monitor",
+      "SageMaker Studio Notebooksのみ"
+    ],
+    "correctIndex": 1,
+    "explanation": "SageMaker Autopilotは、データを与えるだけで前処理・アルゴリズム選定・ハイパーパラメータチューニングを自動化するAutoML機能です。Ground Truthはラベル付け、Model Monitorは本番監視が目的です。"
+  },
+  {
+    "id": "a105",
+    "exam": "AIF",
+    "domain": 1,
+    "services": [
+      "AWSのAI/MLサービス群"
+    ],
+    "question": "スキャンした請求書画像から、金額や日付などのフォームデータを自動的に抽出したい場合、最も適したサービスはどれですか？",
+    "choices": [
+      "Amazon Rekognition",
+      "Amazon Textract",
+      "Amazon Polly",
+      "Amazon Translate"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon Textractは、スキャンした文書や画像からテキスト・表・フォームデータを抽出するサービスです。Rekognitionは画像・動画分析、Pollyは音声合成、Translateは機械翻訳が主な用途です。"
+  },
+  {
+    "id": "a201",
+    "exam": "AIF",
+    "domain": 2,
+    "services": [
+      "生成AIの基本概念"
+    ],
+    "question": "生成AIモデルにおいて、出力の多様性・創造性を高めたい場合に調整すべき推論パラメータはどれですか？",
+    "choices": [
+      "コンテキストウィンドウを小さくする",
+      "温度（Temperature）を高く設定する",
+      "トークンの定義を変更する",
+      "埋め込み次元数を減らす"
+    ],
+    "correctIndex": 1,
+    "explanation": "温度（Temperature）を高く設定すると、モデルの出力がより多様でランダム性の高いものになります。逆に低く設定すると一貫性の高い決定論的な出力になりやすくなります。"
+  },
+  {
+    "id": "a202",
+    "exam": "AIF",
+    "domain": 2,
+    "services": [
+      "基盤モデルとトランスフォーマー"
+    ],
+    "question": "基盤モデル（Foundation Model）の特徴として最も適切な説明はどれですか？",
+    "choices": [
+      "1つの特定タスクのためだけに、少量のデータで学習された小規模モデルである",
+      "大量のデータで事前学習され、多様なタスクに転用・適応できる汎用モデルである",
+      "常に人手でラベル付けされたデータのみを使って学習される",
+      "推論（Inference）を行わず学習のみを行うモデルである"
+    ],
+    "correctIndex": 1,
+    "explanation": "基盤モデルは大規模なデータセットで事前学習され、ファインチューニングやプロンプトを通じて様々な下流タスクに適応できる汎用性の高いモデルです。"
+  },
+  {
+    "id": "a203",
+    "exam": "AIF",
+    "domain": 2,
+    "services": [
+      "生成AIのユースケースと限界"
+    ],
+    "question": "生成AIモデルが、事実と異なる内容をもっともらしく生成してしまう現象を何と呼びますか？",
+    "choices": [
+      "オーバーフィッティング（過学習）",
+      "ハルシネーション",
+      "バイアス",
+      "データドリフト"
+    ],
+    "correctIndex": 1,
+    "explanation": "ハルシネーションは、生成AIモデルが事実に基づかない情報を自信ありげに生成してしまう現象です。RAGの活用や出典の明示要求などで緩和できます。"
+  },
+  {
+    "id": "a204",
+    "exam": "AIF",
+    "domain": 2,
+    "services": [
+      "プロンプトエンジニアリング基礎"
+    ],
+    "question": "モデルに対して、いくつかの入出力例を含めたうえでタスクを実行させるプロンプト手法を何と呼びますか？",
+    "choices": [
+      "ゼロショットプロンプティング",
+      "フューショットプロンプティング",
+      "ファインチューニング",
+      "継続的事前学習"
+    ],
+    "correctIndex": 1,
+    "explanation": "フューショットプロンプティングは、プロンプト内に少数の例（入力と期待される出力のペア）を含めることで、モデルの応答精度を高める手法です。例を与えない場合はゼロショットと呼びます。"
+  },
+  {
+    "id": "a205",
+    "exam": "AIF",
+    "domain": 2,
+    "services": [
+      "Amazon Bedrock概要"
+    ],
+    "question": "インフラの管理をせず、複数プロバイダーの基盤モデルをAPI経由で切り替えながら生成AIアプリケーションを構築したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon EC2にモデルを自前でホスティングする",
+      "Amazon Bedrock",
+      "Amazon RDS",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon Bedrockは、複数プロバイダーの基盤モデルをサーバーレスでAPI経由で利用できるマネージドサービスで、インフラ管理は不要です。"
+  },
+  {
+    "id": "a301",
+    "exam": "AIF",
+    "domain": 3,
+    "services": [
+      "Amazon Bedrockの主要機能"
+    ],
+    "question": "生成AIチャットボットに、社内文書を検索対象として取り込んだ回答をさせたい場合、Amazon Bedrockのどの機能を使うべきですか？",
+    "choices": [
+      "Guardrails for Amazon Bedrock",
+      "Knowledge Bases for Amazon Bedrock",
+      "Model Evaluation",
+      "プロビジョンドスループットのみ"
+    ],
+    "correctIndex": 1,
+    "explanation": "Knowledge Bases for Amazon Bedrockは、社内文書などのデータソースを取り込みRAGの仕組みを簡単に構築できる機能です。Guardrailsは安全対策、Model Evaluationはモデル比較評価が目的です。"
+  },
+  {
+    "id": "a302",
+    "exam": "AIF",
+    "domain": 3,
+    "services": [
+      "RAGとベクトルデータベース"
+    ],
+    "question": "基盤モデルの重みを変更せずに、社内の最新マニュアルの内容を回答に反映させたい場合に最も適した手法はどれですか？",
+    "choices": [
+      "継続的事前学習",
+      "ファインチューニング",
+      "RAG（Retrieval Augmented Generation）",
+      "モデルの温度パラメータの変更"
+    ],
+    "correctIndex": 2,
+    "explanation": "RAGは外部データストアから関連情報を検索し、プロンプトに含めてモデルに回答させる手法で、モデル自体を再学習せずに最新・固有の情報を反映できます。"
+  },
+  {
+    "id": "a303",
+    "exam": "AIF",
+    "domain": 3,
+    "services": [
+      "モデルのカスタマイズ手法"
+    ],
+    "question": "基盤モデルを自社用途に適応させる4つの手法を、一般的にコスト・複雑さが低い順に並べたものはどれですか？",
+    "choices": [
+      "継続的事前学習 → ファインチューニング → RAG → プロンプトエンジニアリング",
+      "プロンプトエンジニアリング → RAG → ファインチューニング → 継続的事前学習",
+      "RAG → プロンプトエンジニアリング → 継続的事前学習 → ファインチューニング",
+      "ファインチューニング → プロンプトエンジニアリング → 継続的事前学習 → RAG"
+    ],
+    "correctIndex": 1,
+    "explanation": "一般的に、モデルの重みを変更しないプロンプトエンジニアリングが最も低コストで、次いでRAG、モデルを追加学習するファインチューニング、大量データで適応させる継続的事前学習の順にコスト・複雑さが増加します。"
+  },
+  {
+    "id": "a304",
+    "exam": "AIF",
+    "domain": 3,
+    "services": [
+      "Amazon Q"
+    ],
+    "question": "開発者がコード生成やAWSサービスに関する質問応答を通じて開発作業を支援してもらいたい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon Q Business",
+      "Amazon Q Developer",
+      "Amazon Comprehend",
+      "Amazon Textract"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon Q Developerは、コード生成・コードレビュー・AWSに関する質問応答など、ソフトウェア開発を支援する生成AIアシスタントです。Amazon Q Businessは社内文書等を対象にした業務向けアシスタントです。"
+  },
+  {
+    "id": "a305",
+    "exam": "AIF",
+    "domain": 3,
+    "services": [
+      "基盤モデル選定の評価基準"
+    ],
+    "question": "リアルタイムのカスタマーサポートチャットで基盤モデルを選定する際に、最も優先して評価すべき項目はどれですか？",
+    "choices": [
+      "モデルの学習に使われたデータセットの総容量",
+      "レイテンシー（応答速度）とスループット",
+      "モデルの開発元企業の従業員数",
+      "モデルのパラメータ数の多さのみ"
+    ],
+    "correctIndex": 1,
+    "explanation": "リアルタイム性が求められるユースケースでは、応答速度（レイテンシー）と処理能力（スループット）が重要な評価基準になります。パラメータ数の多さが必ずしも実用上の適性を保証するわけではありません。"
+  },
+  {
+    "id": "a401",
+    "exam": "AIF",
+    "domain": 4,
+    "services": [
+      "責任あるAIの基本原則"
+    ],
+    "question": "モデルがなぜその予測・出力に至ったかを人が理解できるようにすることを何と呼びますか？",
+    "choices": [
+      "堅牢性（Robustness）",
+      "説明可能性（Explainability）",
+      "公平性（Fairness）",
+      "プライバシー"
+    ],
+    "correctIndex": 1,
+    "explanation": "説明可能性（Explainability）は、モデルの予測・出力に至った根拠を人が理解できるようにすることを指します。公平性は差別的結果の防止、堅牢性は予期しない入力への耐性を指します。"
+  },
+  {
+    "id": "a402",
+    "exam": "AIF",
+    "domain": 4,
+    "services": [
+      "バイアスとハルシネーション"
+    ],
+    "question": "学習データにおいて特定の属性を持つグループのデータが少なく、そのグループに対する予測精度が著しく低い現象を何と呼びますか？",
+    "choices": [
+      "ハルシネーション",
+      "バイアス",
+      "データドリフト",
+      "オーバーフィッティング"
+    ],
+    "correctIndex": 1,
+    "explanation": "学習データの偏り・不均衡がモデルの予測結果に反映され、特定グループへの不公平な結果を生む現象はバイアスと呼ばれます。ハルシネーションは生成AIが誤った情報を生成する現象です。"
+  },
+  {
+    "id": "a403",
+    "exam": "AIF",
+    "domain": 4,
+    "services": [
+      "Guardrails for Amazon Bedrock"
+    ],
+    "question": "生成AIチャットボットが、特定の禁止トピックについて応答しないよう制御し、さらに個人情報を含む出力をブロックしたい場合、何を使うべきですか？",
+    "choices": [
+      "Guardrails for Amazon Bedrock",
+      "SageMaker Ground Truth",
+      "AWS Artifact",
+      "Amazon CloudWatch単体"
+    ],
+    "correctIndex": 0,
+    "explanation": "Guardrails for Amazon Bedrockは、禁止トピックの制御、有害コンテンツのフィルタリング、個人情報（PII）の検出・マスキングなど、生成AIアプリケーションの安全対策をまとめて設定できる機能です。"
+  },
+  {
+    "id": "a404",
+    "exam": "AIF",
+    "domain": 4,
+    "services": [
+      "Amazon SageMaker Clarify"
+    ],
+    "question": "機械学習モデルの学習データセットに、性別や年齢などの属性間で著しい不均衡がないかを事前に検証したい場合、どのツールが適していますか？",
+    "choices": [
+      "Amazon SageMaker Clarify",
+      "Amazon Polly",
+      "AWS Direct Connect",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon SageMaker Clarifyは、学習前のデータセットや学習後のモデルの予測結果に含まれるバイアスを検出し、予測の説明可能性（SHAP値等）も提供するツールです。"
+  },
+  {
+    "id": "a405",
+    "exam": "AIF",
+    "domain": 4,
+    "services": [
+      "責任あるAIのガバナンス文書"
+    ],
+    "question": "あるAWSのAIサービスについて、意図された用途や既知の限界事項を事前に確認したい場合、参照すべき文書はどれですか？",
+    "choices": [
+      "AWS Artifact",
+      "AWS AI Service Cards",
+      "AWS Trusted Advisor レポート",
+      "コスト請求書（Invoice）"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS AI Service Cardsは、AWSの各AIサービスの意図された用途、性能特性、既知の限界、責任あるAIに関する設計上の考慮事項を説明する文書です。"
+  },
+  {
+    "id": "a501",
+    "exam": "AIF",
+    "domain": 5,
+    "services": [
+      "AIワークロードの責任共有モデル"
+    ],
+    "question": "Amazon Bedrockを利用する際、モデルに入力するプロンプトに含める情報の機密区分を判断する責任は誰にありますか？",
+    "choices": [
+      "AWS側の責任",
+      "顧客側の責任",
+      "基盤モデルの提供元企業の責任のみ",
+      "責任の所在は定められていない"
+    ],
+    "correctIndex": 1,
+    "explanation": "責任共有モデルにおいて、顧客が入力するデータの内容や機密区分の判断は顧客側の責任です。AWSはサービスを稼働させる基盤インフラのセキュリティに責任を持ちます。"
+  },
+  {
+    "id": "a502",
+    "exam": "AIF",
+    "domain": 5,
+    "services": [
+      "データ保護とプライバシー"
+    ],
+    "question": "S3バケットに保存された機械学習用の学習データに、個人を特定できる情報（PII）が含まれていないかを自動的に検出したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon Macie",
+      "Amazon Polly",
+      "AWS Direct Connect",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon Macieは、S3内のデータを機械学習で分析し、個人を特定できる情報（PII）などの機密データを自動的に検出するサービスです。"
+  },
+  {
+    "id": "a503",
+    "exam": "AIF",
+    "domain": 5,
+    "services": [
+      "AIサービスへのアクセス制御"
+    ],
+    "question": "アプリケーションからAmazon Bedrockを呼び出す際、認証情報を安全に管理するためのベストプラクティスはどれですか？",
+    "choices": [
+      "IAMユーザーのアクセスキーをアプリケーションのコードに直接埋め込む",
+      "IAMロールをコンピューティングリソースにアタッチし、一時的な認証情報を利用する",
+      "ルートユーザーの認証情報をアプリケーションに埋め込む",
+      "認証情報を使わずパブリックにAPIを公開する"
+    ],
+    "correctIndex": 1,
+    "explanation": "SAAと同様に、AI/MLサービスの呼び出しにおいてもIAMロールを使い一時的な認証情報を利用することがベストプラクティスです。アクセスキーの埋め込みは漏洩リスクがあります。"
+  },
+  {
+    "id": "a504",
+    "exam": "AIF",
+    "domain": 5,
+    "services": [
+      "コンプライアンスとガバナンスツール"
+    ],
+    "question": "AIワークロードを含むAWS環境全体のリソース設定が、社内で定めたルール（例：暗号化の有効化）に準拠しているかを継続的に評価したい場合、どのサービスが適していますか？",
+    "choices": [
+      "AWS Config",
+      "Amazon Polly",
+      "Amazon Translate",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS Configは、リソースの設定状況を継続的に記録・評価し、定義したルールへの準拠状況を可視化・検出するサービスです。"
+  },
+  {
+    "id": "a505",
+    "exam": "AIF",
+    "domain": 5,
+    "services": [
+      "AIシステムの監視とロギング"
+    ],
+    "question": "本番環境にデプロイした機械学習モデルについて、入力データの分布が学習時と変化しモデル品質が低下していないかを継続的に検知したい場合、どのサービスが適していますか？",
+    "choices": [
+      "AWS CloudTrail",
+      "Amazon SageMaker Model Monitor",
+      "AWS Artifact",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon SageMaker Model Monitorは、本番デプロイ後のモデルについてデータドリフトや品質低下を継続的に監視する機能です。CloudTrailはAPI呼び出しの証跡記録が主目的です。"
   }
 ]

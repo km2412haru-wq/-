@@ -33,6 +33,23 @@ export const EXAMS = [
       { id: 4, name: '請求・料金・サポート', weight: 12, color: '#7c3aed' },
     ],
   },
+  {
+    id: 'AIF',
+    code: 'AIF-C01',
+    icon: '🤖',
+    name: 'AWS Certified AI Practitioner',
+    shortLabel: 'AIF-C01: AIプラクティショナー',
+    realExamInfo: '本番は65問90分',
+    examLength: 20,
+    examDurationSec: 40 * 60,
+    domains: [
+      { id: 1, name: 'AIおよびMLの基礎', weight: 20, color: '#2563eb' },
+      { id: 2, name: '生成AIの基礎', weight: 24, color: '#059669' },
+      { id: 3, name: '基盤モデルの活用', weight: 28, color: '#d97706' },
+      { id: 4, name: '責任あるAIのガイドライン', weight: 14, color: '#7c3aed' },
+      { id: 5, name: 'AIソリューションのセキュリティ・コンプライアンス・ガバナンス', weight: 14, color: '#db2777' },
+    ],
+  },
 ]
 
 export function getExam(examId) {
