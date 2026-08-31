@@ -1103,5 +1103,804 @@
     ],
     "correctIndex": 1,
     "explanation": "Amazon SageMaker Model Monitorは、本番デプロイ後のモデルについてデータドリフトや品質低下を継続的に監視する機能です。CloudTrailはAPI呼び出しの証跡記録が主目的です。"
+  },
+  {
+    "id": "q106",
+    "exam": "SAA",
+    "domain": 1,
+    "services": [
+      "AWS Organizations & SCP"
+    ],
+    "question": "複数のAWSアカウントを管理する組織で、特定のOU配下のすべてのアカウントが特定のAWSリージョンでリソースを作成できないように、IAMポリシーとは別に組織全体でガードレールを設定したい場合、何を使うべきですか？",
+    "choices": [
+      "IAMポリシーのみで対応する",
+      "サービスコントロールポリシー（SCP）",
+      "セキュリティグループ",
+      "S3バケットポリシー"
+    ],
+    "correctIndex": 1,
+    "explanation": "SCPはAWS Organizationsの機能で、OUやアカウント単位で利用可能なAWSサービス・操作の上限（ガードレール）を設定できます。IAMポリシーで許可されていてもSCPで禁止されていれば実行できません。"
+  },
+  {
+    "id": "q107",
+    "exam": "SAA",
+    "domain": 1,
+    "services": [
+      "AWS Secrets Manager"
+    ],
+    "question": "RDSデータベースの認証情報を、定期的に自動的にローテーションさせつつ安全に保管したい場合、どのサービスが最適ですか？",
+    "choices": [
+      "AWS Secrets Manager",
+      "Amazon S3",
+      "AWS CloudFormation",
+      "Amazon SNS"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS Secrets Managerは、RDS等の認証情報を暗号化して保管し、自動ローテーション機能を提供するサービスです。"
+  },
+  {
+    "id": "q108",
+    "exam": "SAA",
+    "domain": 1,
+    "services": [
+      "AWS WAF & AWS Shield"
+    ],
+    "question": "ALBの背後にあるWebアプリケーションを、SQLインジェクションやクロスサイトスクリプティング(XSS)などの一般的なWeb攻撃から保護したい場合、何を導入すべきですか？",
+    "choices": [
+      "AWS Shield Standardのみ",
+      "AWS WAF",
+      "Amazon GuardDuty",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS WAFはルールベースでSQLインジェクションやXSSなどのWebアプリケーション層の攻撃をブロックします。ShieldはDDoS攻撃対策が主目的です。"
+  },
+  {
+    "id": "q109",
+    "exam": "SAA",
+    "domain": 1,
+    "services": [
+      "Amazon GuardDuty & Amazon Inspector"
+    ],
+    "question": "EC2インスタンス上で稼働するソフトウェアに既知の脆弱性(CVE)がないかを継続的にスキャンしたい場合、どのサービスを使うべきですか？",
+    "choices": [
+      "Amazon GuardDuty",
+      "Amazon Inspector",
+      "AWS Artifact",
+      "AWS Trusted Advisorのみ"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon Inspectorは、EC2インスタンスやコンテナイメージの既知の脆弱性を自動的にスキャンするサービスです。GuardDutyは不審な挙動の検知が主目的です。"
+  },
+  {
+    "id": "q110",
+    "exam": "SAA",
+    "domain": 1,
+    "services": [
+      "Amazon Cognito"
+    ],
+    "question": "モバイルアプリのユーザーにサインアップ・サインイン機能を提供し、認証後にS3バケットへの一時的なアクセス権限を付与したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon Cognito",
+      "AWS IAM Identity Center",
+      "AWS Secrets Manager",
+      "Amazon GuardDuty"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon Cognitoのユーザープールでサインアップ・サインインを提供し、IDプールで認証済みユーザーに一時的なIAM認証情報を付与できます。"
+  },
+  {
+    "id": "q111",
+    "exam": "SAA",
+    "domain": 1,
+    "services": [
+      "VPCエンドポイント（Gateway型/Interface型）& AWS PrivateLink"
+    ],
+    "question": "プライベートサブネット内のEC2インスタンスから、インターネットを経由せずにAmazon S3にアクセスしたい場合、最も適切な方法はどれですか？",
+    "choices": [
+      "NATゲートウェイ経由でS3にアクセスする",
+      "Gateway型VPCエンドポイントを設定する",
+      "インターネットゲートウェイを直接アタッチする",
+      "パブリックサブネットに移動する"
+    ],
+    "correctIndex": 1,
+    "explanation": "Gateway型VPCエンドポイントを使うと、インターネットを経由せずプライベートにS3・DynamoDBへアクセスできます。NATゲートウェイ経由でもアクセスは可能ですがデータ処理料金が発生し、インターネットを経由します。"
+  },
+  {
+    "id": "q112",
+    "exam": "SAA",
+    "domain": 1,
+    "services": [
+      "AWS Certificate Manager (ACM) & AWS IAM Identity Center"
+    ],
+    "question": "複数のAWSアカウントを保有する企業で、社員が1度のログインで複数のアカウントに使い分けてアクセスできるようにしたい場合、どのサービスが最適ですか？",
+    "choices": [
+      "AWS Certificate Manager",
+      "AWS IAM Identity Center",
+      "Amazon Cognito",
+      "AWS Secrets Manager"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS IAM Identity Center（旧AWS SSO）は、AWS Organizationsと統合し、複数のAWSアカウントへのシングルサインオンを一元的に提供します。"
+  },
+  {
+    "id": "q206",
+    "exam": "SAA",
+    "domain": 2,
+    "services": [
+      "Amazon SQS"
+    ],
+    "question": "注文処理システムで、注文リクエストの急増時にリクエストを失わずに後続のバッチ処理につなげたい場合、何を利用すべきですか？",
+    "choices": [
+      "Amazon SNSのみ",
+      "Amazon SQS",
+      "Amazon CloudFront",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon SQSはメッセージキューにより、プロデューサーとコンシューマーを疎結合にし、急増したリクエストを一時的にバッファリングして後続処理につなげられます。"
+  },
+  {
+    "id": "q207",
+    "exam": "SAA",
+    "domain": 2,
+    "services": [
+      "Amazon SNS"
+    ],
+    "question": "1つのイベントが発生した際に、複数の異なるマイクロサービス（SQSキュー）へ同時に通知を配信したい場合、どのパターンが適していますか？",
+    "choices": [
+      "SNSトピックに複数のSQSキューをサブスクライブさせるファンアウトパターン",
+      "1つのSQSキューだけを使う",
+      "Route 53のみを使う",
+      "CloudFrontのキャッシュ無効化"
+    ],
+    "correctIndex": 0,
+    "explanation": "SNSトピックに複数のサブスクライバー(SQSキュー等)を登録するファンアウトパターンにより、1つのイベントを複数のサービスへ同時配信できます。"
+  },
+  {
+    "id": "q208",
+    "exam": "SAA",
+    "domain": 2,
+    "services": [
+      "Amazon EventBridge & AWS Step Functions"
+    ],
+    "question": "複数のLambda関数を決まった順序で実行し、途中で失敗した場合は自動的にリトライさせたい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon EventBridge",
+      "AWS Step Functions",
+      "Amazon SQS単体",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Step Functionsは、複数のサービス呼び出しをステートマシンとしてオーケストレーションし、リトライやエラーハンドリングを組み込みで管理できます。"
+  },
+  {
+    "id": "q209",
+    "exam": "SAA",
+    "domain": 2,
+    "services": [
+      "Amazon Aurora Global Database"
+    ],
+    "question": "世界中にユーザーがいるサービスで、各リージョンから低レイテンシーで読み取りを行い、かつプライマリリージョン障害時のディザスタリカバリにも対応したい場合、どの構成が適していますか？",
+    "choices": [
+      "単一リージョンのAurora",
+      "Amazon Aurora Global Database",
+      "単一AZのRDS",
+      "S3のクロスリージョンレプリケーションのみ"
+    ],
+    "correctIndex": 1,
+    "explanation": "Aurora Global Databaseは、1つのプライマリリージョンと複数のセカンダリリージョン(読み取り専用)で構成され、グローバルな低レイテンシー読み取りとDR対応の両方を実現します。"
+  },
+  {
+    "id": "q210",
+    "exam": "SAA",
+    "domain": 2,
+    "services": [
+      "AWS Backup & AWS Elastic Disaster Recovery"
+    ],
+    "question": "EC2、RDS、EFSなど複数のAWSリソースのバックアップを、統一されたポリシーでスケジュール管理したい場合、どのサービスが適していますか？",
+    "choices": [
+      "AWS Backup",
+      "AWS Trusted Advisor",
+      "Amazon Inspector",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS Backupは、複数のAWSサービスにまたがるバックアップを一元的なバックアッププランとしてスケジュール・管理できるサービスです。"
+  },
+  {
+    "id": "q211",
+    "exam": "SAA",
+    "domain": 2,
+    "services": [
+      "DynamoDBグローバルテーブル"
+    ],
+    "question": "DynamoDBを使うグローバルアプリケーションで、複数のリージョンのテーブルすべてで読み書きを可能にし、いずれかのリージョン障害時にも他リージョンで書き込みを継続したい場合、どの機能を使うべきですか？",
+    "choices": [
+      "DynamoDBのオンデマンドキャパシティモード",
+      "DynamoDBグローバルテーブル",
+      "DynamoDB Accelerator(DAX)",
+      "DynamoDBのローカルセカンダリインデックス"
+    ],
+    "correctIndex": 1,
+    "explanation": "DynamoDBグローバルテーブルは複数リージョンでマルチマスターの読み書きを可能にし、リージョン障害時にも他リージョンで読み書きを継続できます。"
+  },
+  {
+    "id": "q212",
+    "exam": "SAA",
+    "domain": 2,
+    "services": [
+      "デプロイ戦略（Blue/Green・カナリア）& AWS Elastic Beanstalk"
+    ],
+    "question": "新バージョンのアプリケーションに問題があった場合、即座に旧バージョンへ切り戻せるようにしたいデプロイ戦略はどれですか？",
+    "choices": [
+      "ローリングデプロイ",
+      "Blue/Greenデプロイ",
+      "インプレースデプロイのみ",
+      "手動デプロイ"
+    ],
+    "correctIndex": 1,
+    "explanation": "Blue/Greenデプロイは新環境(Green)と旧環境(Blue)を並行して用意し、問題があれば即座にBlue環境へトラフィックを戻せるため、ロールバックが迅速です。"
+  },
+  {
+    "id": "q306",
+    "exam": "SAA",
+    "domain": 3,
+    "services": [
+      "Amazon EBS（ボリュームタイプ）"
+    ],
+    "question": "低レイテンシー・高いIOPSが要求される本番データベース用のストレージボリュームとして最も適したEBSタイプはどれですか？",
+    "choices": [
+      "スループット最適化HDD(st1)",
+      "プロビジョンドIOPS SSD(io1/io2)",
+      "Cold HDD(sc1)",
+      "汎用SSD(gp2)のみ"
+    ],
+    "correctIndex": 1,
+    "explanation": "プロビジョンドIOPS SSD(io1/io2)は、高く一貫したIOPSとレイテンシーが要求されるデータベースなどのミッションクリティカルな用途に適しています。"
+  },
+  {
+    "id": "q307",
+    "exam": "SAA",
+    "domain": 3,
+    "services": [
+      "Amazon API Gateway"
+    ],
+    "question": "Lambda関数をHTTPS経由で呼び出せるAPIとして公開し、利用者ごとにリクエスト数を制限したい場合、どのサービスを使うべきですか？",
+    "choices": [
+      "Amazon API Gateway",
+      "Amazon CloudFront",
+      "AWS Direct Connect",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon API Gatewayは、Lambda等をバックエンドとするAPIを公開でき、使用量プランやスロットリングによるリクエスト数の制限機能を持ちます。"
+  },
+  {
+    "id": "q308",
+    "exam": "SAA",
+    "domain": 3,
+    "services": [
+      "Amazon ECS / Amazon EKS / AWS Fargate"
+    ],
+    "question": "既存のKubernetesの知識・ツールをそのまま活かしてコンテナを運用したい場合、どのサービスが最も適していますか？",
+    "choices": [
+      "Amazon ECS",
+      "Amazon EKS",
+      "AWS Lambda",
+      "Amazon EC2単体"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon EKSはマネージド型のKubernetesサービスで、既存のKubernetesツール・マニフェストをそのまま活用できます。"
+  },
+  {
+    "id": "q309",
+    "exam": "SAA",
+    "domain": 3,
+    "services": [
+      "AWS Global Accelerator"
+    ],
+    "question": "複数リージョンにデプロイされたアプリケーションで、静的なIPアドレスを維持しながら、ユーザーを常に最もパフォーマンスの良いリージョンへルーティングしたい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon CloudFront",
+      "AWS Global Accelerator",
+      "Amazon Route 53のみ",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Global Acceleratorは、Anycast静的IPを提供し、AWSのグローバルネットワークを経由して最もパフォーマンスの良いエンドポイントへルーティングします。"
+  },
+  {
+    "id": "q310",
+    "exam": "SAA",
+    "domain": 3,
+    "services": [
+      "Amazon Kinesis（Data Streams / Data Firehose）"
+    ],
+    "question": "数千台のIoTデバイスから送信されるセンサーデータをリアルタイムで取り込み、カスタムアプリケーションでストリーム処理したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon Kinesis Data Streams",
+      "Amazon SQS標準キュー",
+      "AWS Direct Connect",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon Kinesis Data Streamsは、大量のストリーミングデータをリアルタイムで取り込み、複数のコンシューマーがカスタムアプリケーションで処理できるサービスです。"
+  },
+  {
+    "id": "q311",
+    "exam": "SAA",
+    "domain": 3,
+    "services": [
+      "Amazon EFS & Amazon FSx"
+    ],
+    "question": "Windows環境で複数のサーバーから同時にアクセスできる共有ファイルストレージが必要な場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon EFS",
+      "Amazon FSx for Windows File Server",
+      "Amazon EBS",
+      "インスタンスストア"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon FSx for Windows File ServerはSMBプロトコルに対応しており、Windows環境向けの共有ファイルストレージとして利用できます。EFSはLinux(NFS)向けです。"
+  },
+  {
+    "id": "q312",
+    "exam": "SAA",
+    "domain": 3,
+    "services": [
+      "Amazon RDS Proxy & Amazon Aurora（パフォーマンス）"
+    ],
+    "question": "Lambda関数から大量かつ断続的にRDSデータベースへ接続する構成で、接続過多によるデータベースの過負荷が発生している場合、どのサービスを導入すべきですか？",
+    "choices": [
+      "Amazon RDS Proxy",
+      "Amazon ElastiCache",
+      "AWS Direct Connect",
+      "Amazon CloudFront"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon RDS Proxyはデータベース接続をプーリング・再利用し、Lambda等からの大量・断続的な接続によるデータベースの過負荷を防ぎます。"
+  },
+  {
+    "id": "q406",
+    "exam": "SAA",
+    "domain": 4,
+    "services": [
+      "AWS Organizations 一括請求 & コスト配分タグ"
+    ],
+    "question": "複数プロジェクトが同じAWSアカウントを共有している場合に、プロジェクトごとの正確なコストを把握するために設定すべきものはどれですか？",
+    "choices": [
+      "セキュリティグループ",
+      "コスト配分タグ",
+      "VPCピアリング",
+      "IAMロール"
+    ],
+    "correctIndex": 1,
+    "explanation": "リソースにコスト配分タグを付与し、Billingコンソールで有効化することで、Cost Explorer上でプロジェクト・部門単位のコストを分析できます。"
+  },
+  {
+    "id": "q407",
+    "exam": "SAA",
+    "domain": 4,
+    "services": [
+      "スポットインスタンス（詳細な活用パターン）"
+    ],
+    "question": "スポットインスタンスを使う際に、AWSからの中断の影響を最小限にするための設計として適切なものはどれですか？",
+    "choices": [
+      "単一のインスタンスタイプ・単一AZのみで構成する",
+      "複数のインスタンスタイプ・複数AZに分散して構成する",
+      "オンデマンドインスタンスを一切使わない",
+      "スポットインスタンスにはAuto Scalingを使わない"
+    ],
+    "correctIndex": 1,
+    "explanation": "複数のインスタンスタイプ・複数AZに分散してスポットインスタンスを構成することで、特定のタイプ・AZが中断されても他で処理を継続でき、影響を最小化できます。"
+  },
+  {
+    "id": "q408",
+    "exam": "SAA",
+    "domain": 4,
+    "services": [
+      "AWS Pricing Calculator"
+    ],
+    "question": "まだAWSアカウントを保有していない企業が、導入予定のシステム構成のおおよその月額コストを事前に見積もりたい場合、どのツールを使うべきですか？",
+    "choices": [
+      "AWS Cost Explorer",
+      "AWS Pricing Calculator",
+      "AWS Budgets",
+      "AWS Cost and Usage Report"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Pricing Calculatorは、AWSアカウントの有無に関わらず、想定する構成の概算コストを事前に見積もれる無料のツールです。"
+  },
+  {
+    "id": "q409",
+    "exam": "SAA",
+    "domain": 4,
+    "services": [
+      "サーバーレス/マネージド型サービスによるコスト最適化"
+    ],
+    "question": "利用パターンが断続的で予測しづらいバッチ処理のコストを最適化したい場合、どのアプローチが適していますか？",
+    "choices": [
+      "常時起動の大型EC2インスタンスで対応する",
+      "AWS Lambda等のサーバーレスサービスを活用し実行時間分のみ課金させる",
+      "3年間の全前払いリザーブドインスタンスを購入する",
+      "オンプレミスに移行する"
+    ],
+    "correctIndex": 1,
+    "explanation": "断続的で予測しづらい負荷には、実行時間・呼び出し回数に応じて課金されるサーバーレスサービス(Lambda等)を活用することで、アイドル時間のコストを削減できます。"
+  },
+  {
+    "id": "q410",
+    "exam": "SAA",
+    "domain": 4,
+    "services": [
+      "データ転送コストの最適化（VPCエンドポイント・CloudFront活用）"
+    ],
+    "question": "NATゲートウェイ経由でS3にアクセスしていることでデータ処理料金がかさんでいる場合、コストを削減する適切な方法はどれですか？",
+    "choices": [
+      "インターネットゲートウェイを追加する",
+      "Gateway型VPCエンドポイントを使いS3への通信をルーティングする",
+      "NATゲートウェイの台数を増やす",
+      "セキュリティグループのルールを緩める"
+    ],
+    "correctIndex": 1,
+    "explanation": "Gateway型VPCエンドポイントを使うと、S3への通信がNATゲートウェイを経由しなくなり、データ処理料金を削減できます。"
+  },
+  {
+    "id": "q411",
+    "exam": "SAA",
+    "domain": 4,
+    "services": [
+      "AWS Well-Architected Framework コスト最適化の柱"
+    ],
+    "question": "AWS Well-Architected Frameworkのコスト最適化の柱が推奨する取り組みとして適切なものはどれですか？",
+    "choices": [
+      "予算やコストの把握を組織的に継続して行う",
+      "常に最大構成のリソースを事前に確保しておく",
+      "コストよりもパフォーマンスを常に最優先する",
+      "タグ付けは行わない"
+    ],
+    "correctIndex": 0,
+    "explanation": "コスト最適化の柱では、クラウド財務管理の実践、需要と供給の一致、コスト効率の高いリソースの利用、支出の把握、継続的な最適化が推奨されます。"
+  },
+  {
+    "id": "q412",
+    "exam": "SAA",
+    "domain": 4,
+    "services": [
+      "AWS Cost Anomaly Detection & AWS Cost and Usage Report (CUR)"
+    ],
+    "question": "意図しないコストの急増を、人が気づく前に自動的に検知して通知を受けたい場合、どのサービスを使うべきですか？",
+    "choices": [
+      "AWS Cost Anomaly Detection",
+      "AWS Pricing Calculator",
+      "AWS Artifact",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS Cost Anomaly Detectionは、過去の支出パターンを機械学習で分析し、通常と異なるコストの急増を自動検知してアラートを送ります。"
+  },
+  {
+    "id": "c106",
+    "exam": "CLF",
+    "domain": 1,
+    "services": [
+      "クラウド移行戦略（6 R's）& AWS Application Migration Service"
+    ],
+    "question": "既存のオンプレミスアプリケーションを、設計変更を最小限にして最速でクラウドに移行したい場合、どの移行戦略が適していますか？",
+    "choices": [
+      "Refactor（リファクタリング）",
+      "Rehost（リホスト、リフト&シフト）",
+      "Repurchase（リパーチェス）",
+      "Retire（廃止）"
+    ],
+    "correctIndex": 1,
+    "explanation": "Rehost（リフト&シフト）は、アプリケーションをほぼそのままの構成でクラウドに移行する、最も迅速な移行戦略です。"
+  },
+  {
+    "id": "c107",
+    "exam": "CLF",
+    "domain": 1,
+    "services": [
+      "AWS Snow Family"
+    ],
+    "question": "数百テラバイトのデータをインターネット経由で転送すると数週間かかってしまうため、より迅速にAWSへデータを移行したい場合、どのサービスが適していますか？",
+    "choices": [
+      "AWS Direct Connect",
+      "AWS Snowball（Snow Family）",
+      "Amazon CloudFront",
+      "AWS Transit Gateway"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Snowball（Snow Family）は、大容量データをオフラインの物理デバイスで転送するサービスで、インターネット回線の帯域制約を受けずに迅速にデータを移行できます。"
+  },
+  {
+    "id": "c108",
+    "exam": "CLF",
+    "domain": 1,
+    "services": [
+      "AWS Database Migration Service (DMS)"
+    ],
+    "question": "オンプレミスのリレーショナルデータベースを、ダウンタイムを最小限に抑えながらAmazon RDSへ移行したい場合、どのサービスが適していますか？",
+    "choices": [
+      "AWS Database Migration Service (DMS)",
+      "Amazon Kinesis",
+      "AWS Direct Connect",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS DMSは、継続的なレプリケーションによりダウンタイムを最小限に抑えながらデータベースをAWSへ移行できるサービスです。"
+  },
+  {
+    "id": "c109",
+    "exam": "CLF",
+    "domain": 1,
+    "services": [
+      "TCO（総所有コスト）の考え方"
+    ],
+    "question": "オンプレミスとクラウドの導入コストを比較する際、ハードウェア購入費だけでなく、データセンターの運用費や人件費まで含めて総合的に評価する考え方を何と呼びますか？",
+    "choices": [
+      "ROI（投資収益率）のみ",
+      "TCO（総所有コスト）",
+      "SLA（サービスレベルアグリーメント）",
+      "RPO（目標復旧時点）"
+    ],
+    "correctIndex": 1,
+    "explanation": "TCO（総所有コスト）は、初期費用だけでなく運用・保守にかかる人件費や設備費なども含めた総合的なコストを比較する考え方です。"
+  },
+  {
+    "id": "c206",
+    "exam": "CLF",
+    "domain": 2,
+    "services": [
+      "AWS KMS & AWS Secrets Manager"
+    ],
+    "question": "アプリケーションのコードにデータベースのパスワードを直接埋め込まず、安全に保管して自動的にローテーションさせたい場合、どのサービスを使うべきですか？",
+    "choices": [
+      "AWS KMS",
+      "AWS Secrets Manager",
+      "Amazon S3",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Secrets Managerは、データベースの認証情報などを暗号化して安全に保管し、自動的にローテーションできるサービスです。"
+  },
+  {
+    "id": "c207",
+    "exam": "CLF",
+    "domain": 2,
+    "services": [
+      "Amazon Macie"
+    ],
+    "question": "S3バケットに保存された大量のファイルの中に、意図せず個人情報が含まれていないかを自動的に検出したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon Macie",
+      "Amazon GuardDuty",
+      "AWS Artifact",
+      "AWS Trusted Advisor"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon Macieは、機械学習を用いてS3内のデータをスキャンし、個人を特定できる情報(PII)などの機密データを自動的に検出するサービスです。"
+  },
+  {
+    "id": "c208",
+    "exam": "CLF",
+    "domain": 2,
+    "services": [
+      "AWS Config & AWS CloudTrail"
+    ],
+    "question": "「先週、誰がセキュリティグループの設定を変更したか」を調査したい場合、どのサービスのログを確認すべきですか？",
+    "choices": [
+      "AWS CloudTrail",
+      "Amazon CloudWatch Metrics",
+      "AWS Budgets",
+      "Amazon Macie"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS CloudTrailは、誰がいつどのAPI操作（設定変更等）を行ったかの証跡を記録するため、このような調査に利用します。"
+  },
+  {
+    "id": "c209",
+    "exam": "CLF",
+    "domain": 2,
+    "services": [
+      "AWS IAM Identity Center & AWS Directory Service"
+    ],
+    "question": "社内に既存のMicrosoft Active Directoryがあり、それを使って複数のAWSアカウントにシングルサインオンでアクセスできるようにしたい場合、適した組み合わせはどれですか？",
+    "choices": [
+      "Amazon Cognitoのみ",
+      "AWS IAM Identity Center と AWS Directory Service",
+      "Amazon Macie",
+      "AWS Artifact"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS IAM Identity CenterとAWS Directory Serviceを組み合わせることで、既存のActive Directoryのアカウントを使って複数のAWSアカウントへシングルサインオンできます。"
+  },
+  {
+    "id": "c210",
+    "exam": "CLF",
+    "domain": 2,
+    "services": [
+      "AWS Network Firewall とネットワークセキュリティ層"
+    ],
+    "question": "VPC全体に対して、特定の悪意あるドメインへの通信をブロックするなど、より高度なネットワークトラフィックの検査を行いたい場合、どのサービスが適していますか？",
+    "choices": [
+      "セキュリティグループのみ",
+      "AWS Network Firewall",
+      "Amazon Route 53のみ",
+      "AWS Budgets"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Network Firewallは、VPCレベルでステートフルなトラフィック検査やドメイン名ベースのフィルタリングなど、より高度なネットワークセキュリティ機能を提供します。"
+  },
+  {
+    "id": "c306",
+    "exam": "CLF",
+    "domain": 3,
+    "services": [
+      "アプリケーション統合サービス（Amazon SQS/SNS/EventBridge/Step Functions）"
+    ],
+    "question": "1つのイベント発生時に、複数の異なるサービスへ同時に通知を配信したい場合、どのサービスの組み合わせが適していますか？",
+    "choices": [
+      "Amazon SNSと複数のサブスクライバー(ファンアウトパターン)",
+      "Amazon EBSのみ",
+      "AWS Direct Connect",
+      "Amazon Route 53のみ"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon SNSのトピックに複数のサブスクライバーを登録するファンアウトパターンにより、1つのイベントを複数のサービスへ同時に配信できます。"
+  },
+  {
+    "id": "c307",
+    "exam": "CLF",
+    "domain": 3,
+    "services": [
+      "分析サービス概要（Amazon Athena/Redshift/QuickSight/EMR）"
+    ],
+    "question": "S3に保存されたログファイルに対して、専用のインフラを構築せずSQLで直接クエリを実行したい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon Athena",
+      "Amazon EC2",
+      "AWS Direct Connect",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amazon Athenaは、S3上のデータに対してサーバー管理不要でSQLクエリを実行できるサーバーレスのクエリサービスです。"
+  },
+  {
+    "id": "c308",
+    "exam": "CLF",
+    "domain": 3,
+    "services": [
+      "機械学習・AIサービス概要（Amazon SageMakerとAI系サービス）"
+    ],
+    "question": "機械学習の専門知識がない企業が、顧客からの問い合わせ音声をテキストに変換する機能を素早く組み込みたい場合、どのサービスが適していますか？",
+    "choices": [
+      "Amazon SageMakerでモデルをゼロから構築する",
+      "Amazon Transcribe",
+      "Amazon EC2",
+      "AWS Direct Connect"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon Transcribeは、音声をテキストに変換する事前学習済みのAIサービスで、機械学習の専門知識がなくてもAPI呼び出しだけで利用できます。"
+  },
+  {
+    "id": "c309",
+    "exam": "CLF",
+    "domain": 3,
+    "services": [
+      "モニタリング・ロギングサービス（Amazon CloudWatch/AWS CloudTrail/AWS X-Ray）"
+    ],
+    "question": "マイクロサービス構成のアプリケーションで、リクエストがどのサービスでボトルネックになっているかを可視化したい場合、どのサービスが適していますか？",
+    "choices": [
+      "AWS X-Ray",
+      "AWS Budgets",
+      "AWS Artifact",
+      "Amazon Route 53"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS X-Rayは、マイクロサービス間をまたぐリクエストを追跡し、レイテンシーのボトルネックとなっているサービスを可視化するサービスです。"
+  },
+  {
+    "id": "c310",
+    "exam": "CLF",
+    "domain": 3,
+    "services": [
+      "コンテナサービス詳細（Amazon ECS/EKS/AWS Fargate）"
+    ],
+    "question": "コンテナ化されたアプリケーションを実行したいが、EC2インスタンスやクラスターのインフラ管理は行いたくない場合、適した組み合わせはどれですか？",
+    "choices": [
+      "Amazon EC2単体",
+      "Amazon ECS/EKS ＋ AWS Fargate",
+      "Amazon RDS",
+      "Amazon S3"
+    ],
+    "correctIndex": 1,
+    "explanation": "Amazon ECSまたはEKSでコンテナをオーケストレーションし、AWS Fargateを実行基盤とすることで、サーバーやクラスターのインフラ管理をせずにコンテナを実行できます。"
+  },
+  {
+    "id": "c311",
+    "exam": "CLF",
+    "domain": 3,
+    "services": [
+      "サーバーレスサービス概要（AWS Lambda/Amazon API Gateway）"
+    ],
+    "question": "サーバーの管理をせずに、S3へのファイルアップロードをトリガーとして処理を実行し、その処理をHTTPS経由のAPIとしても公開したい場合、適した組み合わせはどれですか？",
+    "choices": [
+      "Amazon EC2とElastic Load Balancing",
+      "AWS LambdaとAmazon API Gateway",
+      "Amazon RDSとAmazon Route 53",
+      "AWS Direct ConnectとAmazon CloudFront"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Lambdaはイベント駆動でサーバーレスに処理を実行でき、Amazon API GatewayでHTTPS経由のAPIとして公開できます。"
+  },
+  {
+    "id": "c406",
+    "exam": "CLF",
+    "domain": 4,
+    "services": [
+      "AWS無料利用枠（AWS Free Tier）"
+    ],
+    "question": "AWSアカウントを新規作成した個人が、学習目的で小規模にサービスを試したい場合に活用できる仕組みはどれですか？",
+    "choices": [
+      "AWS Free Tier（無料利用枠）",
+      "AWS Enterpriseサポートプラン",
+      "AWS Direct Connect",
+      "AWS Snowball"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS Free Tierは、新規アカウントで12か月間無料になるサービスや、恒久的に一定量まで無料の「常に無料」のサービスなど、小規模な学習・検証用途に活用できる仕組みです。"
+  },
+  {
+    "id": "c407",
+    "exam": "CLF",
+    "domain": 4,
+    "services": [
+      "コスト配分タグとコストカテゴリ"
+    ],
+    "question": "複数の条件（サービス・タグ・アカウント等）を組み合わせて、独自の部門別グループでコストを分類したい場合、どの機能が適していますか？",
+    "choices": [
+      "コスト配分タグのみ",
+      "コストカテゴリ",
+      "AWS Budgetsのみ",
+      "AWS Artifact"
+    ],
+    "correctIndex": 1,
+    "explanation": "コストカテゴリは、複数のディメンションを組み合わせたルールベースで、独自のグループ分けによりコストを分類できる機能です。"
+  },
+  {
+    "id": "c408",
+    "exam": "CLF",
+    "domain": 4,
+    "services": [
+      "AWS Well-Architected Framework コスト最適化の柱"
+    ],
+    "question": "AWS Well-Architected Frameworkのコスト最適化の柱が推奨する考え方として適切なものはどれですか？",
+    "choices": [
+      "需要に関わらず常に最大構成のリソースを確保しておく",
+      "クラウドの財務管理を組織的に継続して実践する",
+      "コストの可視化は年に一度だけ行えばよい",
+      "タグ付けは不要である"
+    ],
+    "correctIndex": 1,
+    "explanation": "コスト最適化の柱では、クラウド財務管理の実践、需要に応じたリソースの増減、継続的な支出の可視化などが推奨されます。"
+  },
+  {
+    "id": "c409",
+    "exam": "CLF",
+    "domain": 4,
+    "services": [
+      "AWS re:Post とコミュニティ・公式サポートリソース"
+    ],
+    "question": "有償のサポートプランに加入せずに、AWSに関する技術的な疑問をコミュニティや専門家に質問したい場合、どのリソースを利用できますか？",
+    "choices": [
+      "AWS re:Post",
+      "AWS Enterpriseサポート",
+      "AWS Business Support",
+      "AWS Artifact"
+    ],
+    "correctIndex": 0,
+    "explanation": "AWS re:Postは、AWSに関する技術的な質問をコミュニティやAWSの専門家に投稿できる無料のQ&Aプラットフォームです。"
   }
 ]

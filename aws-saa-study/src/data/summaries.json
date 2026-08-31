@@ -969,5 +969,710 @@
       "監視結果をもとにモデルの再学習・再デプロイのタイミングを判断する運用プロセス（MLOps）が重要"
     ],
     "examTips": "「本番運用中のモデルの精度が入力データの変化により劣化していないか継続的に検知したい」→SageMaker Model Monitorが正解になる定番パターン。CloudTrail（証跡）とCloudWatch（メトリクス監視）の役割の違いも頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 1,
+    "service": "AWS Organizations & SCP",
+    "fullName": "AWS Organizations & Service Control Policies (SCPs)",
+    "overview": "複数AWSアカウントを一元的にガバナンスするための組織管理サービスと、アカウントが利用できる操作の上限を制御するポリシー。",
+    "keyPoints": [
+      "組織単位（OU）でアカウントをグループ化し、まとめてポリシーを適用できる",
+      "SCPは「許可を追加する」ものではなく「利用可能なAWSサービス・アクションの上限（ガードレール）を設定する」ものである",
+      "SCPはIAMポリシーと組み合わせて評価され、SCPで許可されていない操作はIAMで許可されていても実行できない",
+      "管理アカウント（旧マスターアカウント）にはSCPは適用されない",
+      "一括請求（Consolidated Billing）と組み合わせることで、複数アカウントの請求を一本化できる"
+    ],
+    "examTips": "「特定のOU配下のアカウントでは特定リージョンの利用を禁止したい」→SCPが正解になるパターン。SCPは「許可の追加」ではなく「上限の制御」という点を混同させる設問に注意。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 1,
+    "service": "AWS Secrets Manager",
+    "fullName": "AWS Secrets Manager",
+    "overview": "データベースの認証情報やAPIキーなどのシークレットを安全に保管・自動ローテーションするサービス。",
+    "keyPoints": [
+      "RDSなど対応サービスの認証情報を自動的にローテーション（定期的に更新）できる",
+      "シークレットはKMSで暗号化されて保管される",
+      "IAMポリシーでシークレットへのアクセスをきめ細かく制御できる",
+      "Systems Manager Parameter Storeと似ているが、自動ローテーション機能やシークレット特化の機能が充実している点が異なる",
+      "アプリケーションコードにパスワードをハードコードする代わりに、実行時にAPI経由でシークレットを取得する設計が推奨される"
+    ],
+    "examTips": "「データベースパスワードを定期的に自動ローテーションしたい」→Secrets Managerが正解になる定番パターン。Parameter Storeとの使い分け（コスト・ローテーション機能の有無）が問われることがある。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 1,
+    "service": "AWS WAF & AWS Shield",
+    "fullName": "AWS WAF & AWS Shield",
+    "overview": "Webアプリケーションを一般的な攻撃から保護するWAFと、DDoS攻撃から保護するShieldの2つのサービス。",
+    "keyPoints": [
+      "AWS WAFはSQLインジェクションやXSSなど、Webアプリケーション層（L7）への攻撃をルールベースでブロックする",
+      "WAFはCloudFront、ALB、API Gatewayなどに関連付けて使用する",
+      "AWS Shield Standardはすべてのユーザーに無料で自動適用され、一般的なDDoS攻撃から保護する",
+      "AWS Shield Advancedは有料で、より高度なDDoS保護と24時間365日のDDoS対応チームへのアクセスを提供する（詳細な料金は要確認）",
+      "レートベースルールをWAFに設定すると、特定のIPからの異常なリクエスト数を検知・ブロックできる"
+    ],
+    "examTips": "「SQLインジェクション攻撃からWebアプリを守りたい」→WAF、「大規模なDDoS攻撃から保護したい」→Shieldという対応関係が頻出。CloudFront/ALBとの組み合わせもよく問われる。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 1,
+    "service": "Amazon GuardDuty & Amazon Inspector",
+    "fullName": "Amazon GuardDuty & Amazon Inspector",
+    "overview": "脅威検出（GuardDuty）と脆弱性診断（Inspector）を行う2つのセキュリティサービス。",
+    "keyPoints": [
+      "GuardDutyはCloudTrail・VPCフローログ・DNSログを機械学習で分析し、不審な挙動を自動検知する脅威検出サービス",
+      "InspectorはEC2インスタンスやコンテナイメージ、Lambda関数の既知の脆弱性（CVE）を自動的にスキャンする",
+      "GuardDutyは「侵入されていないか」の検知、Inspectorは「侵入される前の脆弱性がないか」の診断という役割の違いがある",
+      "どちらもAWS Security Hubと統合し、検出結果を一元的に集約・管理できる",
+      "有効化するだけで継続的にスキャン・分析が行われるマネージド型サービスであり、専用エージェントの管理負担が少ない"
+    ],
+    "examTips": "「不審なAPI呼び出しを自動検知したい」→GuardDuty、「EC2の既知の脆弱性を継続的にスキャンしたい」→Inspectorという使い分けが頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 1,
+    "service": "Amazon Cognito",
+    "fullName": "Amazon Cognito",
+    "overview": "Webアプリ・モバイルアプリのユーザー認証・認可と、AWSリソースへの一時的なアクセス権限付与を行うサービス。",
+    "keyPoints": [
+      "ユーザープール（User Pools）はサインアップ・サインイン機能を提供するユーザーディレクトリ",
+      "IDプール（Identity Pools）は認証済みユーザーにAWSリソースへの一時的な認証情報（IAMロール経由）を付与する",
+      "ソーシャルログイン（Google、Facebook等）やSAML/OIDCベースのエンタープライズID連携にも対応",
+      "MFA（多要素認証）やパスワードポリシーの設定もサポートしている",
+      "アプリ開発者が独自の認証基盤をゼロから構築する手間を省ける"
+    ],
+    "examTips": "「モバイルアプリのユーザーにサインアップ・サインイン機能を提供し、認証後にS3への一時アクセス権を与えたい」→Cognito（ユーザープール＋IDプール）が定番の正解パターン。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 1,
+    "service": "VPCエンドポイント（Gateway型/Interface型）& AWS PrivateLink",
+    "fullName": "VPC Endpoints (Gateway / Interface) & AWS PrivateLink",
+    "overview": "インターネットを経由せずにVPC内からAWSサービスや他VPCのサービスへプライベートに接続する仕組み。",
+    "keyPoints": [
+      "Gateway型エンドポイントはS3・DynamoDBへの接続に使用し、ルートテーブルにエントリを追加する形で無料で利用できる",
+      "Interface型エンドポイントはENI（Elastic Network Interface）を使い、多くのAWSサービスにプライベート接続できる（時間・データ処理料金が発生、詳細は要確認）",
+      "AWS PrivateLinkは、Interface型エンドポイントの基盤技術であり、他のVPCやSaaSプロバイダーのサービスにもプライベートに接続できる",
+      "インターネットゲートウェイやNATゲートウェイを経由しないため、セキュリティとレイテンシーの両面でメリットがある",
+      "プライベートサブネットからインターネットを経由せずS3にアクセスしたい場合の定番構成"
+    ],
+    "examTips": "「プライベートサブネットからインターネットを経由せずS3にアクセスしたい」→Gateway型VPCエンドポイントが正解になる定番パターン。S3/DynamoDB以外のサービスはInterface型を使う点に注意。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 1,
+    "service": "AWS Certificate Manager (ACM) & AWS IAM Identity Center",
+    "fullName": "AWS Certificate Manager (ACM) & AWS IAM Identity Center",
+    "overview": "SSL/TLS証明書の発行・管理を行うACMと、複数AWSアカウントへのシングルサインオン（SSO）を実現するIAM Identity Center。",
+    "keyPoints": [
+      "ACMはパブリックSSL/TLS証明書を無料で発行・自動更新でき、ALB・CloudFront・API Gatewayなどに関連付けられる",
+      "ACMで発行した証明書の秘密鍵はエクスポートできず、AWSサービスとの統合を前提とした設計になっている",
+      "AWS IAM Identity Center（旧AWS SSO）は、複数のAWSアカウントやビジネスアプリケーションへのシングルサインオンを一元的に提供する",
+      "IAM Identity CenterはAWS Organizationsと統合し、ユーザー・グループごとに複数アカウントへのアクセス権限を割り当てられる",
+      "外部のIDプロバイダー（Microsoft Entra ID等）とも連携できる"
+    ],
+    "examTips": "「ALBにSSL証明書を設定し自動更新もしたい」→ACMが正解になる定番パターン。「複数のAWSアカウントに1回のログインでアクセスさせたい」→IAM Identity Centerという対応関係も頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 2,
+    "service": "Amazon SQS",
+    "fullName": "Amazon Simple Queue Service (Amazon SQS)",
+    "overview": "アプリケーションコンポーネント間を疎結合にするマネージド型メッセージキューサービス。",
+    "keyPoints": [
+      "標準キューは高スループットだが順序保証がなく、メッセージが重複配信される可能性がある（at-least-once）",
+      "FIFOキューはメッセージの順序を保証し、重複排除機能を持つが、標準キューよりスループットが低い",
+      "可視性タイムアウトにより、あるコンシューマーが処理中のメッセージを他のコンシューマーが重複処理しないよう制御する",
+      "デッドレターキュー（DLQ）を設定し、処理に繰り返し失敗するメッセージを隔離できる",
+      "プロデューサーとコンシューマーを疎結合にすることで、一方の障害・スパイクが他方に直接影響しない耐障害性の高いアーキテクチャを実現する"
+    ],
+    "examTips": "「注文処理システムでスパイク時にリクエストを失わずに後続処理につなげたい」→SQSでキューイングして疎結合化、という設問パターンが頻出。標準キューとFIFOキューの使い分けも定番。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 2,
+    "service": "Amazon SNS",
+    "fullName": "Amazon Simple Notification Service (Amazon SNS)",
+    "overview": "Pub/Sub型のメッセージ配信サービス。1つのメッセージを複数のサブスクライバーに同時配信する。",
+    "keyPoints": [
+      "トピックにメッセージを発行（Publish）すると、購読（Subscribe）している複数のエンドポイント（SQS、Lambda、メール、SMS等）に配信される",
+      "SQSと組み合わせた「ファンアウトパターン」により、1つのイベントを複数のマイクロサービスに並列配信できる",
+      "メッセージフィルタリングにより、サブスクライバーごとに受信するメッセージを絞り込める",
+      "アプリケーション間（A2A）通知とアプリケーションから人（A2P、SMS/メール等）への通知の両方に対応",
+      "CloudWatchアラームの通知先としてもよく利用される"
+    ],
+    "examTips": "「1つのイベントを複数のサービスに同時に配信したい（ファンアウト）」→SNS＋SQSの組み合わせが定番の正解パターン。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 2,
+    "service": "Amazon EventBridge & AWS Step Functions",
+    "fullName": "Amazon EventBridge & AWS Step Functions",
+    "overview": "イベント駆動型アーキテクチャを構築するEventBridgeと、複数のサービス呼び出しをワークフローとして編成するStep Functions。",
+    "keyPoints": [
+      "EventBridgeは、AWSサービス・SaaS・自作アプリからのイベントをルールに基づいて複数のターゲットにルーティングするサーバーレスイベントバス",
+      "スケジュールルール（Cron式）で定期実行のトリガーとしても使える",
+      "Step Functionsは、Lambda関数や各種AWSサービスの呼び出しを「ステートマシン」として視覚的にオーケストレーションする",
+      "Step Functionsはリトライ・エラーハンドリング・並列実行・待機処理を組み込みで管理できる",
+      "複数サービスにまたがる複雑な業務フローを、個々のLambda関数内にロジックを埋め込まずに管理できる点がメリット"
+    ],
+    "examTips": "「複数のLambda関数を順序立てて実行し、失敗時のリトライも管理したい」→Step Functionsが正解になる定番パターン。「特定のイベント発生時に複数のターゲットへ振り分けたい」→EventBridge。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 2,
+    "service": "Amazon Aurora Global Database",
+    "fullName": "Amazon Aurora Global Database",
+    "overview": "Auroraデータベースを複数リージョンにまたがって展開し、災害対策とグローバルな読み取り性能を両立する機能。",
+    "keyPoints": [
+      "1つのプライマリリージョンと複数のセカンダリリージョン（読み取り専用）で構成される",
+      "レプリケーションはストレージレイヤーで行われ、通常1秒未満の低いレプリケーションラグを実現する（詳細な数値は要確認）",
+      "セカンダリリージョンは通常時は低レイテンシーなグローバル読み取りに使え、プライマリリージョン障害時には高速なフェイルオーバーが可能",
+      "クロスリージョンでのディザスタリカバリ（DR）戦略の中核として利用される",
+      "同一リージョン内のAuroraリードレプリカとは異なり、リージョンをまたいだ構成に特化している"
+    ],
+    "examTips": "「グローバル展開するサービスで、各リージョンから低レイテンシーで読み取りたい、かつリージョン障害時のDRも実現したい」→Aurora Global Databaseが正解になるパターン。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 2,
+    "service": "AWS Backup & AWS Elastic Disaster Recovery",
+    "fullName": "AWS Backup & AWS Elastic Disaster Recovery (AWS DRS)",
+    "overview": "複数サービスのバックアップを一元管理するAWS Backupと、オンプレミス/クラウドサーバーの災害対策を行うAWS DRS。",
+    "keyPoints": [
+      "AWS Backupは、EC2・EBS・RDS・DynamoDB・EFSなど複数サービスのバックアップを一元的なポリシーでスケジュール・管理できる",
+      "バックアップの保持期間・頻度をバックアッププランとして定義し、複数リソースに適用できる",
+      "AWS Elastic Disaster Recovery（DRS）は、オンプレミスや他クラウドのサーバーを継続的にAWSにレプリケーションし、災害時に低いRPO/RTOで復旧できるようにするサービス",
+      "DR戦略には、コストと復旧速度のトレードオフに応じてバックアップ&リストア、パイロットライト、ウォームスタンバイ、マルチサイトアクティブ/アクティブがある",
+      "RPO（目標復旧時点）とRTO（目標復旧時間）の要件に応じて適切なDR戦略・サービスを選定する"
+    ],
+    "examTips": "DR戦略4パターン（コスト・復旧速度の順）を並べ替えさせる設問や、「複数サービスのバックアップを一元的なポリシーで管理したい」→AWS Backupという設問が頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 2,
+    "service": "DynamoDBグローバルテーブル",
+    "fullName": "Amazon DynamoDB Global Tables",
+    "overview": "DynamoDBテーブルを複数リージョンに自動レプリケーションし、マルチマスターで読み書きできるようにする機能。",
+    "keyPoints": [
+      "複数リージョンのテーブルが双方向に自動レプリケーションされ、どのリージョンでも読み書きが可能（マルチマスター）",
+      "結果整合性モデルでレプリケーションされ、通常は秒単位で反映される（詳細な数値は要確認）",
+      "リージョン障害時にも他リージョンで即座に読み書きを継続できるため、高い可用性とDR対応力を持つ",
+      "グローバルにユーザーが分散するアプリケーションで、各ユーザーに最も近いリージョンから低レイテンシーでアクセスさせる用途に向く",
+      "書き込みの競合は「最終書き込み優先（last writer wins）」方式で解決される"
+    ],
+    "examTips": "「グローバルに展開するアプリで、どのリージョンからでも低レイテンシーで読み書きしたい」→DynamoDBグローバルテーブルが正解になるパターン。Aurora Global Database（読み取り専用セカンダリ）との違い（マルチマスターか否か）に注意。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 2,
+    "service": "デプロイ戦略（Blue/Green・カナリア）& AWS Elastic Beanstalk",
+    "fullName": "Deployment Strategies (Blue/Green, Canary) & AWS Elastic Beanstalk",
+    "overview": "アプリケーションの新バージョンをリスクを抑えながらデプロイするための戦略と、それを簡易に実現するElastic Beanstalk。",
+    "keyPoints": [
+      "Blue/Greenデプロイは新環境（Green）を並行して用意し、問題がなければトラフィックを切り替え、旧環境（Blue）はすぐにロールバック可能な状態で残す方式",
+      "カナリアデプロイは新バージョンへ少数のトラフィックのみを段階的に流し、問題がないか確認しながら比率を上げていく方式",
+      "ローリングデプロイは、インスタンスを少しずつ順番に新バージョンへ入れ替える方式で、旧バージョンと新バージョンが一時的に混在する",
+      "AWS Elastic Beanstalkは、コードをアップロードするだけでEC2・ELB・Auto Scaling等のインフラをAWSが自動構築・管理するPaaS的サービスで、上記のデプロイ戦略もサポートする",
+      "Elastic Beanstalk利用時もインフラの詳細設定はユーザーがカスタマイズ可能（完全にブラックボックスではない）"
+    ],
+    "examTips": "「新バージョンに問題があった場合に即座に旧バージョンへ切り戻したい」→Blue/Greenデプロイ、「新バージョンを少数のユーザーだけに段階的に公開したい」→カナリアデプロイという対応が頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 3,
+    "service": "Amazon EBS（ボリュームタイプ）",
+    "fullName": "Amazon Elastic Block Store (Amazon EBS) Volume Types",
+    "overview": "EC2インスタンスにアタッチするブロックストレージ。用途に応じたボリュームタイプの選択がパフォーマンスに直結する。",
+    "keyPoints": [
+      "汎用SSD（gp3/gp2）はバランスの取れた性能を持ち、大半のワークロードに適する",
+      "プロビジョンドIOPS SSD（io1/io2）は、高いIOPS・低レイテンシーが必要なデータベース等のミッションクリティカルな用途向け",
+      "スループット最適化HDD（st1）・Cold HDD（sc1）は、大容量・低コストでシーケンシャルアクセス中心のワークロード向け",
+      "スナップショットはS3に増分バックアップとして保存され、他AZ・他リージョンへのボリューム復元にも使える",
+      "EBSボリュームは基本的に単一のAZ内でのみ利用可能で、複数AZにまたがっては使えない点に注意"
+    ],
+    "examTips": "「高いIOPSが必要なデータベース用ボリューム」→プロビジョンドIOPS SSD、「コストを抑えた大容量ログ保存用」→スループット最適化HDDという用途別の使い分けが頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 3,
+    "service": "Amazon API Gateway",
+    "fullName": "Amazon API Gateway",
+    "overview": "REST/HTTP/WebSocket APIの作成・公開・保護・スケーリングを行うマネージド型サービス。",
+    "keyPoints": [
+      "Lambda・EC2・その他HTTPエンドポイントをバックエンドとするAPIを、サーバー管理なしで公開できる",
+      "APIキー発行、使用量プラン、スロットリング（リクエスト数の制限）によるAPI保護機能を持つ",
+      "Lambdaオーソライザーやamazon Cognitoと連携した認証・認可が可能",
+      "キャッシュ機能によりバックエンドへの呼び出しを減らし、レイテンシーとコストを改善できる",
+      "WebSocket APIによりリアルタイム双方向通信（チャットアプリ等）も構築できる"
+    ],
+    "examTips": "「Lambda関数をHTTP経由で呼び出せるAPIとして公開し、リクエスト数を制限したい」→API Gatewayが正解になる定番パターン。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 3,
+    "service": "Amazon ECS / Amazon EKS / AWS Fargate",
+    "fullName": "Amazon ECS / Amazon EKS / AWS Fargate",
+    "overview": "コンテナ化されたアプリケーションを実行するオーケストレーションサービスと、サーバーレスなコンテナ実行環境。",
+    "keyPoints": [
+      "Amazon ECSはAWS独自のコンテナオーケストレーションサービスで、AWSサービスとのシンプルな統合が特徴",
+      "Amazon EKSはマネージド型のKubernetesサービスで、既存のKubernetesツール・知識をそのまま活用できる",
+      "AWS Fargateは、ECS/EKSのコンテナを実行する基盤で、EC2インスタンスの管理（プロビジョニング・パッチ適用等）が不要",
+      "EC2起動タイプ（自分でEC2インスタンスを管理）とFargate起動タイプ（サーバーレス）を選択できる",
+      "タスク定義でコンテナイメージ・CPU/メモリ・環境変数などを定義する"
+    ],
+    "examTips": "「Kubernetesの知識・ツールをそのまま活かしたい」→EKS、「AWSに最適化されたシンプルなコンテナ運用がしたい」→ECS、「インフラ管理を一切したくない」→Fargateという対応関係が頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 3,
+    "service": "AWS Global Accelerator",
+    "fullName": "AWS Global Accelerator",
+    "overview": "AWSのグローバルネットワークを経由してユーザーのトラフィックを最適なエンドポイントへルーティングし、パフォーマンスと可用性を向上させるサービス。",
+    "keyPoints": [
+      "2つのAnycast静的IPアドレスを提供し、ユーザーは最も近いAWSエッジロケーションへ接続、そこからAWSのバックボーンネットワークを経由して宛先へ到達する",
+      "インターネット経由よりも安定した低レイテンシーの通信を実現できる",
+      "ALB・NLB・EC2インスタンス・Elastic IPなど複数リージョンのエンドポイントへのトラフィック分散・フェイルオーバーが可能",
+      "ヘルスチェックにより異常なエンドポイントを自動的に迂回する",
+      "CloudFrontが静的コンテンツ配信（キャッシュ）に強いのに対し、Global Acceleratorは非HTTPプロトコルを含むTCP/UDPトラフィックや動的コンテンツの高速化に向く"
+    ],
+    "examTips": "「複数リージョンにまたがるアプリケーションで、静的IPを維持しつつ最寄りのリージョンへ自動的にルーティングしたい」→Global Acceleratorが正解になる定番パターン。CloudFrontとの使い分け（静的コンテンツ配信か、TCP/UDPの高速化か）が問われる。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 3,
+    "service": "Amazon Kinesis（Data Streams / Data Firehose）",
+    "fullName": "Amazon Kinesis Data Streams & Amazon Data Firehose",
+    "overview": "リアルタイムのストリーミングデータを収集・処理・配信するためのサービス群。",
+    "keyPoints": [
+      "Kinesis Data Streamsは、大量のストリーミングデータをリアルタイムで取り込み、複数のコンシューマーがカスタムアプリケーションで処理できる",
+      "シャード（Shard）単位でスループットが決まり、シャード数を増やすことでスケールできる",
+      "Amazon Data Firehose（旧Kinesis Data Firehose）は、ストリーミングデータをS3・Redshift・OpenSearch Service等へ自動的に配信するフルマネージドサービスで、カスタムコード不要",
+      "Kinesis Data Streamsはリアルタイム性・カスタム処理の柔軟性が高く、Firehoseは運用の簡易さが高いというトレードオフがある",
+      "IoTデバイスのテレメトリデータやアプリケーションログのリアルタイム分析基盤としてよく利用される"
+    ],
+    "examTips": "「大量のセンサーデータをリアルタイムで取り込み、カスタムのストリーム処理を行いたい」→Kinesis Data Streams、「ストリーミングデータを自動的にS3へ配信するだけでよい」→Data Firehoseという使い分けが頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 3,
+    "service": "Amazon EFS & Amazon FSx",
+    "fullName": "Amazon EFS & Amazon FSx (for Windows File Server / for Lustre / for NetApp ONTAP)",
+    "overview": "マネージド型ファイルストレージのファミリー。用途・プロトコルに応じて使い分ける。",
+    "keyPoints": [
+      "Amazon EFSはNFSプロトコルのマネージド型ファイルストレージで、複数のLinux/EC2インスタンスから同時にマウントできる",
+      "Amazon FSx for Windows File ServerはSMBプロトコルに対応し、Windows環境向けの共有ファイルストレージを提供する",
+      "Amazon FSx for Lustreは、高性能コンピューティング（HPC）や機械学習向けの高スループット・低レイテンシーな並列ファイルシステム",
+      "Amazon FSx for NetApp ONTAPは、NetAppの機能（スナップショット、重複排除等）をマネージドで利用できる",
+      "EFSは複数AZにまたがる高可用性構成、EBSは基本的に単一AZという違いも重要"
+    ],
+    "examTips": "「Linux環境で複数EC2から同時にファイルを共有したい」→EFS、「Windows環境で共有ファイルサーバーが欲しい」→FSx for Windows File Server、「機械学習の高速な並列データ処理が必要」→FSx for Lustreという対応が頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 3,
+    "service": "Amazon RDS Proxy & Amazon Aurora（パフォーマンス）",
+    "fullName": "Amazon RDS Proxy & Amazon Aurora Performance Features",
+    "overview": "データベース接続を効率化するRDS Proxyと、高い性能を実現するAuroraのアーキテクチャ上の特徴。",
+    "keyPoints": [
+      "RDS Proxyは、Lambda等からの大量・断続的なデータベース接続をプーリング（再利用）し、接続過多によるデータベースの過負荷を防ぐ",
+      "RDS Proxyはフェイルオーバー時の接続切り替えも高速化し、アプリケーション側の接続処理を簡素化する",
+      "Amazon Auroraは、ストレージ層がコンピュートと分離された独自アーキテクチャにより、MySQL/PostgreSQL互換ながら高いスループットを実現する",
+      "Auroraのストレージは自動的に複数AZへレプリケーションされ、複数のリードレプリカを持てる（詳細な上限は要確認）",
+      "Aurora Serverlessは、需要に応じてキャパシティを自動的にスケールする、断続的・予測不能な負荷に向いた構成オプション"
+    ],
+    "examTips": "「Lambdaから大量の同時データベース接続が発生し、接続エラーが多発している」→RDS Proxyが正解になる定番パターン。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 4,
+    "service": "AWS Organizations 一括請求 & コスト配分タグ",
+    "fullName": "Consolidated Billing & Cost Allocation Tags (AWS Organizations)",
+    "overview": "複数アカウントの請求を一本化する仕組みと、リソースにタグを付けてコストをプロジェクト・部門単位で追跡する仕組み。",
+    "keyPoints": [
+      "一括請求により、組織内の全メンバーアカウントの利用料金が管理アカウントにまとめて請求される",
+      "ボリュームディスカウント（利用量に応じた割引）を組織全体で合算して受けられる場合がある（詳細は要確認）",
+      "コスト配分タグ（Key:Valueのタグ）をリソースに付与すると、Cost Explorerで部門・プロジェクト単位のコストを分析できる",
+      "タグはAWSが自動生成する「AWS生成タグ」とユーザーが付与する「ユーザー定義タグ」の2種類があり、Billingコンソールで有効化する必要がある",
+      "一貫したタグ付け戦略（命名規則の統一等）がコスト管理の精度を左右する"
+    ],
+    "examTips": "「プロジェクトごとのコストを正確に把握したい」という設問で、コスト配分タグの活用が正解になるパターンが頻出。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 4,
+    "service": "スポットインスタンス（詳細な活用パターン）",
+    "fullName": "Amazon EC2 Spot Instances (Advanced Usage Patterns)",
+    "overview": "AWSの余剰キャパシティを大幅割引で利用できる購入オプションの詳細な活用パターン。",
+    "keyPoints": [
+      "スポットインスタンスはオンデマンド料金に対して大幅な割引を受けられる場合がある（実際の割引率は需給により変動、詳細は要確認）",
+      "AWSがキャパシティを必要とする際、短い予告期間（中断通知）を経て中断される可能性がある（詳細な通知時間は要確認）",
+      "スポットフリート/Auto Scalingグループと組み合わせ、複数のインスタンスタイプ・AZに分散することで中断の影響を最小化できる",
+      "バッチ処理、CI/CDのビルド、ステートレスなWebサーバー、ビッグデータ処理など中断耐性のあるワークロードに向く",
+      "スポットインスタンスとオンデマンド/リザーブドインスタンスを組み合わせる「複数購入オプション戦略」でコストと安定性のバランスを取る"
+    ],
+    "examTips": "「中断されても良いバッチ処理でコストを最大限抑えたい」→スポットインスタンスが定番の正解。複数のインスタンスタイプ・AZへの分散が中断対策の鍵という点も問われる。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 4,
+    "service": "AWS Pricing Calculator",
+    "fullName": "AWS Pricing Calculator",
+    "overview": "AWSアカウントの有無に関わらず、想定する構成の月額コストを事前に見積もれる無料のWebツール。",
+    "keyPoints": [
+      "サービスごとに使用量（インスタンスタイプ、稼働時間、ストレージ容量等）を入力すると概算コストを算出できる",
+      "見積もりはグループ化・共有が可能で、複数の構成案を比較検討する際に便利",
+      "導入前の予算計画や、複数の購入オプション（オンデマンド vs リザーブド等）を比較する用途に向く",
+      "実際の請求額とは異なる場合があり、あくまで概算である点に注意（詳細な料金体系は要確認）",
+      "既存アカウントのコスト分析にはCost Explorerを使い、導入前の見積もりにはPricing Calculatorを使うという役割分担がある"
+    ],
+    "examTips": "「まだAWSアカウントを持っていないが、導入予定の構成のおおよその費用を知りたい」→AWS Pricing Calculatorが正解になる定番パターン。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 4,
+    "service": "サーバーレス/マネージド型サービスによるコスト最適化",
+    "fullName": "Cost Optimization through Serverless & Managed Services",
+    "overview": "サーバー管理が不要なサービスを活用し、アイドル時間のコストや運用負荷を削減する設計アプローチ。",
+    "keyPoints": [
+      "AWS Lambdaは実行時間・呼び出し回数に応じた課金で、アイドル状態のサーバー費用が発生しない",
+      "Amazon Aurora Serverless/DynamoDBオンデマンドモードは、需要に応じて自動的にキャパシティが増減しコストが最適化される",
+      "Fargateはコンテナ実行時のみ課金され、EC2クラスターの常時起動が不要",
+      "常時安定した高い負荷であればEC2/RDSの方がコスト効率が良い場合もあり、負荷パターンに応じた使い分けが重要",
+      "運用負荷（パッチ適用・スケーリング設定等）の削減も、間接的な人件費・コスト最適化につながる"
+    ],
+    "examTips": "「トラフィックが断続的で予測しづらいワークロードのコストを最適化したい」→サーバーレス/オンデマンド型サービスの活用が正解になりやすい。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 4,
+    "service": "データ転送コストの最適化（VPCエンドポイント・CloudFront活用）",
+    "fullName": "Optimizing Data Transfer Costs (VPC Endpoints, CloudFront)",
+    "overview": "AWSのデータ転送料金の仕組みを理解し、アーキテクチャ上の工夫でコストを削減する方法。",
+    "keyPoints": [
+      "一般的に同一AZ内の通信は最も安価、AZをまたぐ通信・インターネットへのアウトバウンド通信は料金が発生する（具体的な単価は要確認）",
+      "VPCエンドポイント（Gateway型）経由でS3・DynamoDBにアクセスすると、NATゲートウェイ経由のデータ処理料金を回避できる",
+      "CloudFrontでコンテンツをキャッシュすることで、オリジンへの繰り返しのデータ転送を削減できる",
+      "複数AZ・複数リージョンにまたがるアーキテクチャでは、通信経路の設計がコストに直結するため、可能な限り同一AZ内で処理を完結させる設計が有効",
+      "S3 Transfer Accelerationは転送速度の改善が主目的だが、経路や利用パターンによってはコスト影響も考慮する必要がある"
+    ],
+    "examTips": "「NATゲートウェイ経由のS3アクセスでデータ処理料金がかさんでいる」→VPCエンドポイント（Gateway型）への切り替えが正解になる定番パターン。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 4,
+    "service": "AWS Well-Architected Framework コスト最適化の柱",
+    "fullName": "AWS Well-Architected Framework – Cost Optimization Pillar",
+    "overview": "Well-Architected Frameworkの6つの柱のうち、コスト最適化に関する設計原則をまとめたもの。",
+    "keyPoints": [
+      "「クラウド財務管理の実践」として、予算管理とコストの把握を組織的に行うことを推奨する",
+      "「需要と供給を一致させる」ため、Auto Scaling等で必要な分だけリソースを確保する",
+      "「コスト効率の高いリソースを使う」ため、マネージドサービスやワークロードに合ったインスタンスタイプを選定する",
+      "「支出の把握」のためタグ付け・Cost Explorer・Budgetsを活用し、可視化を継続的に行う",
+      "「継続的な最適化」として、新しいサービス・料金モデルが登場した際に既存構成を見直す文化を持つ"
+    ],
+    "examTips": "「コスト最適化の柱の原則」を選ばせる設問や、他の柱（信頼性・パフォーマンス効率等）との違いを問う設問が出やすい。"
+  },
+  {
+    "exam": "SAA",
+    "domain": 4,
+    "service": "AWS Cost Anomaly Detection & AWS Cost and Usage Report (CUR)",
+    "fullName": "AWS Cost Anomaly Detection & AWS Cost and Usage Report (CUR)",
+    "overview": "機械学習でコストの異常な増加を自動検知するサービスと、最も詳細なコストデータをエクスポートできるレポート。",
+    "keyPoints": [
+      "AWS Cost Anomaly Detectionは、過去の支出パターンを機械学習で学習し、通常と異なるコスト急増を検知してアラートを送る",
+      "サービス単位、アカウント単位、タグ単位など監視対象（Monitor）を柔軟に設定できる",
+      "AWS Cost and Usage Report（CUR）は、時間単位・リソース単位まで含む最も詳細なコスト・使用状況データをS3にエクスポートできるレポート",
+      "CURのデータはAmazon Athenaやビジネスインテリジェンスツールと連携し、詳細なコスト分析・可視化に利用される",
+      "Cost Explorerが手軽な可視化・傾向把握に向くのに対し、CURはより詳細かつカスタマイズされた分析基盤の構築に向く"
+    ],
+    "examTips": "「意図しないコスト急増を早期に自動検知したい」→Cost Anomaly Detection、「最も詳細な粒度でコストデータを分析基盤に取り込みたい」→CURという対応関係が問われる。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "クラウド移行戦略（6 R's）& AWS Application Migration Service",
+    "fullName": "Cloud Migration Strategies (The 6 R's) & AWS Application Migration Service",
+    "overview": "オンプレミスからクラウドへ移行する際の代表的な6つのアプローチと、それを支援するサービス。",
+    "keyPoints": [
+      "Rehost（リホスト、リフト&シフト）：アプリケーションをほぼそのままクラウドに移す、最も迅速な移行方法",
+      "Replatform（リプラットフォーム）：軽微な最適化を加えながら移行する（例：オンプレミスDBをRDSへ）",
+      "Refactor/Re-architect（リファクタリング）：クラウドネイティブな設計に大きく作り替える、最も工数がかかるが長期的な効果が高い",
+      "Repurchase（リパーチェス、既存システムをSaaS製品に置き換える）、Retire（廃止）、Retain（保持）を含めた合計6つのアプローチがある",
+      "AWS Application Migration Service（MGN）は、オンプレミスサーバーを最小限のダウンタイムでAWSへリフト&シフト移行するサービス"
+    ],
+    "examTips": "「最速でクラウドに移行したいが、大きな設計変更はしたくない」→Rehost（リフト&シフト）、「長期的な運用効率を重視し設計から見直したい」→Refactorという対応が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "AWS Snow Family",
+    "fullName": "AWS Snow Family (Snowcone / Snowball / Snowmobile)",
+    "overview": "インターネット経由でのデータ転送が非現実的な大容量データを、物理デバイスを使ってAWSへ（または他拠点へ）転送するサービス群。",
+    "keyPoints": [
+      "AWS Snowballは、数十テラバイト～ペタバイト級のデータをオフラインで転送する物理ストレージデバイス",
+      "AWS Snowconeは、より小型軽量なデバイスで、エッジロケーションでのデータ収集・簡易コンピューティング用途にも使える",
+      "AWS Snowmobileは、トラックで輸送する大型コンテナ型のデバイスで、エクサバイト級の超大容量データ移行に使われる",
+      "インターネット回線の帯域が限られる環境で、データ転送にかかる時間・コストを大幅に削減できる",
+      "Snowデバイスの一部はエッジコンピューティング機能も備え、収集現場でのデータ処理も可能"
+    ],
+    "examTips": "「数百テラバイトのデータをインターネット経由で転送すると数週間かかってしまう、迅速に移行したい」→Snowball（Snow Family）が正解になる定番パターン。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "AWS Database Migration Service (DMS)",
+    "fullName": "AWS Database Migration Service (AWS DMS)",
+    "overview": "オンプレミスまたは他クラウドのデータベースを、最小限のダウンタイムでAWSのデータベースへ移行するサービス。",
+    "keyPoints": [
+      "移行元と移行先でデータベースエンジンが異なる場合（異種間移行）は、AWS Schema Conversion Tool（SCT）でスキーマ変換を事前に行う",
+      "移行中も継続的にレプリケーションを行うことで、切り替え時のダウンタイムを最小限にできる",
+      "移行先にはRDS、Aurora、Redshift、DynamoDB等、幅広いAWSデータベースサービスを指定できる",
+      "同種間移行（例：Oracle→Oracle）はスキーマ変換が不要でよりシンプル",
+      "一度限りの移行だけでなく、継続的なレプリケーション（例：オンプレDBからのリアルタイム分析用複製）にも利用できる"
+    ],
+    "examTips": "「オンプレミスのOracleデータベースをダウンタイムを最小限にAurora PostgreSQLへ移行したい」→AWS DMS＋AWS SCTが正解になる定番パターン。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 1,
+    "service": "TCO（総所有コスト）の考え方",
+    "fullName": "Total Cost of Ownership (TCO) for Cloud vs. On-Premises",
+    "overview": "オンプレミスとクラウドのコストを比較する際に用いられる、初期投資だけでなく運用全体を含めた総コストの考え方。",
+    "keyPoints": [
+      "オンプレミスのTCOには、ハードウェア購入費だけでなく、データセンターの電力・冷却・スペース費用、運用担当者の人件費なども含まれる",
+      "クラウドのTCOは主に利用量に応じた従量課金だが、運用・保守にかかる人的コストの削減効果も加味して比較する",
+      "AWS Pricing Calculatorや各種TCO計算ツールで、オンプレミスとクラウドの総コストを比較検討できる",
+      "クラウド移行の意思決定では、単純な月額料金の比較だけでなく、俊敏性向上や機会損失の削減といった定性的なメリットも考慮される",
+      "資本支出（CapEx）から運用支出（OpEx）への転換も、TCO評価における重要な観点"
+    ],
+    "examTips": "「オンプレミスとクラウドのコストを比較する際は、ハードウェア費用だけでなく運用担当者の人件費や設備費も含めて評価すべき」という考え方（TCO）が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "AWS KMS & AWS Secrets Manager",
+    "fullName": "AWS Key Management Service (AWS KMS) & AWS Secrets Manager",
+    "overview": "暗号化キーを管理するKMSと、データベース認証情報等の機密情報を管理するSecrets Managerの基本概要。",
+    "keyPoints": [
+      "AWS KMSは、S3・EBS・RDS等の多くのAWSサービスと統合された暗号化キーの作成・管理サービス",
+      "カスタマーマネージドキーとAWSマネージドキーがあり、キーポリシーでアクセスを制御する",
+      "AWS Secrets Managerは、データベースのパスワードやAPIキーなどの機密情報を暗号化して安全に保管し、自動ローテーションもできる",
+      "どちらもコードや設定ファイルに認証情報・キーを直接埋め込む必要をなくし、セキュリティを向上させる",
+      "CloudTrailと連携し、キーやシークレットの利用状況を監査できる"
+    ],
+    "examTips": "「暗号化キー自体を管理したい」→KMS、「データベースのパスワードを安全に保管し自動更新したい」→Secrets Managerという役割の違いが問われる。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "Amazon Macie",
+    "fullName": "Amazon Macie",
+    "overview": "機械学習を用いてS3内の機密データ（個人情報等）を自動的に検出するセキュリティサービス。",
+    "keyPoints": [
+      "S3バケット内のオブジェクトをスキャンし、氏名・クレジットカード番号などの個人を特定できる情報(PII)を自動検出する",
+      "検出結果はダッシュボードで一覧・重大度別に確認でき、対応の優先順位付けに役立つ",
+      "パブリックアクセス可能な設定になっているバケットや暗号化されていないバケットの検出もサポートする",
+      "個人情報保護規制（GDPR等）へのコンプライアンス対応の一環として活用されることが多い",
+      "継続的または一時的なジョブとしてスキャンを実行できる"
+    ],
+    "examTips": "「S3に保存された大量のファイルの中に個人情報が含まれていないか自動的に洗い出したい」→Amazon Macieが定番の正解。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "AWS Config & AWS CloudTrail",
+    "fullName": "AWS Config & AWS CloudTrail",
+    "overview": "リソースの設定変更履歴を記録するConfigと、API呼び出しの証跡を記録するCloudTrail、2つのガバナンス・監査サービス。",
+    "keyPoints": [
+      "AWS CloudTrailは「誰が・いつ・どのAPIを呼び出したか」というアカウント内の操作履歴（証跡）を記録する",
+      "AWS Configは「リソースの設定がいつどう変化したか」を継続的に記録し、あらかじめ定義したルールへの準拠状況を評価する",
+      "Configルールに違反した設定（例：暗号化されていないEBSボリューム）を自動的に検出・通知できる",
+      "CloudTrailは「操作の証跡」、Configは「設定状態の変化とコンプライアンス」に主眼を置くという違いがある",
+      "両方を組み合わせることで、セキュリティインシデントの原因調査や監査対応がしやすくなる"
+    ],
+    "examTips": "「誰がいつS3バケットの設定を変更したか調査したい」→CloudTrail、「暗号化されていないリソースがないか継続的にチェックしたい」→AWS Configという使い分けが頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "AWS IAM Identity Center & AWS Directory Service",
+    "fullName": "AWS IAM Identity Center & AWS Directory Service",
+    "overview": "複数アカウントへのシングルサインオンを実現するIAM Identity Centerと、マネージド型のディレクトリサービス。",
+    "keyPoints": [
+      "AWS IAM Identity Center（旧AWS SSO）は、AWS Organizations配下の複数アカウントへのシングルサインオンを一元的に提供する",
+      "外部のIDプロバイダー（Microsoft Entra ID、Okta等）と連携し、既存の社内アカウントでAWSにログインできるようにする",
+      "AWS Directory Serviceは、Microsoft Active Directory(AD)をマネージドで提供・連携するサービスで、AD Connector（既存ADとの連携）などのオプションがある",
+      "オンプレミスに既存のADがある企業が、AWSリソースへのアクセスをAD管理下で統一したい場合に活用される",
+      "IAMユーザーを個別に大量作成する代わりに、既存のID基盤を活用して管理を簡素化できる点がメリット"
+    ],
+    "examTips": "「社内の既存Active Directoryのアカウントで複数のAWSアカウントにログインできるようにしたい」→IAM Identity Center＋Directory Serviceの組み合わせが定番の正解パターン。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 2,
+    "service": "AWS Network Firewall とネットワークセキュリティ層",
+    "fullName": "AWS Network Firewall & Layered Network Security",
+    "overview": "VPCレベルでのより高度なネットワークトラフィック検査を行うファイアウォールサービスと、多層防御の考え方。",
+    "keyPoints": [
+      "AWS Network Firewallは、VPC全体に対してステートフルなトラフィック検査・侵入防御(IPS)ルールを適用できるマネージド型ファイアウォール",
+      "セキュリティグループ（インスタンスレベル）、NACL（サブネットレベル）、Network Firewall（VPCレベル）を組み合わせた多層防御が推奨される",
+      "ドメイン名ベースのフィルタリングにより、特定の外部ドメインへの通信のみを許可・拒否するといった制御も可能",
+      "AWS Firewall Managerを使うと、複数アカウント・VPCに対してセキュリティポリシーを一元的に適用・管理できる",
+      "WAFがアプリケーション層(L7)の攻撃対策であるのに対し、Network Firewallはより広範なネットワークレイヤーのトラフィック制御を担う"
+    ],
+    "examTips": "「VPC全体で特定の悪意あるドメインへの通信をブロックしたい」→AWS Network Firewallが正解になるパターン。セキュリティグループ・NACLとの役割の違い（レイヤーの違い）も問われる。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "アプリケーション統合サービス（Amazon SQS/SNS/EventBridge/Step Functions）",
+    "fullName": "Application Integration Services (Amazon SQS, SNS, EventBridge, Step Functions)",
+    "overview": "マイクロサービスやサーバーレスコンポーネント同士を疎結合に連携させるためのメッセージング・オーケストレーションサービス群。",
+    "keyPoints": [
+      "Amazon SQSはメッセージキューにより、コンポーネント間を非同期・疎結合に連携させる",
+      "Amazon SNSはPub/Sub型で、1つのメッセージを複数の購読者に同時配信する",
+      "Amazon EventBridgeは、AWSサービスやSaaS、自作アプリからのイベントをルールに基づいてルーティングするイベントバス",
+      "AWS Step Functionsは、複数サービス呼び出しを順序立てたワークフロー（ステートマシン）として管理する",
+      "これらを組み合わせることで、障害の影響範囲を限定し、スケーラブルで疎結合なアーキテクチャを構築できる"
+    ],
+    "examTips": "各サービスの基本的な役割（キュー/Pub-Sub/イベントルーティング/ワークフロー編成）の違いを問う設問が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "分析サービス概要（Amazon Athena/Redshift/QuickSight/EMR）",
+    "fullName": "Core Analytics Services (Amazon Athena, Amazon Redshift, Amazon QuickSight, Amazon EMR)",
+    "overview": "大量のデータを分析・可視化するためのAWSの代表的な分析サービス群の全体像。",
+    "keyPoints": [
+      "Amazon Athenaは、S3上のデータに対しサーバー管理不要でSQLクエリを実行できるサーバーレスクエリサービス",
+      "Amazon Redshiftは、大規模データセットを高速に分析できるマネージド型のデータウェアハウスサービス",
+      "Amazon QuickSightは、データを視覚的なダッシュボード・グラフで可視化するビジネスインテリジェンス(BI)サービス",
+      "Amazon EMR（Elastic MapReduce）は、Apache Spark/Hadoopなどのビッグデータフレームワークをマネージドで実行できるサービス",
+      "データレイク（S3）に蓄積したデータを、用途に応じてこれらのサービスで分析・可視化するのが典型的な構成"
+    ],
+    "examTips": "「S3上のログファイルにSQLで直接クエリしたい、サーバー管理はしたくない」→Athena、「経営層向けにダッシュボードで可視化したい」→QuickSightという対応が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "機械学習・AIサービス概要（Amazon SageMakerとAI系サービス）",
+    "fullName": "Overview of AWS Machine Learning & AI Services",
+    "overview": "AWSが提供する機械学習プラットフォームと、事前学習済みのAIサービス群の全体像（CLFレベルの概要）。",
+    "keyPoints": [
+      "Amazon SageMakerは、機械学習モデルの構築・学習・デプロイをエンドツーエンドで行うプラットフォーム",
+      "Amazon Rekognition（画像・動画分析）、Amazon Transcribe（音声→テキスト）、Amazon Polly（テキスト→音声）、Amazon Comprehend（自然言語処理）などの事前学習済みAIサービスがある",
+      "これらのAIサービスはAPI呼び出しのみで利用でき、機械学習の専門知識がなくても導入できる",
+      "Amazon Bedrockは、生成AI（大規模言語モデル等）をAPI経由で利用できるマネージドサービス",
+      "自社でモデルをゼロから構築するSageMakerと、すぐに使える事前学習済みAIサービスという2つのアプローチがある点を理解する"
+    ],
+    "examTips": "「機械学習の専門知識がなくてもすぐに画像認識機能を組み込みたい」→Rekognitionなどの事前学習済みAIサービスが正解になりやすい（詳細はAWS Certified AI Practitionerでより深く問われる）。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "モニタリング・ロギングサービス（Amazon CloudWatch/AWS CloudTrail/AWS X-Ray）",
+    "fullName": "Monitoring & Logging Services (Amazon CloudWatch, AWS CloudTrail, AWS X-Ray)",
+    "overview": "AWSリソースの状態・性能を監視し、API操作の証跡を記録し、分散アプリケーションのリクエストを追跡するための代表的なサービス。",
+    "keyPoints": [
+      "Amazon CloudWatchは、CPU使用率などのメトリクス収集、ログの集約、しきい値超過時のアラーム通知を行う",
+      "AWS CloudTrailは、AWSアカウント内で行われたAPI呼び出しの証跡（誰が・いつ・何をしたか）を記録する",
+      "AWS X-Rayは、マイクロサービス間をまたぐリクエストを追跡し、ボトルネックとなっているサービスを可視化する",
+      "CloudWatch Logsでアプリケーションログを一元的に収集・検索できる",
+      "これらを組み合わせることで、パフォーマンスの問題調査からセキュリティ監査まで幅広く対応できる"
+    ],
+    "examTips": "「特定のAPI呼び出しが誰によって行われたか調査したい」→CloudTrail、「マイクロサービス構成でどこにレイテンシーのボトルネックがあるか調べたい」→X-Rayという対応が頻出。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "コンテナサービス詳細（Amazon ECS/EKS/AWS Fargate）",
+    "fullName": "Container Services (Amazon ECS, Amazon EKS, AWS Fargate)",
+    "overview": "コンテナ化されたアプリケーションを実行するためのAWSのオーケストレーションサービスと実行環境。",
+    "keyPoints": [
+      "Amazon ECSはAWS独自のコンテナオーケストレーションサービス",
+      "Amazon EKSはマネージド型Kubernetesサービスで、Kubernetesの標準的なツール・エコシステムを利用できる",
+      "AWS Fargateは、ECS/EKSのコンテナをサーバーレスで実行できる基盤で、EC2インスタンスの管理が不要",
+      "コンテナ化により、アプリケーションの依存関係を含めてポータブルにパッケージングできる",
+      "仮想サーバー（EC2）よりも起動が高速で、リソース利用効率が高い場合が多い"
+    ],
+    "examTips": "「サーバーやクラスターのインフラ管理をせずにコンテナを実行したい」→ECS/EKS＋Fargateの組み合わせが定番の正解。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 3,
+    "service": "サーバーレスサービス概要（AWS Lambda/Amazon API Gateway）",
+    "fullName": "Overview of Serverless Services (AWS Lambda, Amazon API Gateway)",
+    "overview": "サーバーの管理を意識せずにコードを実行・公開できるサーバーレスコンピューティングの代表的なサービス。",
+    "keyPoints": [
+      "AWS Lambdaは、イベント（S3アップロード、API呼び出し等）をトリガーにコードを実行し、実行時間に応じて課金される",
+      "Amazon API Gatewayは、LambdaなどをバックエンドとするAPIをHTTPS経由で公開するマネージドサービス",
+      "サーバーレスアーキテクチャでは、アイドル時間のサーバー費用が発生せず、スケーリングも自動的に行われる",
+      "小規模から大規模まで、インフラのプロビジョニングなしに迅速にアプリケーションを構築できる",
+      "常時安定した高負荷なワークロードでは、EC2等の方がコスト効率が良い場合もある"
+    ],
+    "examTips": "「サーバー管理をせずイベント駆動でAPIを公開したい」→Lambda＋API Gatewayの組み合わせが定番の正解パターン。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "AWS無料利用枠（AWS Free Tier）",
+    "fullName": "AWS Free Tier",
+    "overview": "新規・既存のAWSアカウントで、一定の範囲まで無料でAWSサービスを試せる仕組み。",
+    "keyPoints": [
+      "「12か月間無料」（新規アカウント登録から1年間、一定の使用量まで無料）のサービスがある",
+      "「常に無料」（アカウントの新旧を問わず、一定の使用量まで恒久的に無料）のサービスもある",
+      "「トライアル」（サービスごとに定められた短期間だけ無料）のカテゴリもある",
+      "無料利用枠の上限を超えると通常料金が発生するため、Budgetsでのアラート設定と組み合わせることが推奨される",
+      "学習・検証目的での小規模な利用に適しており、本番の大規模ワークロードのコストを代表するものではない"
+    ],
+    "examTips": "無料利用枠の3つのカテゴリ（12か月間無料・常に無料・トライアル）を区別させる設問や、「想定外の課金を防ぐためBudgetsと組み合わせるべき」という設問が出やすい。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "コスト配分タグとコストカテゴリ",
+    "fullName": "Cost Allocation Tags & Cost Categories",
+    "overview": "リソースへのタグ付けと、コストのグルーピングによって支出を可視化・分析するための仕組み。",
+    "keyPoints": [
+      "コスト配分タグは、リソースにKey:Valueのタグを付与し、Cost Explorer等でタグ単位のコストを集計できるようにする機能",
+      "タグには「AWS生成タグ」と「ユーザー定義タグ」があり、Billingコンソールで有効化が必要",
+      "コストカテゴリは、複数のディメンション（サービス、タグ、アカウント等）を組み合わせて、独自のグループ分け（例：部門名）でコストを分類するルールベースの仕組み",
+      "一貫した命名規則でタグを運用することが、正確なコスト配分の前提条件となる",
+      "タグ・コストカテゴリを活用することで、チャージバック（部門間の費用按分）が容易になる"
+    ],
+    "examTips": "「複数の条件を組み合わせて独自のコストグループを作りたい」→コストカテゴリ、「個々のリソースにラベルを付けて集計したい」→コスト配分タグという使い分けが問われることがある。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "AWS Well-Architected Framework コスト最適化の柱",
+    "fullName": "AWS Well-Architected Framework – Cost Optimization Pillar (Overview)",
+    "overview": "Well-Architected Frameworkの6つの柱のうち、無駄のない支出を実現するための設計原則をまとめたもの（CLFレベルの概要）。",
+    "keyPoints": [
+      "クラウドの財務管理を組織的な取り組みとして実践することを推奨する",
+      "需要に応じてリソースを増減させ、過剰なプロビジョニングを避ける",
+      "ワークロードに適したインスタンスタイプ・購入オプション・マネージドサービスを選択する",
+      "タグ付けやコスト管理ツールを使い、支出を継続的に可視化する",
+      "新しいサービスや料金モデルの登場に合わせて、既存の構成を定期的に見直す"
+    ],
+    "examTips": "「コストを最適化するための組織的・技術的な取り組み全般」を問う設問で、コスト最適化の柱の考え方が正解の根拠になることが多い。"
+  },
+  {
+    "exam": "CLF",
+    "domain": 4,
+    "service": "AWS re:Post とコミュニティ・公式サポートリソース",
+    "fullName": "AWS re:Post & Support Resources",
+    "overview": "有償のサポートプランとは別に利用できる、無料の技術情報・コミュニティQ&Aリソース。",
+    "keyPoints": [
+      "AWS re:Postは、AWSに関する技術的な質問を投稿し、コミュニティやAWSの専門家から回答を得られる無料のQ&Aプラットフォーム",
+      "AWSドキュメント、ホワイトペーパー、ナレッジセンターなども無料で参照できる技術情報源である",
+      "サポートプラン（Basic/Developer/Business/Enterprise）は個別ケースへの直接的な技術サポートを提供するのに対し、re:Postはコミュニティベースの情報共有の場という違いがある",
+      "Basicサポートプランのユーザーでも、re:Postやドキュメントは自由に利用できる",
+      "トラブルシューティングの第一歩として、公式ドキュメントやre:Postでの既知の情報確認が推奨される"
+    ],
+    "examTips": "「有償サポートに加入せずに技術的な疑問をコミュニティに質問したい」→AWS re:Postが正解になるパターン。サポートプランとの役割の違いが問われる。"
   }
 ]
