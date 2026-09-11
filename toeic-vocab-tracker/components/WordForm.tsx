@@ -120,23 +120,25 @@ export default function WordForm({
         </div>
         <div className="field">
           <label htmlFor="meaning-input">意味(日本語)</label>
-          <input
-            id="meaning-input"
-            value={meaning}
-            onChange={(e) => setMeaning(e.target.value)}
-            placeholder={
-              meaningSuggestion ||
-              (entryType === "idiom" ? "例: 〜を利用する" : "例: 重要な、著しい")
-            }
-          />
-          <div className="meaning-hint-slot">
+          <div className="input-with-inline-action">
+            <input
+              id="meaning-input"
+              value={meaning}
+              onChange={(e) => setMeaning(e.target.value)}
+              placeholder={
+                meaningSuggestion ||
+                (entryType === "idiom" ? "例: 〜を利用する" : "例: 重要な、著しい")
+              }
+            />
             {meaningSuggestion && (
               <button
                 type="button"
-                className="meaning-hint"
+                className="meaning-hint-inline"
                 onClick={acceptMeaningSuggestion}
+                aria-label={`候補「${meaningSuggestion}」を入力`}
+                title={`候補: ${meaningSuggestion}(タップして入力)`}
               >
-                💡 候補: {meaningSuggestion}(タップして入力)
+                💡
               </button>
             )}
           </div>

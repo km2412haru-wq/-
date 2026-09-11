@@ -230,21 +230,33 @@ a {
   border-radius: 7px;
 }
 
-/* 候補ボタンの有無にかかわらず高さを固定し、表示/非表示でレイアウトがガタつかないようにする */
-.meaning-hint-slot {
-  min-height: 18px;
-  margin-top: 2px;
+/* 入力欄の中に候補の採用ボタンを重ねて表示する。出現/消滅してもフィールドの高さは変わらない */
+.input-with-inline-action {
+  position: relative;
+  display: flex;
 }
 
-.meaning-hint {
-  align-self: flex-start;
+.input-with-inline-action input {
+  width: 100%;
+  padding-right: 34px;
+}
+
+.meaning-hint-inline {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  padding: 0;
-  color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 5px;
+  border-radius: 7px;
   cursor: pointer;
-  text-align: left;
+}
+
+.meaning-hint-inline:hover {
+  background: var(--bg);
 }
 
 .meaning-hint:hover {
