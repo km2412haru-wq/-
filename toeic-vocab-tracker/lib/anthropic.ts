@@ -133,6 +133,54 @@ export async function callClaudeForExample(params: {
   return { exampleEn: input.exampleEn, exampleJa: input.exampleJa };
 }
 
+/** Claudeにtool useで強制させる、発音記号生成の出力スキーマ */
+const GENERATE_PHONETIC_TOOL: Anthropic.Tool = {
+  name: "generate_phonetic",
+  description: "単語・熟語の発音記号(IPA、アクセント位置を含む)を1つ返す",
+  input_schema: {
+    type: "object",
+    properties: {
+      phonetic: {
+        type: "string",
+        description:
+          "IPA(国際音声記号)による発音表記。/ /で囲み、第一強勢の位置にˈを付ける(例: /sɪɡˈnɪfɪkənt/)",
+      },
+    },
+    required: ["phonetic"],
+  },
+};
+
+export async function callClaudeForPhonetic(params: {
+  systemInstruction: string;
+  userPrompt: string;
+}): Promise<string> {
+  const client = getClient();
+  const model = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: 256,
+    system: params.systemInstruction,
+    tools: [GENERATE_PHONETIC_TOOL],
+    tool_choice: { type: "tool", name: "generate_phonetic" },
+    messages: [{ role: "user", content: params.userPrompt }],
+  });
+
+  const toolUse = response.content.find(
+    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+  );
+  if (!toolUse) {
+    throw new Error("Claude APIからの応答にtool_useブロックが含まれていませんでした。");
+  }
+
+  const input = toolUse.input as { phonetic?: unknown };
+  if (typeof input.phonetic !== "string") {
+    throw new Error("Claude APIの応答形式が不正です。");
+  }
+
+  return input.phonetic;
+}
+
 /** Claudeにtool useで強制させる、意味予測の出力スキーマ */
 const SUGGEST_MEANING_TOOL: Anthropic.Tool = {
   name: "suggest_meaning",

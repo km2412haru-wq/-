@@ -54,6 +54,22 @@ export function buildExampleSystemInstruction(): string {
   ].join("\n");
 }
 
+export function buildPhoneticSystemInstruction(): string {
+  return [
+    "あなたは英語学習者(日本人のTOEIC受験者)を支援する語彙コーチです。",
+    "入力された英単語・熟語について、国際音声記号(IPA)による発音表記を1つ答えます。",
+    "アメリカ英語の発音を基準とし、第一強勢(アクセント)の位置にˈを付けてください。",
+    "表記は / /(スラッシュ)で囲んでください(例: /sɪɡˈnɪfɪkənt/)。",
+    "熟語・慣用句の場合は、フレーズ全体を単語ごとにスペースで区切って表記してください。",
+  ].join("\n");
+}
+
+export function buildPhoneticPrompt(params: { entryType: EntryType; text: string }): string {
+  const { entryType, text } = params;
+  const label = entryType === "idiom" ? "熟語・慣用句" : "単語";
+  return `${label}: ${text}\n\nこの${label}のIPA発音表記を答えてください。`;
+}
+
 export function buildMeaningSystemInstruction(): string {
   return [
     "あなたは英語学習者(日本人のTOEIC受験者)を支援する語彙コーチです。",

@@ -19,7 +19,7 @@ import type {
   WordEntry,
 } from "@/types/word";
 
-interface ExampleErrorState {
+interface FieldErrorState {
   id: string;
   message: string;
 }
@@ -43,7 +43,9 @@ export default function Home() {
   const [registering, setRegistering] = useState(false);
   const [suggestion, setSuggestion] = useState<SuggestionState | null>(null);
   const [exampleLoadingId, setExampleLoadingId] = useState<string | null>(null);
-  const [exampleError, setExampleError] = useState<ExampleErrorState | null>(null);
+  const [exampleError, setExampleError] = useState<FieldErrorState | null>(null);
+  const [phoneticLoadingId, setPhoneticLoadingId] = useState<string | null>(null);
+  const [phoneticError, setPhoneticError] = useState<FieldErrorState | null>(null);
 
   const filteredWords = useMemo(() => {
     let list = words;
@@ -156,6 +158,31 @@ export default function Home() {
     }
   }
 
+  async function handleGeneratePhonetic(entry: WordEntry) {
+    setPhoneticLoadingId(entry.id);
+    setPhoneticError(null);
+
+    try {
+      const res = await fetch("/api/generate-phonetic", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryType: entry.entryType, text: entry.word }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error ?? "発音記号の生成に失敗しました。");
+      }
+      updateWord(entry.id, { phonetic: data.phonetic });
+    } catch (err) {
+      setPhoneticError({
+        id: entry.id,
+        message: err instanceof Error ? err.message : "不明なエラーが発生しました。",
+      });
+    } finally {
+      setPhoneticLoadingId(null);
+    }
+  }
+
   function handleAcceptSuggestion(key: string) {
     if (!suggestion) return;
     const item = suggestion.items.find((s) => s.key === key);
@@ -253,6 +280,9 @@ export default function Home() {
           onGenerateExample={handleGenerateExample}
           generatingExampleId={exampleLoadingId}
           exampleError={exampleError}
+          onGeneratePhonetic={handleGeneratePhonetic}
+          generatingPhoneticId={phoneticLoadingId}
+          phoneticError={phoneticError}
         />
       ) : (
         <GroupList words={filteredWords} onToggleMemorized={toggleMemorized} />

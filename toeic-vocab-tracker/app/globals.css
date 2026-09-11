@@ -402,6 +402,28 @@ a {
   line-height: 1.4;
 }
 
+.example-close-btn {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.example-close-btn:hover {
+  color: var(--danger);
+}
+
+.phonetic-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: -2px 0 0;
+  font-family: "Segoe UI", Georgia, serif;
+}
+
 .pos-badge {
   display: inline-flex;
   align-items: center;

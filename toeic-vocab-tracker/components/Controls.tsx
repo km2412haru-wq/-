@@ -48,10 +48,10 @@ export default function Controls({
       <select
         value={memorizedFilter}
         onChange={(e) => onMemorizedFilterChange(e.target.value as MemorizedFilter)}
-        aria-label="覚えた/未定着で絞り込み"
+        aria-label="定着/未定着で絞り込み"
       >
         <option value="all">すべて</option>
-        <option value="memorized">覚えた</option>
+        <option value="memorized">定着</option>
         <option value="unmemorized">未定着</option>
       </select>
 

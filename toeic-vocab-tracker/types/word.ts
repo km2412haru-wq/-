@@ -22,7 +22,7 @@ export interface WordEntry {
   word: string;
   meaning: string;
   partOfSpeech: PartOfSpeech;
-  /** 覚えた: true / 未定着: false */
+  /** 定着済み: true / 未定着: false */
   memorized: boolean;
   /** ISO8601形式の登録日時 */
   createdAt: string;
@@ -32,12 +32,14 @@ export interface WordEntry {
   isRoot: boolean;
   /** AIが生成した例文。未生成の場合はundefined */
   example?: ExampleSentence;
+  /** AIが生成した発音記号(アクセント位置を含むIPA表記)。未生成の場合はundefined */
+  phonetic?: string;
 }
 
 /** 並び替えの種類 */
 export type SortKey = "createdAtDesc" | "createdAtAsc" | "alphabetical";
 
-/** 覚えた/未定着による絞り込み */
+/** 定着/未定着による絞り込み */
 export type MemorizedFilter = "all" | "memorized" | "unmemorized";
 
 /** 単語/熟語の種類による絞り込み */

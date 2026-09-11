@@ -29,6 +29,9 @@ export default function WordCard({
   onGenerateExample,
   generatingExample,
   exampleError,
+  onGeneratePhonetic,
+  generatingPhonetic,
+  phoneticError,
 }: {
   entry: WordEntry;
   onToggleMemorized: (id: string) => void;
@@ -39,12 +42,17 @@ export default function WordCard({
   onGenerateExample: (entry: WordEntry) => void;
   generatingExample?: boolean;
   exampleError?: string | null;
+  onGeneratePhonetic: (entry: WordEntry) => void;
+  generatingPhonetic?: boolean;
+  phoneticError?: string | null;
 }) {
   const [editing, setEditing] = useState(false);
   const [meaning, setMeaning] = useState(entry.meaning);
   const [pos, setPos] = useState<PartOfSpeech>(entry.partOfSpeech);
   const [exampleEn, setExampleEn] = useState(entry.example?.en ?? "");
   const [exampleJa, setExampleJa] = useState(entry.example?.ja ?? "");
+  const [phonetic, setPhonetic] = useState(entry.phonetic ?? "");
+  const [exampleCollapsed, setExampleCollapsed] = useState(false);
 
   const isIdiom = entry.entryType === "idiom";
   const cardClass = isIdiom ? IDIOM_CLASS : POS_CLASS[entry.partOfSpeech];
@@ -57,6 +65,7 @@ export default function WordCard({
         exampleEn.trim() && exampleJa.trim()
           ? { en: exampleEn.trim(), ja: exampleJa.trim() }
           : undefined,
+      phonetic: phonetic.trim() || undefined,
     });
     setEditing(false);
   }
@@ -66,6 +75,7 @@ export default function WordCard({
     setPos(entry.partOfSpeech);
     setExampleEn(entry.example?.en ?? "");
     setExampleJa(entry.example?.ja ?? "");
+    setPhonetic(entry.phonetic ?? "");
     setEditing(false);
   }
 
@@ -77,6 +87,8 @@ export default function WordCard({
         </span>
         <SpeakButton text={entry.word} />
       </div>
+
+      {entry.phonetic && !editing && <p className="phonetic-text">{entry.phonetic}</p>}
 
       {editing ? (
         <>
@@ -91,6 +103,14 @@ export default function WordCard({
             </select>
           )}
           <label className="field" style={{ marginTop: 4 }}>
+            <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>発音記号</span>
+            <input
+              value={phonetic}
+              onChange={(e) => setPhonetic(e.target.value)}
+              placeholder="例: /sɪɡˈnɪfɪkənt/"
+            />
+          </label>
+          <label className="field">
             <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>例文(英語)</span>
             <input value={exampleEn} onChange={(e) => setExampleEn(e.target.value)} />
           </label>
@@ -116,11 +136,22 @@ export default function WordCard({
           )}
           <p className="word-meaning">{entry.meaning}</p>
 
-          {entry.example && (
+          {phoneticError && <p className="error-text">{phoneticError}</p>}
+
+          {entry.example && !exampleCollapsed && (
             <div className="example-block">
               <div className="example-en-row">
                 <p className="example-en">📝 {entry.example.en}</p>
                 <SpeakButton text={entry.example.en} />
+                <button
+                  type="button"
+                  className="example-close-btn"
+                  onClick={() => setExampleCollapsed(true)}
+                  aria-label="例文を閉じる"
+                  title="例文を閉じる"
+                >
+                  ✕
+                </button>
               </div>
               <p className="example-ja">{entry.example.ja}</p>
             </div>
@@ -135,7 +166,7 @@ export default function WordCard({
               checked={entry.memorized}
               onChange={() => onToggleMemorized(entry.id)}
             />
-            {entry.memorized ? "覚えた" : "未定着"}
+            定着
           </label>
 
           <div className="word-card-actions">
@@ -150,11 +181,38 @@ export default function WordCard({
             )}
             <button
               className="btn btn-outline btn-sm"
-              onClick={() => onGenerateExample(entry)}
-              disabled={generatingExample}
+              onClick={() => onGeneratePhonetic(entry)}
+              disabled={generatingPhonetic}
             >
-              {generatingExample ? "生成中…" : entry.example ? "🔄 例文を再生成" : "📝 例文を生成"}
+              {generatingPhonetic
+                ? "生成中…"
+                : entry.phonetic
+                  ? "🔄 アクセント再生成"
+                  : "🔤 アクセント表示"}
             </button>
+            {entry.example && exampleCollapsed ? (
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => setExampleCollapsed(false)}
+              >
+                📖 例文を表示
+              </button>
+            ) : (
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => {
+                  setExampleCollapsed(false);
+                  onGenerateExample(entry);
+                }}
+                disabled={generatingExample}
+              >
+                {generatingExample
+                  ? "生成中…"
+                  : entry.example
+                    ? "🔄 例文を再生成"
+                    : "📝 例文を生成"}
+              </button>
+            )}
             <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
               編集
             </button>

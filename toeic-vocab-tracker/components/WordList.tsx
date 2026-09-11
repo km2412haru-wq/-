@@ -3,6 +3,11 @@
 import WordCard from "@/components/WordCard";
 import type { WordEntry } from "@/types/word";
 
+interface FieldErrorState {
+  id: string;
+  message: string;
+}
+
 export default function WordList({
   words,
   onToggleMemorized,
@@ -13,6 +18,9 @@ export default function WordList({
   onGenerateExample,
   generatingExampleId,
   exampleError,
+  onGeneratePhonetic,
+  generatingPhoneticId,
+  phoneticError,
 }: {
   words: WordEntry[];
   onToggleMemorized: (id: string) => void;
@@ -22,7 +30,10 @@ export default function WordList({
   suggestingGroupId: string | null;
   onGenerateExample: (entry: WordEntry) => void;
   generatingExampleId: string | null;
-  exampleError: { id: string; message: string } | null;
+  exampleError: FieldErrorState | null;
+  onGeneratePhonetic: (entry: WordEntry) => void;
+  generatingPhoneticId: string | null;
+  phoneticError: FieldErrorState | null;
 }) {
   if (words.length === 0) {
     return <p className="empty-state">登録した単語がまだありません。上のフォームから追加してみましょう。</p>;
@@ -42,6 +53,9 @@ export default function WordList({
           onGenerateExample={onGenerateExample}
           generatingExample={generatingExampleId === entry.id}
           exampleError={exampleError?.id === entry.id ? exampleError.message : null}
+          onGeneratePhonetic={onGeneratePhonetic}
+          generatingPhonetic={generatingPhoneticId === entry.id}
+          phoneticError={phoneticError?.id === entry.id ? phoneticError.message : null}
         />
       ))}
     </div>
