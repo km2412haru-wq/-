@@ -128,6 +128,8 @@ export default function Home() {
     if (entry.entryType === "word") {
       void fetchSuggestions(entry);
     }
+    // アクセント(発音記号)は単語・熟語どちらも登録時に自動生成する
+    void handleGeneratePhonetic(entry);
   }
 
   async function handleGenerateExample(entry: WordEntry) {
