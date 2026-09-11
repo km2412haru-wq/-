@@ -230,12 +230,17 @@ a {
   border-radius: 7px;
 }
 
+/* 候補ボタンの有無にかかわらず高さを固定し、表示/非表示でレイアウトがガタつかないようにする */
+.meaning-hint-slot {
+  min-height: 18px;
+  margin-top: 2px;
+}
+
 .meaning-hint {
   align-self: flex-start;
   background: none;
   border: none;
   padding: 0;
-  margin-top: 2px;
   color: var(--text-muted);
   font-size: 0.74rem;
   cursor: pointer;

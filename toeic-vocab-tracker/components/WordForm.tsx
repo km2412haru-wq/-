@@ -129,15 +129,17 @@ export default function WordForm({
               (entryType === "idiom" ? "例: 〜を利用する" : "例: 重要な、著しい")
             }
           />
-          {meaningSuggestion && (
-            <button
-              type="button"
-              className="meaning-hint"
-              onClick={acceptMeaningSuggestion}
-            >
-              💡 候補: {meaningSuggestion}(タップして入力)
-            </button>
-          )}
+          <div className="meaning-hint-slot">
+            {meaningSuggestion && (
+              <button
+                type="button"
+                className="meaning-hint"
+                onClick={acceptMeaningSuggestion}
+              >
+                💡 候補: {meaningSuggestion}(タップして入力)
+              </button>
+            )}
+          </div>
         </div>
         {entryType === "word" && (
           <div className="field">
