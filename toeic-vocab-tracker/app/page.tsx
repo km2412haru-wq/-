@@ -220,11 +220,13 @@ export default function Home() {
     if (!suggestion) return;
     const item = suggestion.items.find((s) => s.key === key);
     if (!item) return;
-    addDerivative(suggestion.entry.groupId, item);
+    const entry = addDerivative(suggestion.entry.groupId, item);
     setSuggestion({
       ...suggestion,
       items: suggestion.items.map((s) => (s.key === key ? { ...s, status: "accepted" } : s)),
     });
+    // アクセント(発音記号)は派生語を採用した時も自動生成する
+    void handleGeneratePhonetic(entry);
   }
 
   function handleRejectSuggestion(key: string) {
