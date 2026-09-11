@@ -260,7 +260,7 @@ export default function Home() {
     <main className="page">
       <div className="page-header">
         <div>
-          <h1>📓 知らない単語記録アプリ</h1>
+          <h1>知らない単語記録アプリ</h1>
           <p>TOEIC学習用。単語・熟語を登録するとAI(Claude)が派生語や例文を提案します。</p>
         </div>
         <span className="word-count">{words.length}語 登録済み</span>
