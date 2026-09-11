@@ -22,6 +22,8 @@
   --pos-adverb-bg: #fbe7f4;
   --pos-other-text: #575761;
   --pos-other-bg: #eeeef1;
+  --pos-idiom-text: #0d7a7a;
+  --pos-idiom-bg: #e1f5f4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,6 +51,8 @@
     --pos-adverb-bg: #3a1e35;
     --pos-other-text: #b3b3bd;
     --pos-other-bg: #26262d;
+    --pos-idiom-text: #4fd6d6;
+    --pos-idiom-bg: #123a3a;
   }
 }
 
@@ -319,6 +323,9 @@ a {
 .word-card.pos-other {
   border-left-color: var(--pos-other-text);
 }
+.word-card.pos-idiom {
+  border-left-color: var(--pos-idiom-text);
+}
 
 .word-card-top {
   display: flex;
@@ -342,6 +349,29 @@ a {
 .word-meaning {
   font-size: 0.92rem;
   color: var(--text);
+}
+
+.example-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.example-en {
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.example-ja {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
 }
 
 .pos-badge {
@@ -373,6 +403,11 @@ a {
 .pos-badge.pos-other {
   color: var(--pos-other-text);
   background: var(--pos-other-bg);
+}
+
+.pos-badge.pos-idiom {
+  color: var(--pos-idiom-text);
+  background: var(--pos-idiom-bg);
 }
 
 .root-badge {

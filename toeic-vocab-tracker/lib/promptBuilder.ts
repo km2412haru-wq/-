@@ -1,5 +1,5 @@
 import { POS_LABEL } from "@/lib/partOfSpeech";
-import type { PartOfSpeech } from "@/types/word";
+import type { EntryType, PartOfSpeech } from "@/types/word";
 
 export function buildSystemInstruction(): string {
   return [
@@ -42,4 +42,40 @@ export function buildDerivativesPrompt(params: {
   );
 
   return lines.join("\n");
+}
+
+export function buildExampleSystemInstruction(): string {
+  return [
+    "あなたは英語学習者(日本人のTOEIC受験者)を支援する語彙コーチです。",
+    "登録された単語・熟語について、TOEIC L&Rで出題されるようなビジネスシーン(オフィス・会議・メール・出張・契約など)を想定した、自然で簡潔な英語の例文を1つ作成します。",
+    "例文は1文のみとし、長すぎず(15〜25語程度)、TOEIC学習者が読んで理解しやすい難易度にしてください。",
+    "例文には指定された単語・熟語を、指定された意味・品詞に合う形で自然に使ってください(活用形に変化させてよい)。",
+    "日本語訳は、例文全体の自然な訳にしてください。単語の意味の説明ではなく、文全体の翻訳です。",
+  ].join("\n");
+}
+
+export function buildExamplePrompt(params: {
+  entryType: EntryType;
+  text: string;
+  meaning: string;
+  partOfSpeech: PartOfSpeech;
+}): string {
+  const { entryType, text, meaning, partOfSpeech } = params;
+
+  if (entryType === "idiom") {
+    return [
+      `熟語・慣用句: ${text}`,
+      `意味(参考): ${meaning}`,
+      "",
+      `この熟語・慣用句を自然に使った、TOEICのビジネスシーンを想定した英語の例文を1つ作成し、日本語訳もつけてください。`,
+    ].join("\n");
+  }
+
+  return [
+    `単語: ${text}`,
+    `品詞: ${POS_LABEL[partOfSpeech]}`,
+    `意味(参考): ${meaning}`,
+    "",
+    `この単語を自然に使った、TOEICのビジネスシーンを想定した英語の例文を1つ作成し、日本語訳もつけてください。`,
+  ].join("\n");
 }

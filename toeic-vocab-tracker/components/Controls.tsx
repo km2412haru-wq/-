@@ -1,6 +1,6 @@
 "use client";
 
-import type { MemorizedFilter, SortKey, ViewMode } from "@/types/word";
+import type { EntryTypeFilter, MemorizedFilter, SortKey, ViewMode } from "@/types/word";
 
 export default function Controls({
   search,
@@ -9,6 +9,8 @@ export default function Controls({
   onSortChange,
   memorizedFilter,
   onMemorizedFilterChange,
+  entryTypeFilter,
+  onEntryTypeFilterChange,
   viewMode,
   onViewModeChange,
 }: {
@@ -18,6 +20,8 @@ export default function Controls({
   onSortChange: (v: SortKey) => void;
   memorizedFilter: MemorizedFilter;
   onMemorizedFilterChange: (v: MemorizedFilter) => void;
+  entryTypeFilter: EntryTypeFilter;
+  onEntryTypeFilterChange: (v: EntryTypeFilter) => void;
   viewMode: ViewMode;
   onViewModeChange: (v: ViewMode) => void;
 }) {
@@ -49,6 +53,16 @@ export default function Controls({
         <option value="all">すべて</option>
         <option value="memorized">覚えた</option>
         <option value="unmemorized">未定着</option>
+      </select>
+
+      <select
+        value={entryTypeFilter}
+        onChange={(e) => onEntryTypeFilterChange(e.target.value as EntryTypeFilter)}
+        aria-label="単語/熟語で絞り込み"
+      >
+        <option value="all">単語+熟語</option>
+        <option value="word">単語のみ</option>
+        <option value="idiom">熟語・慣用句のみ</option>
       </select>
 
       <div className="segmented" role="group" aria-label="表示切り替え">

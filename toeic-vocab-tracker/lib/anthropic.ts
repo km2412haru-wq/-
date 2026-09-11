@@ -82,3 +82,53 @@ export async function callClaudeForDerivatives(params: {
 
   return input.derivatives as RawDerivative[];
 }
+
+/** Claudeにtool useで強制させる、例文生成の出力スキーマ */
+const GENERATE_EXAMPLE_TOOL: Anthropic.Tool = {
+  name: "generate_example",
+  description: "英語の例文とその日本語訳を1組返す",
+  input_schema: {
+    type: "object",
+    properties: {
+      exampleEn: { type: "string", description: "英語の例文(1文)" },
+      exampleJa: { type: "string", description: "例文全体の自然な日本語訳" },
+    },
+    required: ["exampleEn", "exampleJa"],
+  },
+};
+
+export interface RawExample {
+  exampleEn: string;
+  exampleJa: string;
+}
+
+export async function callClaudeForExample(params: {
+  systemInstruction: string;
+  userPrompt: string;
+}): Promise<RawExample> {
+  const client = getClient();
+  const model = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: 512,
+    system: params.systemInstruction,
+    tools: [GENERATE_EXAMPLE_TOOL],
+    tool_choice: { type: "tool", name: "generate_example" },
+    messages: [{ role: "user", content: params.userPrompt }],
+  });
+
+  const toolUse = response.content.find(
+    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+  );
+  if (!toolUse) {
+    throw new Error("Claude APIからの応答にtool_useブロックが含まれていませんでした。");
+  }
+
+  const input = toolUse.input as Partial<RawExample>;
+  if (typeof input.exampleEn !== "string" || typeof input.exampleJa !== "string") {
+    throw new Error("Claude APIの応答形式が不正です。");
+  }
+
+  return { exampleEn: input.exampleEn, exampleJa: input.exampleJa };
+}

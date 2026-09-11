@@ -17,3 +17,7 @@ export const POS_CLASS: Record<PartOfSpeech, string> = {
   adverb: "pos-adverb",
   other: "pos-other",
 };
+
+/** 熟語・慣用句用の表示ラベルと配色クラス(品詞とは別枠で管理) */
+export const IDIOM_LABEL = "熟語・慣用句";
+export const IDIOM_CLASS = "pos-idiom";

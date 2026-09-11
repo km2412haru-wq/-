@@ -13,11 +13,23 @@ export function loadWords(): WordEntry[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed as WordEntry[];
+    return parsed.map(normalizeEntry);
   } catch (err) {
     console.error("単語データの読み込みに失敗しました:", err);
     return [];
   }
+}
+
+/**
+ * 旧バージョンのデータ(entryTypeフィールドが無い等)を新しい形式に補完する。
+ * 既存データはすべて通常の単語として扱う。
+ */
+function normalizeEntry(raw: unknown): WordEntry {
+  const entry = raw as Partial<WordEntry>;
+  return {
+    ...entry,
+    entryType: entry.entryType ?? "word",
+  } as WordEntry;
 }
 
 /**

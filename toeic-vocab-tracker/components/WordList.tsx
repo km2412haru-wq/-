@@ -10,6 +10,9 @@ export default function WordList({
   onUpdate,
   onSuggest,
   suggestingGroupId,
+  onGenerateExample,
+  generatingExampleId,
+  exampleError,
 }: {
   words: WordEntry[];
   onToggleMemorized: (id: string) => void;
@@ -17,6 +20,9 @@ export default function WordList({
   onUpdate: (id: string, changes: Partial<WordEntry>) => void;
   onSuggest: (entry: WordEntry) => void;
   suggestingGroupId: string | null;
+  onGenerateExample: (entry: WordEntry) => void;
+  generatingExampleId: string | null;
+  exampleError: { id: string; message: string } | null;
 }) {
   if (words.length === 0) {
     return <p className="empty-state">登録した単語がまだありません。上のフォームから追加してみましょう。</p>;
@@ -33,6 +39,9 @@ export default function WordList({
           onUpdate={onUpdate}
           onSuggest={onSuggest}
           suggesting={suggestingGroupId === entry.groupId}
+          onGenerateExample={onGenerateExample}
+          generatingExample={generatingExampleId === entry.id}
+          exampleError={exampleError?.id === entry.id ? exampleError.message : null}
         />
       ))}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import PosBadge from "@/components/PosBadge";
+import { IDIOM_CLASS, IDIOM_LABEL } from "@/lib/partOfSpeech";
 import type { WordEntry } from "@/types/word";
 
 interface Group {
@@ -58,12 +59,16 @@ export default function GroupList({
                 {g.root.word}
               </span>
             </label>
-            <PosBadge partOfSpeech={g.root.partOfSpeech} />
+            {g.root.entryType === "idiom" ? (
+              <span className={`pos-badge ${IDIOM_CLASS}`}>{IDIOM_LABEL}</span>
+            ) : (
+              <PosBadge partOfSpeech={g.root.partOfSpeech} />
+            )}
             <span className="word-meaning">{g.root.meaning}</span>
-            <span className="root-badge">起点</span>
+            {g.root.entryType !== "idiom" && <span className="root-badge">起点</span>}
           </div>
 
-          {g.derivatives.length === 0 ? (
+          {g.root.entryType === "idiom" ? null : g.derivatives.length === 0 ? (
             <p className="group-empty">派生語はまだ登録されていません。</p>
           ) : (
             <div className="group-derivatives">

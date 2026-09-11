@@ -10,12 +10,19 @@ import { useWords } from "@/lib/useWords";
 import type {
   DerivativeSuggestion,
   EditableSuggestion,
+  EntryType,
+  EntryTypeFilter,
   MemorizedFilter,
   PartOfSpeech,
   SortKey,
   ViewMode,
   WordEntry,
 } from "@/types/word";
+
+interface ExampleErrorState {
+  id: string;
+  message: string;
+}
 
 interface SuggestionState {
   entry: WordEntry;
@@ -31,9 +38,12 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("createdAtDesc");
   const [memorizedFilter, setMemorizedFilter] = useState<MemorizedFilter>("all");
+  const [entryTypeFilter, setEntryTypeFilter] = useState<EntryTypeFilter>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [registering, setRegistering] = useState(false);
   const [suggestion, setSuggestion] = useState<SuggestionState | null>(null);
+  const [exampleLoadingId, setExampleLoadingId] = useState<string | null>(null);
+  const [exampleError, setExampleError] = useState<ExampleErrorState | null>(null);
 
   const filteredWords = useMemo(() => {
     let list = words;
@@ -47,6 +57,9 @@ export default function Home() {
     } else if (memorizedFilter === "unmemorized") {
       list = list.filter((w) => !w.memorized);
     }
+    if (entryTypeFilter !== "all") {
+      list = list.filter((w) => w.entryType === entryTypeFilter);
+    }
 
     const sorted = [...list];
     if (sortKey === "createdAtAsc") {
@@ -57,7 +70,7 @@ export default function Home() {
       sorted.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     }
     return sorted;
-  }, [words, search, memorizedFilter, sortKey]);
+  }, [words, search, memorizedFilter, entryTypeFilter, sortKey]);
 
   async function fetchSuggestions(entry: WordEntry) {
     setSuggestion({ entry, loading: true, error: null, items: [] });
@@ -98,11 +111,49 @@ export default function Home() {
     }
   }
 
-  function handleRegister(input: { word: string; meaning: string; partOfSpeech: PartOfSpeech }) {
+  function handleRegister(input: {
+    entryType: EntryType;
+    word: string;
+    meaning: string;
+    partOfSpeech: PartOfSpeech;
+  }) {
     setRegistering(true);
     const entry = addRootWord(input);
     setRegistering(false);
-    void fetchSuggestions(entry);
+    // 派生語の概念があるのは通常の単語のみ。熟語・慣用句では自動提案しない
+    if (entry.entryType === "word") {
+      void fetchSuggestions(entry);
+    }
+  }
+
+  async function handleGenerateExample(entry: WordEntry) {
+    setExampleLoadingId(entry.id);
+    setExampleError(null);
+
+    try {
+      const res = await fetch("/api/generate-example", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entryType: entry.entryType,
+          text: entry.word,
+          meaning: entry.meaning,
+          partOfSpeech: entry.partOfSpeech,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error ?? "例文の生成に失敗しました。");
+      }
+      updateWord(entry.id, { example: data.example });
+    } catch (err) {
+      setExampleError({
+        id: entry.id,
+        message: err instanceof Error ? err.message : "不明なエラーが発生しました。",
+      });
+    } finally {
+      setExampleLoadingId(null);
+    }
   }
 
   function handleAcceptSuggestion(key: string) {
@@ -152,7 +203,7 @@ export default function Home() {
       <div className="page-header">
         <div>
           <h1>📓 知らない単語記録アプリ</h1>
-          <p>TOEIC学習用。単語を登録するとAI(Claude)が派生語を提案します。</p>
+          <p>TOEIC学習用。単語・熟語を登録するとAI(Claude)が派生語や例文を提案します。</p>
         </div>
         <span className="word-count">{words.length}語 登録済み</span>
       </div>
@@ -183,6 +234,8 @@ export default function Home() {
         onSortChange={setSortKey}
         memorizedFilter={memorizedFilter}
         onMemorizedFilterChange={setMemorizedFilter}
+        entryTypeFilter={entryTypeFilter}
+        onEntryTypeFilterChange={setEntryTypeFilter}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />
@@ -197,6 +250,9 @@ export default function Home() {
           onUpdate={updateWord}
           onSuggest={fetchSuggestions}
           suggestingGroupId={suggestion?.loading ? suggestion.entry.groupId : null}
+          onGenerateExample={handleGenerateExample}
+          generatingExampleId={exampleLoadingId}
+          exampleError={exampleError}
         />
       ) : (
         <GroupList words={filteredWords} onToggleMemorized={toggleMemorized} />

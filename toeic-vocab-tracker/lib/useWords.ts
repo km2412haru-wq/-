@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { generateId } from "@/lib/id";
 import { loadWords, saveWords } from "@/lib/storage";
-import type { DerivativeSuggestion, PartOfSpeech, WordEntry } from "@/types/word";
+import type { DerivativeSuggestion, EntryType, PartOfSpeech, WordEntry } from "@/types/word";
 
 /**
  * 単語データのCRUDとlocalStorageへの永続化を担うフック。
@@ -29,12 +29,18 @@ export function useWords() {
     saveWords(words);
   }, [words, ready]);
 
-  /** 新しい単語(グループの起点)を登録する。作成したエントリを返す */
+  /** 新しい単語・熟語(グループの起点)を登録する。作成したエントリを返す */
   const addRootWord = useCallback(
-    (input: { word: string; meaning: string; partOfSpeech: PartOfSpeech }): WordEntry => {
+    (input: {
+      entryType: EntryType;
+      word: string;
+      meaning: string;
+      partOfSpeech: PartOfSpeech;
+    }): WordEntry => {
       const id = generateId();
       const entry: WordEntry = {
         id,
+        entryType: input.entryType,
         word: input.word.trim(),
         meaning: input.meaning.trim(),
         partOfSpeech: input.partOfSpeech,
@@ -54,6 +60,7 @@ export function useWords() {
     (groupId: string, suggestion: DerivativeSuggestion): WordEntry => {
       const entry: WordEntry = {
         id: generateId(),
+        entryType: "word",
         word: suggestion.word.trim(),
         meaning: suggestion.meaning.trim(),
         partOfSpeech: suggestion.partOfSpeech,
