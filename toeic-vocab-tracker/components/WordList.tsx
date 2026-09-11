@@ -18,7 +18,6 @@ export default function WordList({
   onGenerateExample,
   generatingExampleId,
   exampleError,
-  onGeneratePhonetic,
   generatingPhoneticId,
   phoneticError,
   onGenerateUsageNote,
@@ -34,7 +33,6 @@ export default function WordList({
   onGenerateExample: (entry: WordEntry) => void;
   generatingExampleId: string | null;
   exampleError: FieldErrorState | null;
-  onGeneratePhonetic: (entry: WordEntry) => void;
   generatingPhoneticId: string | null;
   phoneticError: FieldErrorState | null;
   onGenerateUsageNote: (entry: WordEntry) => void;
@@ -59,7 +57,6 @@ export default function WordList({
           onGenerateExample={onGenerateExample}
           generatingExample={generatingExampleId === entry.id}
           exampleError={exampleError?.id === entry.id ? exampleError.message : null}
-          onGeneratePhonetic={onGeneratePhonetic}
           generatingPhonetic={generatingPhoneticId === entry.id}
           phoneticError={phoneticError?.id === entry.id ? phoneticError.message : null}
           onGenerateUsageNote={onGenerateUsageNote}

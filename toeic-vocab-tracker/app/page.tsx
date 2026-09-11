@@ -313,7 +313,6 @@ export default function Home() {
           onGenerateExample={handleGenerateExample}
           generatingExampleId={exampleLoadingId}
           exampleError={exampleError}
-          onGeneratePhonetic={handleGeneratePhonetic}
           generatingPhoneticId={phoneticLoadingId}
           phoneticError={phoneticError}
           onGenerateUsageNote={handleGenerateUsageNote}

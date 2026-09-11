@@ -29,7 +29,6 @@ export default function WordCard({
   onGenerateExample,
   generatingExample,
   exampleError,
-  onGeneratePhonetic,
   generatingPhonetic,
   phoneticError,
   onGenerateUsageNote,
@@ -45,7 +44,7 @@ export default function WordCard({
   onGenerateExample: (entry: WordEntry) => void;
   generatingExample?: boolean;
   exampleError?: string | null;
-  onGeneratePhonetic: (entry: WordEntry) => void;
+  /** アクセント(発音記号)は登録時に自動生成されるため、手動トリガーは無い。生成中/失敗の状態表示にのみ使う */
   generatingPhonetic?: boolean;
   phoneticError?: string | null;
   onGenerateUsageNote: (entry: WordEntry) => void;
@@ -98,7 +97,10 @@ export default function WordCard({
         <SpeakButton text={entry.word} />
       </div>
 
-      {entry.phonetic && !editing && <p className="phonetic-text">{entry.phonetic}</p>}
+      {!editing && entry.phonetic && <p className="phonetic-text">{entry.phonetic}</p>}
+      {!editing && !entry.phonetic && generatingPhonetic && (
+        <p className="phonetic-text">発音記号を生成中…</p>
+      )}
 
       {editing ? (
         <>
@@ -213,17 +215,6 @@ export default function WordCard({
                 {suggesting ? "提案中…" : "🤖 派生語を提案"}
               </button>
             )}
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={() => onGeneratePhonetic(entry)}
-              disabled={generatingPhonetic}
-            >
-              {generatingPhonetic
-                ? "生成中…"
-                : entry.phonetic
-                  ? "🔄 アクセント再生成"
-                  : "🔤 アクセント表示"}
-            </button>
             {entry.example && exampleCollapsed ? (
               <button
                 className="btn btn-outline btn-sm"
