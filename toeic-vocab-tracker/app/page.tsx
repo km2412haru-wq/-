@@ -46,6 +46,8 @@ export default function Home() {
   const [exampleError, setExampleError] = useState<FieldErrorState | null>(null);
   const [phoneticLoadingId, setPhoneticLoadingId] = useState<string | null>(null);
   const [phoneticError, setPhoneticError] = useState<FieldErrorState | null>(null);
+  const [usageNoteLoadingId, setUsageNoteLoadingId] = useState<string | null>(null);
+  const [usageNoteError, setUsageNoteError] = useState<FieldErrorState | null>(null);
 
   const filteredWords = useMemo(() => {
     let list = words;
@@ -183,6 +185,35 @@ export default function Home() {
     }
   }
 
+  async function handleGenerateUsageNote(entry: WordEntry) {
+    setUsageNoteLoadingId(entry.id);
+    setUsageNoteError(null);
+
+    try {
+      const res = await fetch("/api/generate-usage-note", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          word: entry.word,
+          meaning: entry.meaning,
+          partOfSpeech: entry.partOfSpeech,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error ?? "語法メモの生成に失敗しました。");
+      }
+      updateWord(entry.id, { usageNote: data.note });
+    } catch (err) {
+      setUsageNoteError({
+        id: entry.id,
+        message: err instanceof Error ? err.message : "不明なエラーが発生しました。",
+      });
+    } finally {
+      setUsageNoteLoadingId(null);
+    }
+  }
+
   function handleAcceptSuggestion(key: string) {
     if (!suggestion) return;
     const item = suggestion.items.find((s) => s.key === key);
@@ -283,6 +314,9 @@ export default function Home() {
           onGeneratePhonetic={handleGeneratePhonetic}
           generatingPhoneticId={phoneticLoadingId}
           phoneticError={phoneticError}
+          onGenerateUsageNote={handleGenerateUsageNote}
+          generatingUsageNoteId={usageNoteLoadingId}
+          usageNoteError={usageNoteError}
         />
       ) : (
         <GroupList words={filteredWords} onToggleMemorized={toggleMemorized} />

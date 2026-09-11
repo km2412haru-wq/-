@@ -21,6 +21,9 @@ export default function WordList({
   onGeneratePhonetic,
   generatingPhoneticId,
   phoneticError,
+  onGenerateUsageNote,
+  generatingUsageNoteId,
+  usageNoteError,
 }: {
   words: WordEntry[];
   onToggleMemorized: (id: string) => void;
@@ -34,6 +37,9 @@ export default function WordList({
   onGeneratePhonetic: (entry: WordEntry) => void;
   generatingPhoneticId: string | null;
   phoneticError: FieldErrorState | null;
+  onGenerateUsageNote: (entry: WordEntry) => void;
+  generatingUsageNoteId: string | null;
+  usageNoteError: FieldErrorState | null;
 }) {
   if (words.length === 0) {
     return <p className="empty-state">登録した単語がまだありません。上のフォームから追加してみましょう。</p>;
@@ -56,6 +62,9 @@ export default function WordList({
           onGeneratePhonetic={onGeneratePhonetic}
           generatingPhonetic={generatingPhoneticId === entry.id}
           phoneticError={phoneticError?.id === entry.id ? phoneticError.message : null}
+          onGenerateUsageNote={onGenerateUsageNote}
+          generatingUsageNote={generatingUsageNoteId === entry.id}
+          usageNoteError={usageNoteError?.id === entry.id ? usageNoteError.message : null}
         />
       ))}
     </div>

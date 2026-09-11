@@ -70,6 +70,34 @@ export function buildPhoneticPrompt(params: { entryType: EntryType; text: string
   return `${label}: ${text}\n\nこの${label}のIPA発音表記を答えてください。`;
 }
 
+export function buildUsageNoteSystemInstruction(): string {
+  return [
+    "あなたは英語学習者(日本人のTOEIC受験者)を支援する語彙コーチです。",
+    "入力された単語について、TOEIC学習者が知っておくと得する語法・語感上の特徴を、次の観点で確認してください:",
+    "1. 相性の良い前置詞(コロケーション)。例: depend on / responsible for / interested in のような、その単語特有の決まった前置詞の組み合わせ",
+    "2. 後置修飾で使われる形容詞の場合、その用法と英語の例(例: something available / the people present / the only option possible)",
+    "3. その単語を使った特徴的な言い回し・決まり文句(定型表現)。例: in accordance with / on behalf of / make a decision のような、ビジネス英語・TOEICで頻出する組み合わせ表現",
+    "4. その他、可算・不可算の区別、自動詞・他動詞の使い分け、フォーマル度・使われる場面のニュアンスなど、TOEICで間違えやすい・知っておくと役立つ語法上の特徴",
+    "該当する内容がある場合は、日本語で1〜3文程度の簡潔なメモにまとめてください。英語のコロケーション・言い回し・例文はそのまま英語で書いてください。",
+    "該当する内容が特に無い場合は、「特記事項はありません。」とだけ答えてください。",
+  ].join("\n");
+}
+
+export function buildUsageNotePrompt(params: {
+  word: string;
+  meaning: string;
+  partOfSpeech: PartOfSpeech;
+}): string {
+  const { word, meaning, partOfSpeech } = params;
+  return [
+    `単語: ${word}`,
+    `品詞: ${POS_LABEL[partOfSpeech]}`,
+    `意味(参考): ${meaning}`,
+    "",
+    "この単語について、語法上の注意点(前置詞コロケーション・後置修飾など)があれば教えてください。",
+  ].join("\n");
+}
+
 export function buildMeaningSystemInstruction(): string {
   return [
     "あなたは英語学習者(日本人のTOEIC受験者)を支援する語彙コーチです。",

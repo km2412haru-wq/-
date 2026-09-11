@@ -394,6 +394,24 @@ a {
   gap: 2px;
 }
 
+.usage-note-block {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.usage-note-text {
+  font-size: 0.82rem;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.5;
+  flex: 1;
+}
+
 .example-en-row {
   display: flex;
   align-items: flex-start;

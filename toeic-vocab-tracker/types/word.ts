@@ -34,6 +34,8 @@ export interface WordEntry {
   example?: ExampleSentence;
   /** AIが生成した発音記号(アクセント位置を含むIPA表記)。未生成の場合はundefined */
   phonetic?: string;
+  /** AIが生成した語法メモ(相性の良い前置詞、後置修飾の用法など)。未生成の場合はundefined */
+  usageNote?: string;
 }
 
 /** 並び替えの種類 */

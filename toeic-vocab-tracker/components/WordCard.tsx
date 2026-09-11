@@ -32,6 +32,9 @@ export default function WordCard({
   onGeneratePhonetic,
   generatingPhonetic,
   phoneticError,
+  onGenerateUsageNote,
+  generatingUsageNote,
+  usageNoteError,
 }: {
   entry: WordEntry;
   onToggleMemorized: (id: string) => void;
@@ -45,6 +48,9 @@ export default function WordCard({
   onGeneratePhonetic: (entry: WordEntry) => void;
   generatingPhonetic?: boolean;
   phoneticError?: string | null;
+  onGenerateUsageNote: (entry: WordEntry) => void;
+  generatingUsageNote?: boolean;
+  usageNoteError?: string | null;
 }) {
   const [editing, setEditing] = useState(false);
   const [meaning, setMeaning] = useState(entry.meaning);
@@ -52,7 +58,9 @@ export default function WordCard({
   const [exampleEn, setExampleEn] = useState(entry.example?.en ?? "");
   const [exampleJa, setExampleJa] = useState(entry.example?.ja ?? "");
   const [phonetic, setPhonetic] = useState(entry.phonetic ?? "");
+  const [usageNote, setUsageNote] = useState(entry.usageNote ?? "");
   const [exampleCollapsed, setExampleCollapsed] = useState(false);
+  const [usageNoteCollapsed, setUsageNoteCollapsed] = useState(false);
 
   const isIdiom = entry.entryType === "idiom";
   const cardClass = isIdiom ? IDIOM_CLASS : POS_CLASS[entry.partOfSpeech];
@@ -66,6 +74,7 @@ export default function WordCard({
           ? { en: exampleEn.trim(), ja: exampleJa.trim() }
           : undefined,
       phonetic: phonetic.trim() || undefined,
+      usageNote: usageNote.trim() || undefined,
     });
     setEditing(false);
   }
@@ -76,6 +85,7 @@ export default function WordCard({
     setExampleEn(entry.example?.en ?? "");
     setExampleJa(entry.example?.ja ?? "");
     setPhonetic(entry.phonetic ?? "");
+    setUsageNote(entry.usageNote ?? "");
     setEditing(false);
   }
 
@@ -118,6 +128,14 @@ export default function WordCard({
             <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>例文の日本語訳</span>
             <input value={exampleJa} onChange={(e) => setExampleJa(e.target.value)} />
           </label>
+          {!isIdiom && (
+            <label className="field">
+              <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                語法メモ(前置詞・後置修飾など)
+              </span>
+              <input value={usageNote} onChange={(e) => setUsageNote(e.target.value)} />
+            </label>
+          )}
           <div className="word-card-actions">
             <button className="btn btn-sm" onClick={saveEdit}>
               保存
@@ -157,6 +175,22 @@ export default function WordCard({
             </div>
           )}
           {exampleError && <p className="error-text">{exampleError}</p>}
+
+          {entry.usageNote && !usageNoteCollapsed && (
+            <div className="usage-note-block">
+              <p className="usage-note-text">📌 {entry.usageNote}</p>
+              <button
+                type="button"
+                className="example-close-btn"
+                onClick={() => setUsageNoteCollapsed(true)}
+                aria-label="語法メモを閉じる"
+                title="語法メモを閉じる"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {usageNoteError && <p className="error-text">{usageNoteError}</p>}
 
           <span className="word-meta">登録日: {formatDate(entry.createdAt)}</span>
 
@@ -213,6 +247,30 @@ export default function WordCard({
                     : "📝 例文を生成"}
               </button>
             )}
+            {!isIdiom &&
+              (entry.usageNote && usageNoteCollapsed ? (
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => setUsageNoteCollapsed(false)}
+                >
+                  📌 語法メモを表示
+                </button>
+              ) : (
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => {
+                    setUsageNoteCollapsed(false);
+                    onGenerateUsageNote(entry);
+                  }}
+                  disabled={generatingUsageNote}
+                >
+                  {generatingUsageNote
+                    ? "生成中…"
+                    : entry.usageNote
+                      ? "🔄 語法メモ再生成"
+                      : "📌 語法メモを生成"}
+                </button>
+              ))}
             <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
               編集
             </button>

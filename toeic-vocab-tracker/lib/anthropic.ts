@@ -181,6 +181,54 @@ export async function callClaudeForPhonetic(params: {
   return input.phonetic;
 }
 
+/** Claudeにtool useで強制させる、語法メモ生成の出力スキーマ */
+const GENERATE_USAGE_NOTE_TOOL: Anthropic.Tool = {
+  name: "generate_usage_note",
+  description: "単語の語法・言い回し上の特徴(前置詞コロケーション、後置修飾、定型表現など)のメモを返す",
+  input_schema: {
+    type: "object",
+    properties: {
+      note: {
+        type: "string",
+        description:
+          "語法上の注意点の日本語メモ(1〜2文)。該当なしの場合は「特記事項はありません。」",
+      },
+    },
+    required: ["note"],
+  },
+};
+
+export async function callClaudeForUsageNote(params: {
+  systemInstruction: string;
+  userPrompt: string;
+}): Promise<string> {
+  const client = getClient();
+  const model = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: 384,
+    system: params.systemInstruction,
+    tools: [GENERATE_USAGE_NOTE_TOOL],
+    tool_choice: { type: "tool", name: "generate_usage_note" },
+    messages: [{ role: "user", content: params.userPrompt }],
+  });
+
+  const toolUse = response.content.find(
+    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+  );
+  if (!toolUse) {
+    throw new Error("Claude APIからの応答にtool_useブロックが含まれていませんでした。");
+  }
+
+  const input = toolUse.input as { note?: unknown };
+  if (typeof input.note !== "string") {
+    throw new Error("Claude APIの応答形式が不正です。");
+  }
+
+  return input.note;
+}
+
 /** Claudeにtool useで強制させる、意味予測の出力スキーマ */
 const SUGGEST_MEANING_TOOL: Anthropic.Tool = {
   name: "suggest_meaning",
