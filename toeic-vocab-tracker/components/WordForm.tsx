@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { POS_LABEL } from "@/lib/partOfSpeech";
 import { ENTRY_TYPES, PARTS_OF_SPEECH, type EntryType, type PartOfSpeech } from "@/types/word";
 
@@ -8,6 +8,9 @@ const ENTRY_TYPE_LABEL: Record<EntryType, string> = {
   word: "単語",
   idiom: "熟語・慣用句",
 };
+
+/** 意味の予測変換を問い合わせるまでの、入力が止まってからの待ち時間(ms) */
+const MEANING_SUGGEST_DEBOUNCE_MS = 600;
 
 export default function WordForm({
   onSubmit,
@@ -26,6 +29,43 @@ export default function WordForm({
   const [meaning, setMeaning] = useState("");
   const [partOfSpeech, setPartOfSpeech] = useState<PartOfSpeech>("noun");
   const [error, setError] = useState<string | null>(null);
+  const [meaningSuggestion, setMeaningSuggestion] = useState("");
+
+  // 単語入力が止まったら、意味を控えめに予測してplaceholderに薄く表示する(意味欄が空のときだけ)
+  useEffect(() => {
+    setMeaningSuggestion("");
+
+    const trimmedWord = word.trim();
+    if (meaning.trim() || trimmedWord.length < 2) return;
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/suggest-meaning", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entryType, text: trimmedWord }),
+        });
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (!cancelled && typeof data.meaning === "string" && data.meaning) {
+          setMeaningSuggestion(data.meaning);
+        }
+      } catch {
+        // 補助的な機能なので、失敗しても静かに諦める
+      }
+    }, MEANING_SUGGEST_DEBOUNCE_MS);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [word, entryType, meaning]);
+
+  function acceptMeaningSuggestion() {
+    setMeaning(meaningSuggestion);
+    setMeaningSuggestion("");
+  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -47,6 +87,7 @@ export default function WordForm({
     setWord("");
     setMeaning("");
     setPartOfSpeech("noun");
+    setMeaningSuggestion("");
   }
 
   return (
@@ -83,8 +124,20 @@ export default function WordForm({
             id="meaning-input"
             value={meaning}
             onChange={(e) => setMeaning(e.target.value)}
-            placeholder={entryType === "idiom" ? "例: 〜を利用する" : "例: 重要な、著しい"}
+            placeholder={
+              meaningSuggestion ||
+              (entryType === "idiom" ? "例: 〜を利用する" : "例: 重要な、著しい")
+            }
           />
+          {meaningSuggestion && (
+            <button
+              type="button"
+              className="meaning-hint"
+              onClick={acceptMeaningSuggestion}
+            >
+              💡 候補: {meaningSuggestion}(タップして入力)
+            </button>
+          )}
         </div>
         {entryType === "word" && (
           <div className="field">

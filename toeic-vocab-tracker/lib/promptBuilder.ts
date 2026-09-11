@@ -54,6 +54,22 @@ export function buildExampleSystemInstruction(): string {
   ].join("\n");
 }
 
+export function buildMeaningSystemInstruction(): string {
+  return [
+    "あなたは英語学習者(日本人のTOEIC受験者)を支援する語彙コーチです。",
+    "入力された英単語・熟語について、最も一般的でTOEICに頻出する意味を日本語で1つだけ簡潔に答えます。",
+    "複数の意味がある場合は、TOEIC(ビジネス英語)の文脈で最も典型的なものを選んでください。",
+    "説明文ではなく、辞書の訳語のように短く(「〜する」「〜な」「〜(名詞)」のような数語)答えてください。",
+    "入力が不完全な単語(タイピング途中)の場合は、最も近いと思われる実在の単語として推測して答えてください。該当する単語が思い当たらない場合は空文字を返してください。",
+  ].join("\n");
+}
+
+export function buildMeaningPrompt(params: { entryType: EntryType; text: string }): string {
+  const { entryType, text } = params;
+  const label = entryType === "idiom" ? "熟語・慣用句" : "単語";
+  return `${label}: ${text}\n\nこの${label}の日本語の意味を1つ答えてください。`;
+}
+
 export function buildExamplePrompt(params: {
   entryType: EntryType;
   text: string;

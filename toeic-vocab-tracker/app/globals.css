@@ -230,6 +230,22 @@ a {
   border-radius: 7px;
 }
 
+.meaning-hint {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.meaning-hint:hover {
+  color: var(--accent);
+}
+
 .error-text {
   color: var(--danger);
   font-size: 0.82rem;

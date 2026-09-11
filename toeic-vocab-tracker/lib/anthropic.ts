@@ -132,3 +132,50 @@ export async function callClaudeForExample(params: {
 
   return { exampleEn: input.exampleEn, exampleJa: input.exampleJa };
 }
+
+/** Claudeにtool useで強制させる、意味予測の出力スキーマ */
+const SUGGEST_MEANING_TOOL: Anthropic.Tool = {
+  name: "suggest_meaning",
+  description: "単語・熟語の最も一般的な日本語の意味を1つ返す",
+  input_schema: {
+    type: "object",
+    properties: {
+      meaning: {
+        type: "string",
+        description: "TOEIC学習者向けの、簡潔で一般的な日本語の意味(数語程度)",
+      },
+    },
+    required: ["meaning"],
+  },
+};
+
+export async function callClaudeForMeaning(params: {
+  systemInstruction: string;
+  userPrompt: string;
+}): Promise<string> {
+  const client = getClient();
+  const model = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: 256,
+    system: params.systemInstruction,
+    tools: [SUGGEST_MEANING_TOOL],
+    tool_choice: { type: "tool", name: "suggest_meaning" },
+    messages: [{ role: "user", content: params.userPrompt }],
+  });
+
+  const toolUse = response.content.find(
+    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+  );
+  if (!toolUse) {
+    throw new Error("Claude APIからの応答にtool_useブロックが含まれていませんでした。");
+  }
+
+  const input = toolUse.input as { meaning?: unknown };
+  if (typeof input.meaning !== "string") {
+    throw new Error("Claude APIの応答形式が不正です。");
+  }
+
+  return input.meaning;
+}
