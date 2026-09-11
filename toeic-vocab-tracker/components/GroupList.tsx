@@ -65,7 +65,6 @@ export default function GroupList({
               <PosBadge partOfSpeech={g.root.partOfSpeech} />
             )}
             <span className="word-meaning">{g.root.meaning}</span>
-            {g.root.entryType !== "idiom" && <span className="root-badge">起点</span>}
           </div>
 
           {g.root.entryType === "idiom" ? null : g.derivatives.length === 0 ? (

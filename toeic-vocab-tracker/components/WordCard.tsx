@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import PosBadge from "@/components/PosBadge";
+import SpeakButton from "@/components/SpeakButton";
 import { IDIOM_CLASS, IDIOM_LABEL, POS_CLASS, POS_LABEL } from "@/lib/partOfSpeech";
 import { PARTS_OF_SPEECH, type PartOfSpeech, type WordEntry } from "@/types/word";
 
@@ -74,9 +75,7 @@ export default function WordCard({
         <span className={`word-title ${entry.memorized ? "memorized" : ""}`}>
           {entry.word}
         </span>
-        {!isIdiom && (
-          <span className="root-badge">{entry.isRoot ? "起点" : "派生語"}</span>
-        )}
+        <SpeakButton text={entry.word} />
       </div>
 
       {editing ? (
@@ -119,7 +118,10 @@ export default function WordCard({
 
           {entry.example && (
             <div className="example-block">
-              <p className="example-en">📝 {entry.example.en}</p>
+              <div className="example-en-row">
+                <p className="example-en">📝 {entry.example.en}</p>
+                <SpeakButton text={entry.example.en} />
+              </div>
               <p className="example-ja">{entry.example.ja}</p>
             </div>
           )}
