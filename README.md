@@ -7,6 +7,7 @@
 | 🗞️ **AI M&A Radar** | [`ai-ma-radar/`](./ai-ma-radar) | AI関連企業のM&A・ビジネスモデル・業績動向をRSSから自動収集するダッシュボード（Next.js） |
 | 🗺️ **世界史マップ** | [`world-history-map/`](./world-history-map) | 世界地図から国を選ぶと、その国の歴史をWikipediaから要約表示するアプリ（Next.js） |
 | 📘 **AWS SAA-C03 学習ツール** | [`aws-saa-study/`](./aws-saa-study) | AWS認定ソリューションアーキテクト–アソシエイト試験対策の個人学習アプリ（React + Vite、データはlocalStorageに保存） |
+| 🩺 **Vitalog** | [`vitalog/`](./vitalog) | 成人発症スティル病(AOSD)当事者本人のための体調・服薬・生活負荷トラッキングPWA（Next.js、データはlocalStorageに保存） |
 
 各アプリの詳しい説明・セットアップ手順は、それぞれのディレクトリ内の README を参照してください。
 

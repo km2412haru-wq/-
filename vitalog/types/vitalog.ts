@@ -1,0 +1,189 @@
+/**
+ * データ構造のバージョン。
+ * 仕様変更時は上げる前に必ず lib/migrate.ts に旧バージョンからの変換関数を追加すること
+ * (F8: 「データの引き継ぎやすさ」を最優先する設計方針のため、破壊的変更をしない)。
+ */
+export const SCHEMA_VERSION = 1;
+
+export const JOINT_SITES = ["膝", "手", "足", "肘", "肩", "その他"] as const;
+export type JointSite = (typeof JOINT_SITES)[number];
+
+export interface JointPainEntry {
+  site: JointSite;
+  /** 1(軽い)〜5(激しい) */
+  severity: 1 | 2 | 3 | 4 | 5;
+}
+
+export const MOOD_REASON_TAGS = [
+  "体調不良",
+  "人間関係",
+  "将来不安",
+  "疲労",
+  "特になし",
+] as const;
+export type MoodReasonTag = (typeof MOOD_REASON_TAGS)[number];
+
+export const MEDICATION_TYPES = ["regular", "asNeeded"] as const;
+export type MedicationType = (typeof MEDICATION_TYPES)[number];
+
+export interface MedicationRecord {
+  id: string;
+  name: string;
+  /** 用量。単位込みの自由記述(例: "5mg") */
+  dose?: string;
+  /** 定期薬か頓服か */
+  type: MedicationType;
+  /** 服薬時刻(HH:mm)。未入力可 */
+  time?: string;
+  /** 写真から自動入力した場合、元になった写真のIndexedDB上のID(ユーザーが保持を選んだ場合のみ) */
+  sourcePhotoId?: string;
+}
+
+/** 外用薬(シップ・ローション等)の記録1件。内服のMedicationRecordとは用法が違うため分けて持つ */
+export interface TopicalMedicationRecord {
+  id: string;
+  name: string;
+  /** 使用部位(任意・自由記述) */
+  site?: string;
+  note?: string;
+  sourcePhotoId?: string;
+}
+
+/**
+ * F2: 登録済みの定期薬・頓服マスタ。
+ * DailyLogのmedications(その日実際に飲んだ記録)とは別に、
+ * 「普段飲んでいる薬」を管理してリマインダーの元データにする。
+ */
+export interface RegisteredMedication {
+  id: string;
+  name: string;
+  dose?: string;
+  type: MedicationType;
+  /** リマインダーを出す時刻(HH:mm)。頓服は空でよい */
+  reminderTime?: string;
+  /** 服用終了済み(減薬完了・中止)の薬は非表示にできるようfalseにする */
+  active: boolean;
+  createdAt: string;
+}
+
+/** F2: 減薬・増薬(テーパリング)履歴1件 */
+export interface TaperingEvent {
+  id: string;
+  medicationName: string;
+  date: string;
+  /** 変更後の用量(自由記述) */
+  newDose: string;
+  note?: string;
+  createdAt: string;
+}
+
+export const ACTIVITY_TAGS = [
+  "授業",
+  "バイト",
+  "部活",
+  "ゼミ",
+  "資格勉強",
+  "仕事",
+  "通勤",
+  "シフト",
+] as const;
+export type ActivityTag = (typeof ACTIVITY_TAGS)[number] | string;
+
+export const LOAD_LEVELS = ["暇", "普通", "過密"] as const;
+export type LoadLevel = (typeof LOAD_LEVELS)[number];
+
+/**
+ * F1: 毎日の体調記録。
+ * 「いつでも記録可能」「後入力・スキップ可」の方針のため、
+ * 記録対象日(targetDate)と実際の入力時刻(recordedAt)を分けて持つ。
+ */
+export interface DailyLog {
+  id: string;
+  /** この記録が対象とする日(YYYY-MM-DD)。後入力時はここを過去日にする */
+  targetDate: string;
+  /** 実際に入力ボタンを押した日時(ISO8601)。改ざんしない実入力ログ */
+  recordedAt: string;
+  /** この日は「スキップ」を選んだ記録かどうか。trueの場合、他の値は無視してよい */
+  skipped: boolean;
+
+  // --- 必須項目 ---
+  /** 体温(℃)。未入力を許容するため optional */
+  temperature?: number;
+  /** 体調スコア 1(最悪)〜10(絶好調) */
+  conditionScore?: number;
+  jointPain: JointPainEntry[];
+  /** 咽頭痛。「普段と違う感覚」を拾いたいため強さに加えて自由記述を持てる */
+  soreThroat?: {
+    severity: 1 | 2 | 3 | 4 | 5;
+    /** 「いつもと違う」感覚があった場合のメモ */
+    unusualNote?: string;
+  };
+  /** 気分スコア 1〜10。常時表示 */
+  moodScore?: number;
+  /** moodScore が低い時のみ入力される理由タグ */
+  moodReasonTags: MoodReasonTag[];
+  /**
+   * F10向け: 「普段と違う強い倦怠感」の有無。
+   * conditionScoreだけでは拾えない質的な違和感を単独フラグとして残す。
+   */
+  fatigueUnusual?: boolean;
+
+  // --- F9: スケジュール・負荷管理(時間単位ではなくざっくり記録) ---
+  loadLevel?: LoadLevel;
+  activityTags: ActivityTag[];
+  /** 睡眠時間(時間、0.5刻み) */
+  sleepHours?: number;
+
+  // --- 任意・低優先度項目 ---
+  /** 皮疹。写真は実験的機能のためdata URLとして保存(将来Driveバックアップの対象からは除外予定) */
+  rash?: {
+    note?: string;
+    photoDataUrl?: string;
+  };
+  musclePain?: {
+    severity: 1 | 2 | 3 | 4 | 5;
+    note?: string;
+  };
+  lymphNodeSwelling?: {
+    note?: string;
+  };
+  /**
+   * F10向け検査値(採血結果を受け取った時だけ任意入力)。
+   * MAS等の重篤合併症の急変検知にのみ使う、通常のトレンドには出さない値。
+   */
+  labs?: {
+    wbcPerUl?: number;
+    ferritinNgMl?: number;
+    crpMgDl?: number;
+    astUL?: number;
+    altUL?: number;
+    plateletsPerUl?: number;
+    /** 写真から自動入力した場合、元になった検査結果票の写真ID(ユーザーが保持を選んだ場合のみ) */
+    sourcePhotoId?: string;
+  };
+
+  medications: MedicationRecord[];
+  topicalMedications: TopicalMedicationRecord[];
+
+  /** 自由メモ。Web Speech APIによる音声入力も同じ欄に反映される */
+  memo?: string;
+  /** LLMによるメモの構造化タグ付け結果(任意・失敗しても記録自体は成立する) */
+  memoTags?: string[];
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * localStorageに保存する際の実データ形式(バージョン付き)。
+ * registeredMedications/taperingEventsはv1に対する後方互換な追加フィールド
+ * (旧データには存在しないため、読み込み時に空配列で補う。lib/migrate.ts参照)。
+ */
+export interface VitalogStoreV1 {
+  version: 1;
+  dailyLogs: DailyLog[];
+  registeredMedications: RegisteredMedication[];
+  taperingEvents: TaperingEvent[];
+}
+
+export type VitalogStore = VitalogStoreV1;
