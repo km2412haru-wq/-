@@ -108,6 +108,10 @@ function normalizeRegisteredMedication(raw: unknown): RegisteredMedication {
     type: entry.type ?? "regular",
     reminderTime: entry.reminderTime,
     active: entry.active ?? true,
+    // 旧データにはstartDate/endDateが無いため、後方互換でundefinedのままにする。
+    // isMedicationApplicableOnDate側でundefinedを「いつでも表示可」として扱う
+    startDate: entry.startDate,
+    endDate: entry.endDate,
     createdAt: entry.createdAt ?? new Date().toISOString(),
   };
 }

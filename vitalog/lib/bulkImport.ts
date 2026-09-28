@@ -86,6 +86,9 @@ export function applyPrescriptionToRegisteredMedications(
       dose,
       type: "regular",
       active: true,
+      // 処方箋/お薬手帳から読み取った日付を処方開始日とする。
+      // これによりバックフィル入力時、この日より前の対象日ではチェックリストに出ない
+      startDate: date,
       createdAt: new Date().toISOString(),
     });
     saveRegisteredMedications(meds);
@@ -118,6 +121,7 @@ export function discontinueRegisteredMedication(name: string, date: string): voi
   const existing = meds.find((m) => m.name === name && m.active);
   if (!existing) return;
   existing.active = false;
+  existing.endDate = date;
   saveRegisteredMedications(meds);
 
   const events = loadTaperingEvents();

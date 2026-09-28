@@ -73,6 +73,18 @@ export interface RegisteredMedication {
   reminderTime?: string;
   /** 服用終了済み(減薬完了・中止)の薬は非表示にできるようfalseにする */
   active: boolean;
+  /**
+   * 処方開始日(登録日)。バックフィル入力時、対象日がこれより前の場合は
+   * まだ処方されていなかった薬として毎日の記録のチェックリストに出さないために使う。
+   * 未設定(旧データ)の場合はいつの対象日でも表示可能として扱う。
+   */
+  startDate?: string;
+  /**
+   * 中止日。中止(active=false)にした日を記録し、対象日がこれより後の場合は
+   * チェックリストに出さない。対象日がこれ以前(中止前)なら引き続き表示する。
+   * 再開時はクリアする。
+   */
+  endDate?: string;
   createdAt: string;
 }
 

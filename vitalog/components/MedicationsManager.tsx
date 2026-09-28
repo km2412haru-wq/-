@@ -20,9 +20,12 @@ export default function MedicationsManager() {
   } = useMedications();
   const { permission, requestPermission } = useForegroundReminders(registeredMedications);
 
+  const todayIso = () => new Date().toISOString().slice(0, 10);
+
   const [name, setName] = useState("");
   const [dose, setDose] = useState("");
   const [type, setType] = useState<MedicationType>("regular");
+  const [startDate, setStartDate] = useState(todayIso());
   const [reminderTime, setReminderTime] = useState("");
 
   const [taperMedName, setTaperMedName] = useState("");
@@ -39,10 +42,12 @@ export default function MedicationsManager() {
       name: name.trim(),
       dose: dose.trim() || undefined,
       type,
+      startDate: startDate || undefined,
       reminderTime: reminderTime || undefined,
     });
     setName("");
     setDose("");
+    setStartDate(todayIso());
     setReminderTime("");
   };
 
@@ -91,14 +96,24 @@ export default function MedicationsManager() {
                 <strong>{m.name}</strong>
                 {m.dose && <span className="muted"> ({m.dose})</span>}
                 <span className="tag">{m.type === "regular" ? "定期薬" : "頓服"}</span>
+                {m.startDate && <span className="tag">開始 {m.startDate}</span>}
                 {m.reminderTime && <span className="tag">通知 {m.reminderTime}</span>}
-                {!m.active && <span className="tag">中止済み</span>}
+                {!m.active && (
+                  <span className="tag">中止済み{m.endDate ? `(${m.endDate})` : ""}</span>
+                )}
               </div>
               <div className="row">
                 <button
                   type="button"
                   className="btn-ghost"
-                  onClick={() => updateMedication(m.id, { active: !m.active })}
+                  onClick={() =>
+                    updateMedication(
+                      m.id,
+                      m.active
+                        ? { active: false, endDate: todayIso() }
+                        : { active: true, endDate: undefined }
+                    )
+                  }
                 >
                   {m.active ? "中止にする" : "再開する"}
                 </button>
@@ -140,6 +155,19 @@ export default function MedicationsManager() {
               value={reminderTime}
               onChange={(e) => setReminderTime(e.target.value)}
             />
+          </div>
+          <div className="field">
+            <label htmlFor="medStartDate">処方開始日(登録日)</label>
+            <input
+              id="medStartDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <p className="field-hint">
+              毎日の記録画面のチェックリストは、対象日がこの日より前の場合は表示されません。
+              以前から飲んでいる薬を今登録する場合は、実際に飲み始めた日に変更してください。
+            </p>
           </div>
           <p className="field-hint">
             ※通知はアプリ(このタブ)を開いている間のみ動作します。閉じている間や画面ロック中は届きません。

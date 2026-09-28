@@ -100,9 +100,14 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                   服薬:{" "}
                   {log.medications
                     .map((m) => {
-                      const takenMark =
-                        m.registeredMedicationId != null ? (m.taken === false ? "✗未服用 " : "✓") : "";
-                      return `${takenMark}${m.name}${m.dose ? `(${m.dose})` : ""}`;
+                      if (m.registeredMedicationId != null) {
+                        const takenMark = m.taken === false ? "✗未服用 " : "✓";
+                        return `${takenMark}${m.name}${m.dose ? `(${m.dose})` : ""}`;
+                      }
+                      // チェックリスト方式導入前に手動で「定期薬」として記録された過去データは、
+                      // 種別情報を失わないよう区別して表示する(現行UIでは手動追加は頓服のみ)
+                      const legacyMark = m.type === "regular" ? "[旧・定期薬記録]" : "";
+                      return `${legacyMark}${m.name}${m.dose ? `(${m.dose})` : ""}`;
                     })
                     .join(", ")}
                 </div>

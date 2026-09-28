@@ -7,6 +7,7 @@ import { savePhotoBlob } from "@/lib/photoStore";
 import { useSpeechToText } from "@/lib/useSpeechToText";
 import { useEnvironment } from "@/lib/useEnvironment";
 import { useMedications } from "@/lib/useMedications";
+import { isMedicationApplicableOnDate } from "@/lib/medicationApplicability";
 import {
   ACTIVITY_TAGS,
   JOINT_SITES,
@@ -83,12 +84,15 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [memo, setMemo] = useState("");
 
   const { registeredMedications } = useMedications();
+  // バックフィル対応: 対象日の時点でまだ処方されていなかった薬・既に中止していた薬は
+  // チェックリストに出さない(startDate/endDateで判定。旧データはいつでも表示可)
   const activeRegularMedications = registeredMedications.filter(
-    (m) => m.active && m.type === "regular"
+    (m) => m.type === "regular" && isMedicationApplicableOnDate(m, targetDate)
   );
 
   // 定期薬チェックリスト(3-2): 登録済みの定期薬は既定でチェック済み(服用した)扱いにする。
-  // 既にユーザーがチェックを操作した項目は上書きしない
+  // 既にユーザーがチェックを操作した項目は上書きしない。対象日を変えて新たに
+  // 適用対象になった薬にも既定値を補う
   useEffect(() => {
     setMedicationChecklist((prev) => {
       const next = { ...prev };
@@ -102,7 +106,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       return changed ? next : prev;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registeredMedications]);
+  }, [registeredMedications, targetDate]);
 
   const { supported: speechSupported, listening, start, stop } = useSpeechToText((text) => {
     setMemo((prev) => (prev ? `${prev} ${text}` : text));
@@ -575,6 +579,14 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
 
       <div className="field">
         <label>定期薬(服用した薬のチェックを外してください)</label>
+        {registeredMedications.some((m) => m.type === "regular") &&
+          activeRegularMedications.length <
+            registeredMedications.filter((m) => m.type === "regular").length && (
+            <p className="field-hint">
+              ※対象日の時点でまだ処方されていなかった、または既に中止していた定期薬は
+              リストから除外しています。
+            </p>
+          )}
         {activeRegularMedications.length === 0 ? (
           <p className="field-hint">
             登録済みの定期薬がありません。「服薬管理」画面から登録できます。
