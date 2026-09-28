@@ -10,6 +10,7 @@ import { useMedications } from "@/lib/useMedications";
 import { isMedicationApplicableOnDate } from "@/lib/medicationApplicability";
 import {
   ACTIVITY_TAGS,
+  DEFAULT_SYMPTOM_NAMES,
   JOINT_SITES,
   LOAD_LEVELS,
   MOOD_REASON_TAGS,
@@ -20,6 +21,7 @@ import {
   type MedicationRecord,
   type MedicationType,
   type MoodReasonTag,
+  type SymptomEntry,
   type TopicalMedicationRecord,
 } from "@/types/vitalog";
 import type { DailyLogDraft } from "@/lib/useDailyLogs";
@@ -48,10 +50,11 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [temperatureUnmeasured, setTemperatureUnmeasured] = useState(false);
   const [conditionScore, setConditionScore] = useState(7);
   const [jointPain, setJointPain] = useState<JointPainEntry[]>([]);
-  const [hasSoreThroat, setHasSoreThroat] = useState(false);
-  const [soreThroatSeverity, setSoreThroatSeverity] = useState<1 | 2 | 3 | 4 | 5>(2);
-  const [soreThroatUnusual, setSoreThroatUnusual] = useState(false);
-  const [soreThroatNote, setSoreThroatNote] = useState("");
+  const [symptomNames, setSymptomNames] = useState<string[]>([]);
+  const [customSymptomName, setCustomSymptomName] = useState("");
+  const [symptomDetails, setSymptomDetails] = useState<
+    Record<string, { severity: 1 | 2 | 3 | 4 | 5; unusualOn: boolean; unusualNote: string }>
+  >({});
   const [moodScore, setMoodScore] = useState(7);
   const [moodReasonTags, setMoodReasonTags] = useState<MoodReasonTag[]>([]);
   const [fatigueUnusual, setFatigueUnusual] = useState(false);
@@ -62,8 +65,6 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [showOptional, setShowOptional] = useState(false);
   const [productivityOn, setProductivityOn] = useState(false);
   const [productivityScore, setProductivityScore] = useState(5);
-  const [musclePainOn, setMusclePainOn] = useState(false);
-  const [musclePainSeverity, setMusclePainSeverity] = useState<1 | 2 | 3 | 4 | 5>(2);
   const [lymphNoteOn, setLymphNoteOn] = useState(false);
   const [lymphNote, setLymphNote] = useState("");
   const [rashOn, setRashOn] = useState(false);
@@ -153,6 +154,35 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setCustomActivityTag("");
   };
 
+  const toggleSymptom = (name: string) => {
+    setSymptomNames((prev) => {
+      if (prev.includes(name)) return prev.filter((n) => n !== name);
+      return [...prev, name];
+    });
+    setSymptomDetails((prev) => {
+      if (prev[name]) return prev;
+      return { ...prev, [name]: { severity: 3, unusualOn: false, unusualNote: "" } };
+    });
+  };
+
+  const addCustomSymptom = () => {
+    const name = customSymptomName.trim();
+    if (!name || symptomNames.includes(name)) return;
+    setSymptomNames((prev) => [...prev, name]);
+    setSymptomDetails((prev) => ({ ...prev, [name]: { severity: 3, unusualOn: false, unusualNote: "" } }));
+    setCustomSymptomName("");
+  };
+
+  const updateSymptomDetail = (
+    name: string,
+    changes: Partial<{ severity: 1 | 2 | 3 | 4 | 5; unusualOn: boolean; unusualNote: string }>
+  ) => {
+    setSymptomDetails((prev) => ({
+      ...prev,
+      [name]: { ...(prev[name] ?? { severity: 3, unusualOn: false, unusualNote: "" }), ...changes },
+    }));
+  };
+
   const addMedicationRow = () => {
     // 定期薬はチェックリスト方式に移行したため、手動追加は頓服専用
     setMedications((prev) => [
@@ -186,9 +216,9 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setTemperatureUnmeasured(false);
     setConditionScore(7);
     setJointPain([]);
-    setHasSoreThroat(false);
-    setSoreThroatUnusual(false);
-    setSoreThroatNote("");
+    setSymptomNames([]);
+    setCustomSymptomName("");
+    setSymptomDetails({});
     setMoodScore(7);
     setMoodReasonTags([]);
     setFatigueUnusual(false);
@@ -198,7 +228,6 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setSleepHours(7);
     setProductivityOn(false);
     setProductivityScore(5);
-    setMusclePainOn(false);
     setLymphNoteOn(false);
     setLymphNote("");
     setRashOn(false);
@@ -228,12 +257,14 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       temperature: temperatureUnmeasured ? "unmeasured" : temperature ? Number(temperature) : undefined,
       conditionScore,
       jointPain,
-      soreThroat: hasSoreThroat
-        ? {
-            severity: soreThroatSeverity,
-            unusualNote: soreThroatUnusual ? soreThroatNote || "いつもと違う感覚あり" : undefined,
-          }
-        : undefined,
+      symptoms: symptomNames.map((name): SymptomEntry => {
+        const d = symptomDetails[name] ?? { severity: 3, unusualOn: false, unusualNote: "" };
+        return {
+          name,
+          severity: d.severity,
+          unusualNote: d.unusualOn ? d.unusualNote || "いつもと違う感覚あり" : undefined,
+        };
+      }),
       moodScore,
       moodReasonTags: showMoodReason ? moodReasonTags : [],
       fatigueUnusual: fatigueUnusual || undefined,
@@ -243,7 +274,6 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       productivityScore: productivityOn ? productivityScore : undefined,
       environment: environment ?? undefined,
       rash: rashOn ? { note: rashNote || undefined, sourcePhotoId: rashPhotoId } : undefined,
-      musclePain: musclePainOn ? { severity: musclePainSeverity } : undefined,
       lymphNodeSwelling: lymphNoteOn ? { note: lymphNote || undefined } : undefined,
       labs: labsOn
         ? {
@@ -410,48 +440,85 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       </div>
 
       <div className="field">
-        <label>
+        <label>症状</label>
+        <div className="row">
+          {DEFAULT_SYMPTOM_NAMES.map((name) => (
+            <button
+              type="button"
+              key={name}
+              className="chip"
+              data-active={symptomNames.includes(name)}
+              onClick={() => toggleSymptom(name)}
+            >
+              {name}
+            </button>
+          ))}
+          {symptomNames
+            .filter((n) => !(DEFAULT_SYMPTOM_NAMES as readonly string[]).includes(n))
+            .map((name) => (
+              <button
+                type="button"
+                key={name}
+                className="chip"
+                data-active
+                onClick={() => toggleSymptom(name)}
+              >
+                {name}
+              </button>
+            ))}
+        </div>
+        <div className="row" style={{ marginTop: 8 }}>
           <input
-            type="checkbox"
-            checked={hasSoreThroat}
-            onChange={(e) => setHasSoreThroat(e.target.checked)}
-          />{" "}
-          咽頭痛あり
-        </label>
-        {hasSoreThroat && (
-          <div style={{ marginTop: 8 }}>
-            <div className="row">
-              <span>強さ</span>
-              <input
-                type="range"
-                min={1}
-                max={5}
-                value={soreThroatSeverity}
-                onChange={(e) =>
-                  setSoreThroatSeverity(Number(e.target.value) as 1 | 2 | 3 | 4 | 5)
-                }
-              />
-              <span className="slider-value">{soreThroatSeverity}</span>
+            type="text"
+            placeholder="症状を追加(任意)"
+            value={customSymptomName}
+            onChange={(e) => setCustomSymptomName(e.target.value)}
+          />
+          <button type="button" className="btn-secondary" onClick={addCustomSymptom}>
+            追加
+          </button>
+        </div>
+
+        {symptomNames.map((name) => {
+          const d = symptomDetails[name] ?? { severity: 3, unusualOn: false, unusualNote: "" };
+          return (
+            <div key={name} style={{ marginTop: 12 }}>
+              <strong>{name}</strong>
+              <div className="row" style={{ marginTop: 4 }}>
+                <span>強さ</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={5}
+                  value={d.severity}
+                  onChange={(e) =>
+                    updateSymptomDetail(name, {
+                      severity: Number(e.target.value) as 1 | 2 | 3 | 4 | 5,
+                    })
+                  }
+                />
+                <span className="slider-value">{d.severity}</span>
+              </div>
+              <label style={{ marginTop: 8, display: "block" }}>
+                <input
+                  type="checkbox"
+                  checked={d.unusualOn}
+                  onChange={(e) => updateSymptomDetail(name, { unusualOn: e.target.checked })}
+                />{" "}
+                普段と違う感覚がある
+              </label>
+              {d.unusualOn && (
+                <input
+                  type="text"
+                  placeholder="どう違うか(任意)"
+                  value={d.unusualNote}
+                  onChange={(e) => updateSymptomDetail(name, { unusualNote: e.target.value })}
+                  style={{ marginTop: 6 }}
+                />
+              )}
             </div>
-            <label style={{ marginTop: 8, display: "block" }}>
-              <input
-                type="checkbox"
-                checked={soreThroatUnusual}
-                onChange={(e) => setSoreThroatUnusual(e.target.checked)}
-              />{" "}
-              普段と違う感覚がある
-            </label>
-            {soreThroatUnusual && (
-              <input
-                type="text"
-                placeholder="どう違うか(任意)"
-                value={soreThroatNote}
-                onChange={(e) => setSoreThroatNote(e.target.value)}
-                style={{ marginTop: 6 }}
-              />
-            )}
-          </div>
-        )}
+          );
+        })}
       </div>
 
       <div className="field">
@@ -743,30 +810,6 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
                   onChange={(e) => setProductivityScore(Number(e.target.value))}
                 />
                 <span className="slider-value">{productivityScore}</span>
-              </div>
-            )}
-
-            <label style={{ display: "block", marginBottom: 8 }}>
-              <input
-                type="checkbox"
-                checked={musclePainOn}
-                onChange={(e) => setMusclePainOn(e.target.checked)}
-              />{" "}
-              筋肉痛あり
-            </label>
-            {musclePainOn && (
-              <div className="row" style={{ marginBottom: 8 }}>
-                <span>強さ</span>
-                <input
-                  type="range"
-                  min={1}
-                  max={5}
-                  value={musclePainSeverity}
-                  onChange={(e) =>
-                    setMusclePainSeverity(Number(e.target.value) as 1 | 2 | 3 | 4 | 5)
-                  }
-                />
-                <span className="slider-value">{musclePainSeverity}</span>
               </div>
             )}
 

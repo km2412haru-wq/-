@@ -84,11 +84,26 @@ export default function ReportView() {
           </ul>
         )}
 
-        <h3>咽頭痛(「普段と違う」感覚があった日)</h3>
-        {report.soreThroatUnusualDates.length === 0 ? (
+        <h3>症状(記録日数)</h3>
+        {report.symptomCounts.length === 0 ? (
           <p className="muted">記録なし</p>
         ) : (
-          <p>{report.soreThroatUnusualDates.join(", ")}</p>
+          <ul>
+            {report.symptomCounts.map((c) => (
+              <li key={c.name}>
+                {c.name}: {c.count}日
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <h3>症状(「普段と違う」感覚があった日)</h3>
+        {report.symptomUnusualEntries.length === 0 ? (
+          <p className="muted">記録なし</p>
+        ) : (
+          <p>
+            {report.symptomUnusualEntries.map((e) => `${e.date}(${e.name})`).join(", ")}
+          </p>
         )}
 
         <h3>服薬</h3>

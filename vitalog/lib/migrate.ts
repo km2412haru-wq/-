@@ -4,6 +4,7 @@ import {
   type Hypothesis,
   type RegisteredMedication,
   type SelfExperiment,
+  type SymptomEntry,
   type TaperingEvent,
   type VitalogStore,
   type Visit,
@@ -77,6 +78,7 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     temperature: entry.temperature,
     conditionScore: entry.conditionScore,
     jointPain: Array.isArray(entry.jointPain) ? entry.jointPain : [],
+    symptoms: normalizeSymptoms(entry),
     soreThroat: entry.soreThroat,
     moodScore: entry.moodScore,
     moodReasonTags: Array.isArray(entry.moodReasonTags) ? entry.moodReasonTags : [],
@@ -97,6 +99,33 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     createdAt: entry.createdAt ?? new Date().toISOString(),
     updatedAt: entry.updatedAt ?? new Date().toISOString(),
   };
+}
+
+/**
+ * 症状記録の汎用化(旧: soreThroat/musclePainという専用フィールドだったものを
+ * symptoms配列に統合)に伴う後方互換処理。
+ * 新形式(symptomsが存在)ならそのまま使い、旧形式しか無ければ
+ * soreThroat/musclePainから合成する。どちらも無ければ空配列。
+ */
+function normalizeSymptoms(entry: Partial<DailyLog>): SymptomEntry[] {
+  if (Array.isArray(entry.symptoms)) return entry.symptoms;
+
+  const synthesized: SymptomEntry[] = [];
+  if (entry.soreThroat) {
+    synthesized.push({
+      name: "咽頭痛",
+      severity: entry.soreThroat.severity,
+      unusualNote: entry.soreThroat.unusualNote,
+    });
+  }
+  if (entry.musclePain) {
+    synthesized.push({
+      name: "筋肉痛",
+      severity: entry.musclePain.severity,
+      unusualNote: entry.musclePain.note,
+    });
+  }
+  return synthesized;
 }
 
 function normalizeRegisteredMedication(raw: unknown): RegisteredMedication {

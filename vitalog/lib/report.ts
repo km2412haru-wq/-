@@ -7,7 +7,8 @@ export interface ReportSummary {
   temperatureMin?: number;
   temperatureMax?: number;
   jointPainCounts: { site: string; count: number }[];
-  soreThroatUnusualDates: string[];
+  symptomCounts: { name: string; count: number }[];
+  symptomUnusualEntries: { date: string; name: string }[];
   fatigueUnusualCount: number;
   medicationNames: string[];
   topicalMedicationNames: string[];
@@ -38,9 +39,17 @@ export function buildReport(logs: DailyLog[]): ReportSummary {
     count: nonSkipped.filter((l) => l.jointPain.some((p) => p.site === site)).length,
   })).filter((c) => c.count > 0);
 
-  const soreThroatUnusualDates = nonSkipped
-    .filter((l) => l.soreThroat?.unusualNote)
-    .map((l) => l.targetDate);
+  const symptomNameSet = new Set(nonSkipped.flatMap((l) => l.symptoms.map((s) => s.name)));
+  const symptomCounts = Array.from(symptomNameSet)
+    .map((name) => ({
+      name,
+      count: nonSkipped.filter((l) => l.symptoms.some((s) => s.name === name)).length,
+    }))
+    .filter((c) => c.count > 0);
+
+  const symptomUnusualEntries = nonSkipped.flatMap((l) =>
+    l.symptoms.filter((s) => s.unusualNote).map((s) => ({ date: l.targetDate, name: s.name }))
+  );
 
   const fatigueUnusualCount = nonSkipped.filter((l) => l.fatigueUnusual).length;
 
@@ -63,7 +72,8 @@ export function buildReport(logs: DailyLog[]): ReportSummary {
     temperatureMin: temperatures.length ? Math.min(...temperatures) : undefined,
     temperatureMax: temperatures.length ? Math.max(...temperatures) : undefined,
     jointPainCounts,
-    soreThroatUnusualDates,
+    symptomCounts,
+    symptomUnusualEntries,
     fatigueUnusualCount,
     medicationNames,
     topicalMedicationNames,

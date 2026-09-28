@@ -37,6 +37,7 @@ export default function Home() {
       targetDate,
       skipped: true,
       jointPain: [],
+      symptoms: [],
       moodReasonTags: [],
       activityTags: [],
       medications: [],

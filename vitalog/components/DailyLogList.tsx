@@ -50,12 +50,11 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                     関節痛:{p.site}({p.severity})
                   </span>
                 ))}
-                {log.soreThroat && (
-                  <span className="tag">
-                    咽頭痛({log.soreThroat.severity})
-                    {log.soreThroat.unusualNote ? " ⚠︎普段と違う" : ""}
+                {log.symptoms.map((s) => (
+                  <span key={s.name} className="tag">
+                    {s.name}({s.severity}){s.unusualNote ? " ⚠︎普段と違う" : ""}
                   </span>
-                )}
+                ))}
                 {log.moodReasonTags.map((t) => (
                   <span key={t} className="tag">
                     {t}

@@ -127,6 +127,21 @@ export type ActivityTag = (typeof ACTIVITY_TAGS)[number] | string;
 export const LOAD_LEVELS = ["暇", "普通", "過密"] as const;
 export type LoadLevel = (typeof LOAD_LEVELS)[number];
 
+export const DEFAULT_SYMPTOM_NAMES = ["咽頭痛", "頭痛", "腹痛", "筋肉痛"] as const;
+
+/**
+ * 汎用化された症状記録1件。元々は咽頭痛専用だった「強さ＋普段と違う感覚」という
+ * 構造を、複数の症状(既定候補＋自由入力)に使い回せるようにしたもの。
+ * 部位選択を伴う関節痛、所見寄りの皮疹・リンパ節腫れはこの対象外のまま。
+ */
+export interface SymptomEntry {
+  /** 症状名。既定候補(DEFAULT_SYMPTOM_NAMES)またはユーザーの自由入力 */
+  name: string;
+  severity: 1 | 2 | 3 | 4 | 5;
+  /** 「普段と違う感覚」があった場合のメモ */
+  unusualNote?: string;
+}
+
 /** F12-1: 自分で登録する仮説(例:「気圧低下を3日後に関節痛」) */
 export interface Hypothesis {
   id: string;
@@ -172,10 +187,17 @@ export interface DailyLog {
   /** 体調スコア 1(最悪)〜10(絶好調) */
   conditionScore?: number;
   jointPain: JointPainEntry[];
-  /** 咽頭痛。「普段と違う感覚」を拾いたいため強さに加えて自由記述を持てる */
+  /**
+   * 症状記録(咽頭痛・頭痛・腹痛・筋肉痛等、既定候補＋自由入力)。
+   * 各症状ごとに強さと「普段と違う感覚」の有無を記録する。
+   */
+  symptoms: SymptomEntry[];
+  /**
+   * @deprecated symptomsに統合された(name: "咽頭痛"のSymptomEntryとして記録する)。
+   * 旧データの読み込み互換のためのみ型に残している。新規データはsymptomsを使うこと。
+   */
   soreThroat?: {
     severity: 1 | 2 | 3 | 4 | 5;
-    /** 「いつもと違う」感覚があった場合のメモ */
     unusualNote?: string;
   };
   /** 気分スコア 1〜10。常時表示 */
@@ -217,6 +239,10 @@ export interface DailyLog {
     note?: string;
     sourcePhotoId?: string;
   };
+  /**
+   * @deprecated symptomsに統合された(name: "筋肉痛"のSymptomEntryとして記録する)。
+   * 旧データの読み込み互換のためのみ型に残している。新規データはsymptomsを使うこと。
+   */
   musclePain?: {
     severity: 1 | 2 | 3 | 4 | 5;
     note?: string;

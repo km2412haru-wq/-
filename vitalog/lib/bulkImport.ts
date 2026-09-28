@@ -19,6 +19,7 @@ function emptyDailyLogFields(): Omit<DailyLog, "id" | "targetDate" | "recordedAt
   return {
     skipped: false,
     jointPain: [],
+    symptoms: [],
     moodReasonTags: [],
     activityTags: [],
     medications: [],
