@@ -1,0 +1,23 @@
+{
+  "name": "vitalog",
+  "version": "0.1.0",
+  "private": true,
+  "description": "成人スティル病(AOSD)の当事者本人のための、体調・服薬・生活負荷を記録するセルフトラッキングPWA",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.125.0",
+    "next": "16.3.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "typescript": "^5.7.2"
+  }
+}
