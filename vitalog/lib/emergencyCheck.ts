@@ -1,3 +1,4 @@
+import { isInLifeStageTransitionWindow } from "@/lib/lifeStage";
 import type { DailyLog } from "@/types/vitalog";
 
 /**
@@ -47,22 +48,30 @@ function takeConsecutiveRecent(sortedDesc: DailyLog[], maxDays: number): DailyLo
 export function checkEmergency(dailyLogs: DailyLog[]): EmergencyCheckResult {
   const reasons: string[] = [];
 
+  // F12-4: ライフステージ移行の要注意期間中は、普段より敏感な閾値で検知する
+  const sensitive = isInLifeStageTransitionWindow();
+  const sustainedDaysThreshold = sensitive ? SUSTAINED_DAYS - 1 : SUSTAINED_DAYS;
+  const fatigueDaysThreshold = sensitive ? 1 : 2;
+
   const nonSkipped = dailyLogs
     .filter((l) => !l.skipped)
     .sort((a, b) => (a.targetDate < b.targetDate ? 1 : -1));
 
-  const recent = takeConsecutiveRecent(nonSkipped, SUSTAINED_DAYS);
+  const recent = takeConsecutiveRecent(nonSkipped, sustainedDaysThreshold);
 
   const feverDays = recent.filter(
     (l) => typeof l.temperature === "number" && l.temperature >= FEVER_THRESHOLD_C
   );
   const fatigueDays = recent.filter((l) => l.fatigueUnusual);
 
-  const sustainedFever = feverDays.length >= SUSTAINED_DAYS;
-  const sustainedFatigue = fatigueDays.length >= 2;
+  const sustainedFever = feverDays.length >= sustainedDaysThreshold;
+  const sustainedFatigue = fatigueDays.length >= fatigueDaysThreshold;
 
   if (sustainedFever) {
-    reasons.push(`${SUSTAINED_DAYS}日以上、${FEVER_THRESHOLD_C}℃以上の高熱が続いています`);
+    reasons.push(
+      `${sustainedDaysThreshold}日以上、${FEVER_THRESHOLD_C}℃以上の高熱が続いています` +
+        (sensitive ? "(ライフステージ移行の要注意期間中のため通常より敏感な閾値です)" : "")
+    );
   }
   if (sustainedFatigue) {
     reasons.push("複数日にわたり「普段と違う強い倦怠感」が記録されています");

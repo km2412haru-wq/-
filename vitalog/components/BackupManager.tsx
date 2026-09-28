@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { downloadCsvBackup, downloadJsonBackup, restoreFromJsonFile } from "@/lib/exportImport";
+import GoogleDriveBackup from "@/components/GoogleDriveBackup";
 
 export default function BackupManager() {
   const [message, setMessage] = useState<string | null>(null);
@@ -51,14 +52,7 @@ export default function BackupManager() {
         {message && <p className="muted" style={{ marginTop: 8 }}>{message}</p>}
       </div>
 
-      <div className="card">
-        <h2>Google Driveへの自動バックアップ</h2>
-        <p className="field-hint">
-          このセッションでは未実装です。自動バックアップにはGoogle
-          OAuthクライアントの登録・認証フローの構築が必要なため、まずは上記の手動エクスポートで
-          Google Driveの同期フォルダにJSONファイルを保存する運用を推奨します。
-        </p>
-      </div>
+      <GoogleDriveBackup />
     </>
   );
 }

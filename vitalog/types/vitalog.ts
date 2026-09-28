@@ -92,6 +92,25 @@ export type ActivityTag = (typeof ACTIVITY_TAGS)[number] | string;
 export const LOAD_LEVELS = ["暇", "普通", "過密"] as const;
 export type LoadLevel = (typeof LOAD_LEVELS)[number];
 
+/** F12-1: 自分で登録する仮説(例:「気圧低下を3日後に関節痛」) */
+export interface Hypothesis {
+  id: string;
+  statement: string;
+  createdAt: string;
+  /** 支持しているかどうかの手応え(任意メモ)。統計的な支持率算出はF5/F11実装後 */
+  note?: string;
+}
+
+/** F12-2: セルフA/Bテストの介入宣言 */
+export interface SelfExperiment {
+  id: string;
+  description: string;
+  startDate: string;
+  /** 未終了ならundefined(進行中) */
+  endDate?: string;
+  createdAt: string;
+}
+
 /**
  * F1: 毎日の体調記録。
  * 「いつでも記録可能」「後入力・スキップ可」の方針のため、
@@ -139,6 +158,19 @@ export interface DailyLog {
   activityTags: ActivityTag[];
   /** 睡眠時間(時間、0.5刻み) */
   sleepHours?: number;
+
+  /** F12-5: 健康×生産性相関記録(任意)。その日の成果実感 1〜10 */
+  productivityScore?: number;
+
+  /**
+   * F3: 環境データ(気温・気圧・湿度)。Open-Meteoから自動取得。
+   * 取得元は対象日が今日なら現在値API、過去日ならアーカイブAPI。
+   */
+  environment?: {
+    temperatureC?: number;
+    pressureHpa?: number;
+    humidityPercent?: number;
+  };
 
   // --- 任意・低優先度項目 ---
   /** 皮疹。写真は実験的機能のためdata URLとして保存(将来Driveバックアップの対象からは除外予定) */
@@ -190,6 +222,8 @@ export interface VitalogStoreV1 {
   dailyLogs: DailyLog[];
   registeredMedications: RegisteredMedication[];
   taperingEvents: TaperingEvent[];
+  hypotheses: Hypothesis[];
+  selfExperiments: SelfExperiment[];
 }
 
 export type VitalogStore = VitalogStoreV1;

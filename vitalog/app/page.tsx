@@ -4,6 +4,7 @@ import Nav from "@/components/Nav";
 import DailyLogForm from "@/components/DailyLogForm";
 import DailyLogList from "@/components/DailyLogList";
 import EmergencyBanner from "@/components/EmergencyBanner";
+import LifeStageBanner from "@/components/LifeStageBanner";
 import { useDailyLogs, type DailyLogDraft } from "@/lib/useDailyLogs";
 
 export default function Home() {
@@ -50,6 +51,7 @@ export default function Home() {
       {ready && (
         <>
           <EmergencyBanner dailyLogs={dailyLogs} />
+          <LifeStageBanner />
           <DailyLogForm onSubmit={handleSubmit} onSkip={handleSkip} />
           <DailyLogList dailyLogs={dailyLogs} onDelete={deleteLog} />
         </>

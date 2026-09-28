@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { generateId } from "@/lib/id";
 import PhotoCaptureButton from "@/components/PhotoCaptureButton";
 import { useSpeechToText } from "@/lib/useSpeechToText";
+import { useEnvironment } from "@/lib/useEnvironment";
 import {
   ACTIVITY_TAGS,
   JOINT_SITES,
@@ -57,6 +58,8 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [customActivityTag, setCustomActivityTag] = useState("");
   const [sleepHours, setSleepHours] = useState(7);
   const [showOptional, setShowOptional] = useState(false);
+  const [productivityOn, setProductivityOn] = useState(false);
+  const [productivityScore, setProductivityScore] = useState(5);
   const [musclePainOn, setMusclePainOn] = useState(false);
   const [musclePainSeverity, setMusclePainSeverity] = useState<1 | 2 | 3 | 4 | 5>(2);
   const [lymphNoteOn, setLymphNoteOn] = useState(false);
@@ -79,6 +82,14 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const { supported: speechSupported, listening, start, stop } = useSpeechToText((text) => {
     setMemo((prev) => (prev ? `${prev} ${text}` : text));
   });
+
+  const {
+    location: envLocation,
+    environment,
+    loading: envLoading,
+    error: envError,
+    enableLocation,
+  } = useEnvironment(targetDate);
 
   const showMoodReason = moodScore <= MOOD_LOW_THRESHOLD;
 
@@ -155,6 +166,8 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setActivityTags([]);
     setCustomActivityTag("");
     setSleepHours(7);
+    setProductivityOn(false);
+    setProductivityScore(5);
     setMusclePainOn(false);
     setLymphNoteOn(false);
     setLymphNote("");
@@ -196,6 +209,8 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       loadLevel,
       activityTags,
       sleepHours,
+      productivityScore: productivityOn ? productivityScore : undefined,
+      environment: environment ?? undefined,
       rash: rashOn ? { note: rashNote || undefined, photoDataUrl: rashPhoto } : undefined,
       musclePain: musclePainOn ? { severity: musclePainSeverity } : undefined,
       lymphNodeSwelling: lymphNoteOn ? { note: lymphNote || undefined } : undefined,
@@ -242,6 +257,26 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           max={todayIso()}
         />
         <div className="field-hint">後日入力の場合はここを過去日にしてください</div>
+      </div>
+
+      <div className="field">
+        <label>環境データ(気温・気圧・湿度)</label>
+        {!envLocation && (
+          <button type="button" className="btn-secondary" onClick={enableLocation}>
+            📍 位置情報を取得して自動記録を有効にする
+          </button>
+        )}
+        {envLocation && envLoading && <p className="muted">取得中...</p>}
+        {envLocation && !envLoading && environment && (
+          <div className="row">
+            {environment.temperatureC != null && <span className="tag">🌡️ {environment.temperatureC}℃</span>}
+            {environment.pressureHpa != null && <span className="tag">🌬️ {environment.pressureHpa}hPa</span>}
+            {environment.humidityPercent != null && <span className="tag">💧 {environment.humidityPercent}%</span>}
+          </div>
+        )}
+        {envLocation && !envLoading && envError && (
+          <p className="field-hint">{envError}(手入力は不要、記録自体は続行できます)</p>
+        )}
       </div>
 
       <div className="field">
@@ -621,6 +656,28 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
         </button>
         {showOptional && (
           <div style={{ marginTop: 8 }}>
+            <label style={{ display: "block", marginBottom: 8 }}>
+              <input
+                type="checkbox"
+                checked={productivityOn}
+                onChange={(e) => setProductivityOn(e.target.checked)}
+              />{" "}
+              今日の成果実感を記録する(F12-5・健康×生産性相関)
+            </label>
+            {productivityOn && (
+              <div className="row" style={{ marginBottom: 12 }}>
+                <span>成果実感</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  value={productivityScore}
+                  onChange={(e) => setProductivityScore(Number(e.target.value))}
+                />
+                <span className="slider-value">{productivityScore}</span>
+              </div>
+            )}
+
             <label style={{ display: "block", marginBottom: 8 }}>
               <input
                 type="checkbox"

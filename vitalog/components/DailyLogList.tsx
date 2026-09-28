@@ -66,6 +66,18 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                 {typeof log.sleepHours === "number" && (
                   <span className="tag">睡眠 {log.sleepHours}h</span>
                 )}
+                {typeof log.productivityScore === "number" && (
+                  <span className="tag">成果実感 {log.productivityScore}/10</span>
+                )}
+                {log.environment?.temperatureC != null && (
+                  <span className="tag">🌡️{log.environment.temperatureC}℃</span>
+                )}
+                {log.environment?.pressureHpa != null && (
+                  <span className="tag">🌬️{log.environment.pressureHpa}hPa</span>
+                )}
+                {log.environment?.humidityPercent != null && (
+                  <span className="tag">💧{log.environment.humidityPercent}%</span>
+                )}
                 {log.activityTags.map((t) => (
                   <span key={t} className="tag">
                     {t}

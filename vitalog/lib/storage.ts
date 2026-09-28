@@ -2,7 +2,9 @@ import { migrateToLatest } from "@/lib/migrate";
 import {
   SCHEMA_VERSION,
   type DailyLog,
+  type Hypothesis,
   type RegisteredMedication,
+  type SelfExperiment,
   type TaperingEvent,
   type VitalogStore,
 } from "@/types/vitalog";
@@ -10,7 +12,14 @@ import {
 const STORAGE_KEY = "vitalog:store";
 
 function emptyStore(): VitalogStore {
-  return { version: SCHEMA_VERSION, dailyLogs: [], registeredMedications: [], taperingEvents: [] };
+  return {
+    version: SCHEMA_VERSION,
+    dailyLogs: [],
+    registeredMedications: [],
+    taperingEvents: [],
+    hypotheses: [],
+    selfExperiments: [],
+  };
 }
 
 export function loadStore(): VitalogStore {
@@ -59,6 +68,24 @@ export function loadTaperingEvents(): TaperingEvent[] {
 export function saveTaperingEvents(taperingEvents: TaperingEvent[]): void {
   const store = loadStore();
   saveStore({ ...store, taperingEvents });
+}
+
+export function loadHypotheses(): Hypothesis[] {
+  return loadStore().hypotheses;
+}
+
+export function saveHypotheses(hypotheses: Hypothesis[]): void {
+  const store = loadStore();
+  saveStore({ ...store, hypotheses });
+}
+
+export function loadSelfExperiments(): SelfExperiment[] {
+  return loadStore().selfExperiments;
+}
+
+export function saveSelfExperiments(selfExperiments: SelfExperiment[]): void {
+  const store = loadStore();
+  saveStore({ ...store, selfExperiments });
 }
 
 /** F8: JSONエクスポート(バックアップ・医師向け提出等の土台) */

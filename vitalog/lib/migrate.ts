@@ -1,7 +1,9 @@
 import {
   SCHEMA_VERSION,
   type DailyLog,
+  type Hypothesis,
   type RegisteredMedication,
+  type SelfExperiment,
   type TaperingEvent,
   type VitalogStore,
 } from "@/types/vitalog";
@@ -21,6 +23,8 @@ export function migrateToLatest(raw: unknown): VitalogStore {
     dailyLogs: [],
     registeredMedications: [],
     taperingEvents: [],
+    hypotheses: [],
+    selfExperiments: [],
   };
 
   if (!raw || typeof raw !== "object") {
@@ -32,6 +36,8 @@ export function migrateToLatest(raw: unknown): VitalogStore {
     dailyLogs?: unknown;
     registeredMedications?: unknown;
     taperingEvents?: unknown;
+    hypotheses?: unknown;
+    selfExperiments?: unknown;
   };
 
   // バージョン番号が無い(=最初期のスキーマより前)データはここで空扱いにする。
@@ -48,6 +54,10 @@ export function migrateToLatest(raw: unknown): VitalogStore {
       : [],
     taperingEvents: Array.isArray(data.taperingEvents)
       ? data.taperingEvents.map(normalizeTaperingEvent)
+      : [],
+    hypotheses: Array.isArray(data.hypotheses) ? data.hypotheses.map(normalizeHypothesis) : [],
+    selfExperiments: Array.isArray(data.selfExperiments)
+      ? data.selfExperiments.map(normalizeSelfExperiment)
       : [],
   };
 }
@@ -70,6 +80,8 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     loadLevel: entry.loadLevel,
     activityTags: Array.isArray(entry.activityTags) ? entry.activityTags : [],
     sleepHours: entry.sleepHours,
+    productivityScore: entry.productivityScore,
+    environment: entry.environment,
     rash: entry.rash,
     musclePain: entry.musclePain,
     lymphNodeSwelling: entry.lymphNodeSwelling,
@@ -104,6 +116,27 @@ function normalizeTaperingEvent(raw: unknown): TaperingEvent {
     date: entry.date ?? "",
     newDose: entry.newDose ?? "",
     note: entry.note,
+    createdAt: entry.createdAt ?? new Date().toISOString(),
+  };
+}
+
+function normalizeHypothesis(raw: unknown): Hypothesis {
+  const entry = raw as Partial<Hypothesis>;
+  return {
+    id: entry.id ?? "",
+    statement: entry.statement ?? "",
+    createdAt: entry.createdAt ?? new Date().toISOString(),
+    note: entry.note,
+  };
+}
+
+function normalizeSelfExperiment(raw: unknown): SelfExperiment {
+  const entry = raw as Partial<SelfExperiment>;
+  return {
+    id: entry.id ?? "",
+    description: entry.description ?? "",
+    startDate: entry.startDate ?? "",
+    endDate: entry.endDate,
     createdAt: entry.createdAt ?? new Date().toISOString(),
   };
 }

@@ -7,6 +7,8 @@ const TABS = [
   { href: "/", label: "毎日の記録" },
   { href: "/trends", label: "トレンド" },
   { href: "/medications", label: "服薬管理" },
+  { href: "/experiments", label: "仮説・実験" },
+  { href: "/report", label: "レポート" },
   { href: "/backup", label: "バックアップ" },
   { href: "/roadmap", label: "今後の機能" },
 ];
