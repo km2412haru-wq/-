@@ -35,6 +35,18 @@ export interface MedicationRecord {
   type: MedicationType;
   /** 服薬時刻(HH:mm)。未入力可 */
   time?: string;
+  /** 写真から自動入力した場合、元になった写真のIndexedDB上のID(ユーザーが保持を選んだ場合のみ) */
+  sourcePhotoId?: string;
+}
+
+/** 外用薬(シップ・ローション等)の記録1件。内服のMedicationRecordとは用法が違うため分けて持つ */
+export interface TopicalMedicationRecord {
+  id: string;
+  name: string;
+  /** 使用部位(任意・自由記述) */
+  site?: string;
+  note?: string;
+  sourcePhotoId?: string;
 }
 
 /**
@@ -140,11 +152,18 @@ export interface DailyLog {
    * MAS等の重篤合併症の急変検知にのみ使う、通常のトレンドには出さない値。
    */
   labs?: {
+    wbcPerUl?: number;
     ferritinNgMl?: number;
+    crpMgDl?: number;
+    astUL?: number;
+    altUL?: number;
     plateletsPerUl?: number;
+    /** 写真から自動入力した場合、元になった検査結果票の写真ID(ユーザーが保持を選んだ場合のみ) */
+    sourcePhotoId?: string;
   };
 
   medications: MedicationRecord[];
+  topicalMedications: TopicalMedicationRecord[];
 
   /** 自由メモ。Web Speech APIによる音声入力も同じ欄に反映される */
   memo?: string;

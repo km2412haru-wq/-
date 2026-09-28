@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { generateId } from "@/lib/id";
+import PhotoCaptureButton from "@/components/PhotoCaptureButton";
 import { useSpeechToText } from "@/lib/useSpeechToText";
 import {
   ACTIVITY_TAGS,
@@ -16,6 +17,7 @@ import {
   type MedicationRecord,
   type MedicationType,
   type MoodReasonTag,
+  type TopicalMedicationRecord,
 } from "@/types/vitalog";
 import type { DailyLogDraft } from "@/lib/useDailyLogs";
 
@@ -55,9 +57,15 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [rashNote, setRashNote] = useState("");
   const [rashPhoto, setRashPhoto] = useState<string | undefined>(undefined);
   const [labsOn, setLabsOn] = useState(false);
+  const [wbc, setWbc] = useState("");
   const [ferritin, setFerritin] = useState("");
+  const [crp, setCrp] = useState("");
+  const [ast, setAst] = useState("");
+  const [alt, setAlt] = useState("");
   const [platelets, setPlatelets] = useState("");
+  const [labsPhotoId, setLabsPhotoId] = useState<string | undefined>(undefined);
   const [medications, setMedications] = useState<MedicationRecord[]>([]);
+  const [topicalMedications, setTopicalMedications] = useState<TopicalMedicationRecord[]>([]);
   const [memo, setMemo] = useState("");
 
   const { supported: speechSupported, listening, start, stop } = useSpeechToText((text) => {
@@ -112,6 +120,18 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setMedications((prev) => prev.filter((m) => m.id !== id));
   };
 
+  const addTopicalRow = () => {
+    setTopicalMedications((prev) => [...prev, { id: generateId(), name: "" }]);
+  };
+
+  const updateTopical = (id: string, changes: Partial<TopicalMedicationRecord>) => {
+    setTopicalMedications((prev) => prev.map((t) => (t.id === id ? { ...t, ...changes } : t)));
+  };
+
+  const removeTopical = (id: string) => {
+    setTopicalMedications((prev) => prev.filter((t) => t.id !== id));
+  };
+
   const reset = () => {
     setTemperature("");
     setConditionScore(7);
@@ -133,9 +153,15 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setRashNote("");
     setRashPhoto(undefined);
     setLabsOn(false);
+    setWbc("");
     setFerritin("");
+    setCrp("");
+    setAst("");
+    setAlt("");
     setPlatelets("");
+    setLabsPhotoId(undefined);
     setMedications([]);
+    setTopicalMedications([]);
     setMemo("");
   };
 
@@ -166,11 +192,17 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       lymphNodeSwelling: lymphNoteOn ? { note: lymphNote || undefined } : undefined,
       labs: labsOn
         ? {
+            wbcPerUl: wbc ? Number(wbc) : undefined,
             ferritinNgMl: ferritin ? Number(ferritin) : undefined,
+            crpMgDl: crp ? Number(crp) : undefined,
+            astUL: ast ? Number(ast) : undefined,
+            altUL: alt ? Number(alt) : undefined,
             plateletsPerUl: platelets ? Number(platelets) : undefined,
+            sourcePhotoId: labsPhotoId,
           }
         : undefined,
       medications: medications.filter((m) => m.name.trim().length > 0),
+      topicalMedications: topicalMedications.filter((t) => t.name.trim().length > 0),
       memo: memo.trim() || undefined,
     };
     onSubmit(draft);
@@ -460,6 +492,68 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
         <button type="button" className="btn-secondary" onClick={addMedicationRow}>
           ＋ 服薬を追加
         </button>
+        <PhotoCaptureButton
+          kind="medication"
+          label="📷 薬の写真から読み取る"
+          onConfirm={(fields, photoId) => {
+            if (!fields.name && !fields.dose) return;
+            setMedications((prev) => [
+              ...prev,
+              {
+                id: generateId(),
+                name: fields.name ?? "",
+                dose: fields.dose,
+                type: "asNeeded",
+                sourcePhotoId: photoId,
+              },
+            ]);
+          }}
+        />
+      </div>
+
+      <div className="field">
+        <label>外用薬(シップ・ローション等)</label>
+        {topicalMedications.map((t) => (
+          <div key={t.id} className="row" style={{ marginBottom: 6 }}>
+            <input
+              type="text"
+              placeholder="品目名"
+              value={t.name}
+              onChange={(e) => updateTopical(t.id, { name: e.target.value })}
+              style={{ flex: 2 }}
+            />
+            <input
+              type="text"
+              placeholder="使用部位(任意)"
+              value={t.site ?? ""}
+              onChange={(e) => updateTopical(t.id, { site: e.target.value })}
+              style={{ flex: 1 }}
+            />
+            <button type="button" className="btn-ghost" onClick={() => removeTopical(t.id)}>
+              削除
+            </button>
+          </div>
+        ))}
+        <button type="button" className="btn-secondary" onClick={addTopicalRow}>
+          ＋ 外用薬を追加
+        </button>
+        <PhotoCaptureButton
+          kind="topical"
+          label="📷 外用薬の写真から読み取る"
+          onConfirm={(fields, photoId) => {
+            if (!fields.name) return;
+            setTopicalMedications((prev) => [
+              ...prev,
+              {
+                id: generateId(),
+                name: fields.name ?? "",
+                site: fields.site,
+                note: fields.note,
+                sourcePhotoId: photoId,
+              },
+            ]);
+          }}
+        />
       </div>
 
       <div className="field">
@@ -564,20 +658,61 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
               採血結果の入力あり(任意・重篤な合併症の早期検知に利用)
             </label>
             {labsOn && (
-              <div className="row">
-                <input
-                  type="number"
-                  placeholder="フェリチン(ng/mL)"
-                  value={ferritin}
-                  onChange={(e) => setFerritin(e.target.value)}
+              <>
+                <div className="row" style={{ marginBottom: 8 }}>
+                  <input
+                    type="number"
+                    placeholder="WBC(/μL)"
+                    value={wbc}
+                    onChange={(e) => setWbc(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="フェリチン(ng/mL)"
+                    value={ferritin}
+                    onChange={(e) => setFerritin(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="CRP(mg/dL)"
+                    value={crp}
+                    onChange={(e) => setCrp(e.target.value)}
+                  />
+                </div>
+                <div className="row">
+                  <input
+                    type="number"
+                    placeholder="AST(U/L)"
+                    value={ast}
+                    onChange={(e) => setAst(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="ALT(U/L)"
+                    value={alt}
+                    onChange={(e) => setAlt(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="血小板数(/μL)"
+                    value={platelets}
+                    onChange={(e) => setPlatelets(e.target.value)}
+                  />
+                </div>
+                <PhotoCaptureButton
+                  kind="labResult"
+                  label="📷 検査結果票の写真から読み取る"
+                  onConfirm={(fields, photoId) => {
+                    if (fields.wbcPerUl != null) setWbc(String(fields.wbcPerUl));
+                    if (fields.ferritinNgMl != null) setFerritin(String(fields.ferritinNgMl));
+                    if (fields.crpMgDl != null) setCrp(String(fields.crpMgDl));
+                    if (fields.astUL != null) setAst(String(fields.astUL));
+                    if (fields.altUL != null) setAlt(String(fields.altUL));
+                    if (fields.plateletsPerUl != null) setPlatelets(String(fields.plateletsPerUl));
+                    setLabsPhotoId(photoId);
+                  }}
                 />
-                <input
-                  type="number"
-                  placeholder="血小板数(/μL)"
-                  value={platelets}
-                  onChange={(e) => setPlatelets(e.target.value)}
-                />
-              </div>
+              </>
             )}
           </div>
         )}

@@ -75,6 +75,7 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     lymphNodeSwelling: entry.lymphNodeSwelling,
     labs: entry.labs,
     medications: Array.isArray(entry.medications) ? entry.medications : [],
+    topicalMedications: Array.isArray(entry.topicalMedications) ? entry.topicalMedications : [],
     memo: entry.memo,
     memoTags: entry.memoTags,
     createdAt: entry.createdAt ?? new Date().toISOString(),

@@ -68,9 +68,13 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                     {t}
                   </span>
                 ))}
+                {log.labs?.wbcPerUl != null && <span className="tag">WBC {log.labs.wbcPerUl}</span>}
                 {log.labs?.ferritinNgMl != null && (
                   <span className="tag">フェリチン {log.labs.ferritinNgMl}</span>
                 )}
+                {log.labs?.crpMgDl != null && <span className="tag">CRP {log.labs.crpMgDl}</span>}
+                {log.labs?.astUL != null && <span className="tag">AST {log.labs.astUL}</span>}
+                {log.labs?.altUL != null && <span className="tag">ALT {log.labs.altUL}</span>}
                 {log.labs?.plateletsPerUl != null && (
                   <span className="tag">血小板 {log.labs.plateletsPerUl}</span>
                 )}
@@ -81,6 +85,15 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                   服薬:{" "}
                   {log.medications
                     .map((m) => `${m.name}${m.dose ? `(${m.dose})` : ""}`)
+                    .join(", ")}
+                </div>
+              )}
+
+              {log.topicalMedications.length > 0 && (
+                <div className="muted" style={{ fontSize: "0.85rem", marginTop: 4 }}>
+                  外用薬:{" "}
+                  {log.topicalMedications
+                    .map((t) => `${t.name}${t.site ? `(${t.site})` : ""}`)
                     .join(", ")}
                 </div>
               )}

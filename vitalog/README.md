@@ -13,6 +13,7 @@
 - **F10: 緊急時検出・受診推奨**: 高熱の持続＋普段と違う強い倦怠感、または検査値(フェリチン/血小板)の急変をルールベースで検知し、記録画面上部に警告バナーを表示。**診断ではなく受診推奨の一次スクリーニングであり、閾値は暫定値**であることを明記（`lib/emergencyCheck.ts`）
 - **F8の一部**: `types/vitalog.ts` の `SCHEMA_VERSION` と `lib/migrate.ts` によるデータバージョン管理・マイグレーション、JSON/CSVエクスポート、JSONからの復元（`/backup`）。Google Driveへの自動バックアップはOAuth連携の構築が必要なため未実装（手動エクスポートしたJSONをGoogle Drive同期フォルダに保存する運用を暫定案内）
 - 自由メモの自動タグ付け（`POST /api/tag-memo`、Claude Haiku利用、`ANTHROPIC_API_KEY`未設定でも記録自体は問題なく動作）
+- **写真ベースの自動記録(F1拡張)**: 服薬パッケージ/外用薬パッケージ/血液検査結果票の写真をVision対応LLM(既定はHaiku、`ANTHROPIC_VISION_MODEL`で変更可)に渡し構造化データを抽出。**抽出結果は必ず確認・編集画面(`components/PhotoCaptureButton.tsx`)を経てからDailyLogにマージ**され、無確認で自動保存されることはない。写真本体は既定では破棄し、ユーザーが明示的に選んだ場合のみIndexedDB(この端末のブラウザ内のみ)に保存する。抽出結果はDailyLogの頓服(`medications`, type: asNeeded)・新設の外用薬(`topicalMedications`)・検査値(`labs`、WBC/フェリチン/CRP/AST/ALT/血小板)にそれぞれ反映
 
 F3、F5/F6/F11、F7、F12-*は未実装。`app/roadmap` に実装状況の一覧、`types/roadmap.ts` に未実装機能の将来のデータ型の当たりだけ置いてある。
 
@@ -24,6 +25,8 @@ F3、F5/F6/F11、F7、F12-*は未実装。`app/roadmap` に実装状況の一覧
 - **F9の項目は独立レコードにせず、DailyLogのフィールドとして統合**: 「1日の記録は1つ」というF1の設計をそのまま踏襲した方が、相関分析(F5/F11)の際にレコード結合の手間がなく扱いやすいと判断した。
 - **F10の閾値はハードコードされた暫定値**: 山口基準等の一般的な目安（38℃の高熱、フェリチン500ng/mL等）を仮置きしている。F5/F11で個人のベースラインが学習できるようになれば、パーソナライズ閾値に置き換える前提。
 - **緊急検出はローカルで即時判定**: サーバーへのデータ送信なしにブラウザ内で完結させ、オフラインでも動作する。
+- **写真データはDailyLogの外に置く**: `lib/photoStore.ts` (IndexedDB)で写真を管理し、DailyLogには`sourcePhotoId`という参照IDだけを持たせる。これにより写真本体がJSON/CSVエクスポートやlocalStorageの記録データ本体に混入することが構造的にありえない(既存の皮疹写真は実験的機能として例外的にdata URLをDailyLogに直接持たせているが、新設のIndexedDB方式の方が望ましいため、将来的な移行候補としている)。
+- **写真からの抽出は確認必須、無確認保存は不可**: 特に検査値はF10の緊急検知に使われるため、LLMの誤読がそのまま記録される事態を型・UIの両方で構造的に防止している(`PhotoCaptureButton`はconfirm操作なしに状態を`reviewing`から先に進められない)。
 
 ## セットアップ
 
@@ -32,7 +35,7 @@ npm install
 npm run dev
 ```
 
-自由メモの自動タグ付けを使う場合は `.env.local.example` を `.env.local` にコピーし、`ANTHROPIC_API_KEY` を設定する（未設定でも他機能は動作する）。
+自由メモの自動タグ付け・写真からの自動記録を使う場合は `.env.local.example` を `.env.local` にコピーし、`ANTHROPIC_API_KEY` を設定する（未設定でも他機能は動作し、自動入力機能だけ手動入力にフォールバックする）。
 
 ## Vercelへのデプロイ
 

@@ -39,6 +39,7 @@ export default function Home() {
       moodReasonTags: [],
       activityTags: [],
       medications: [],
+      topicalMedications: [],
     });
   };
 
