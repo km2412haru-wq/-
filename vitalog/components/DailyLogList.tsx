@@ -42,6 +42,9 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                 {typeof log.temperature === "number" && (
                   <span className="tag">体温 {log.temperature}℃</span>
                 )}
+                {log.temperature === "unmeasured" && (
+                  <span className="tag muted">体温 未測定</span>
+                )}
                 {log.jointPain.map((p) => (
                   <span key={p.site} className="tag">
                     関節痛:{p.site}({p.severity})

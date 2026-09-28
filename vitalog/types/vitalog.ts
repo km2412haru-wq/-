@@ -107,8 +107,14 @@ export interface DailyLog {
   skipped: boolean;
 
   // --- 必須項目 ---
-  /** 体温(℃)。未入力を許容するため optional */
-  temperature?: number;
+  /**
+   * 体温(℃)。3つの状態を区別する:
+   * - undefined: 未入力(入力し忘れ、または過去データにフィールド自体がない)
+   * - "unmeasured": ユーザーが明示的に「測っていない」を選んだ
+   * - number: 実測値
+   * トレンドグラフ等ではnumber以外を欠損として扱う(0℃扱いはしない)
+   */
+  temperature?: number | "unmeasured";
   /** 体調スコア 1(最悪)〜10(絶好調) */
   conditionScore?: number;
   jointPain: JointPainEntry[];

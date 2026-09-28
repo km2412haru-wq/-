@@ -151,6 +151,13 @@ textarea {
   text-align: center;
 }
 
+.slider-endpoints {
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  margin-top: 2px;
+}
+
 nav.tabs {
   display: flex;
   gap: 4px;

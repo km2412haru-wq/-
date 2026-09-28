@@ -27,6 +27,13 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** スライダーが「数字が大きいほど良い」方向であることを一目で伝えるための補助ラベル(極端な値のみ表示) */
+function scaleLabel(score: number, low: string, high: string): string {
+  if (score <= 3) return low;
+  if (score >= 8) return high;
+  return "";
+}
+
 interface Props {
   onSubmit: (draft: DailyLogDraft) => void;
   onSkip: (targetDate: string) => void;
@@ -35,6 +42,7 @@ interface Props {
 export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [targetDate, setTargetDate] = useState(todayIso());
   const [temperature, setTemperature] = useState("");
+  const [temperatureUnmeasured, setTemperatureUnmeasured] = useState(false);
   const [conditionScore, setConditionScore] = useState(7);
   const [jointPain, setJointPain] = useState<JointPainEntry[]>([]);
   const [hasSoreThroat, setHasSoreThroat] = useState(false);
@@ -134,6 +142,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
 
   const reset = () => {
     setTemperature("");
+    setTemperatureUnmeasured(false);
     setConditionScore(7);
     setJointPain([]);
     setHasSoreThroat(false);
@@ -172,7 +181,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     const draft: DailyLogDraft = {
       targetDate,
       skipped: false,
-      temperature: temperature ? Number(temperature) : undefined,
+      temperature: temperatureUnmeasured ? "unmeasured" : temperature ? Number(temperature) : undefined,
       conditionScore,
       jointPain,
       soreThroat: hasSoreThroat
@@ -246,12 +255,29 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           value={temperature}
           onChange={(e) => setTemperature(e.target.value)}
           placeholder="例: 36.8"
+          disabled={temperatureUnmeasured}
         />
+        <label style={{ display: "block", marginTop: 6 }}>
+          <input
+            type="checkbox"
+            checked={temperatureUnmeasured}
+            onChange={(e) => {
+              setTemperatureUnmeasured(e.target.checked);
+              if (e.target.checked) setTemperature("");
+            }}
+          />{" "}
+          今日は体温を測っていない(未測定)
+        </label>
       </div>
 
       <div className="field">
         <label htmlFor="conditionScore">
-          体調スコア(1〜10) <span className="slider-value">{conditionScore}</span>
+          体調スコア(1〜10) <span className="slider-value">{conditionScore}</span>{" "}
+          {scaleLabel(conditionScore, "つらい", "絶好調") && (
+            <span className="muted" style={{ fontSize: "0.85rem" }}>
+              ({scaleLabel(conditionScore, "つらい", "絶好調")})
+            </span>
+          )}
         </label>
         <input
           id="conditionScore"
@@ -261,6 +287,10 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           value={conditionScore}
           onChange={(e) => setConditionScore(Number(e.target.value))}
         />
+        <div className="row slider-endpoints">
+          <span>😣 つらい</span>
+          <span>絶好調 😊</span>
+        </div>
       </div>
 
       <div className="field">
@@ -342,7 +372,12 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
 
       <div className="field">
         <label htmlFor="moodScore">
-          気分スコア(1〜10) <span className="slider-value">{moodScore}</span>
+          気分スコア(1〜10) <span className="slider-value">{moodScore}</span>{" "}
+          {scaleLabel(moodScore, "沈んでいる", "最高") && (
+            <span className="muted" style={{ fontSize: "0.85rem" }}>
+              ({scaleLabel(moodScore, "沈んでいる", "最高")})
+            </span>
+          )}
         </label>
         <input
           id="moodScore"
@@ -352,6 +387,10 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           value={moodScore}
           onChange={(e) => setMoodScore(Number(e.target.value))}
         />
+        <div className="row slider-endpoints">
+          <span>😞 沈んでいる</span>
+          <span>最高 😄</span>
+        </div>
         {showMoodReason && (
           <div className="row" style={{ marginTop: 8 }}>
             {MOOD_REASON_TAGS.map((tag) => (
