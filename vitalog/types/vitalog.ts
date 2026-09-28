@@ -37,6 +37,16 @@ export interface MedicationRecord {
   time?: string;
   /** 写真から自動入力した場合、元になった写真のIndexedDB上のID(ユーザーが保持を選んだ場合のみ) */
   sourcePhotoId?: string;
+  /**
+   * 登録済みの定期薬(RegisteredMedication)由来のチェックリスト項目である場合、その参照ID。
+   * 手動追加・頓服・写真からの追加にはundefined。
+   */
+  registeredMedicationId?: string;
+  /**
+   * registeredMedicationId経由の場合の服用有無。既定はチェック済み(服用した)で、
+   * 外した場合はfalseとして明示的に記録する(記録が無い状態にはしない。アドヒアランス確認のため)。
+   */
+  taken?: boolean;
 }
 
 /** 外用薬(シップ・ローション等)の記録1件。内服のMedicationRecordとは用法が違うため分けて持つ */

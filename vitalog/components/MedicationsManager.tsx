@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useForegroundReminders } from "@/lib/useForegroundReminders";
 import { useMedications } from "@/lib/useMedications";
+import MedicationNotebookUpdater from "@/components/MedicationNotebookUpdater";
+import BulkImportManager from "@/components/BulkImportManager";
 import { MEDICATION_TYPES, type MedicationType } from "@/types/vitalog";
 
 export default function MedicationsManager() {
@@ -146,6 +148,8 @@ export default function MedicationsManager() {
             ＋ 薬を登録
           </button>
         </form>
+
+        <MedicationNotebookUpdater registeredMedications={registeredMedications} />
       </div>
 
       <div className="card">
@@ -203,6 +207,8 @@ export default function MedicationsManager() {
           </button>
         </form>
       </div>
+
+      <BulkImportManager />
     </>
   );
 }

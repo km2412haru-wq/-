@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { generateId } from "@/lib/id";
 import { savePhotoBlob } from "@/lib/photoStore";
+import { fileToBase64 } from "@/lib/fileToBase64";
 import type {
   ExtractedLabFields,
   ExtractedMedicationFields,
@@ -52,21 +53,9 @@ const FIELDS_BY_KIND: Record<PhotoCaptureKind, string[]> = {
   medication: ["name", "dose"],
   topical: ["name", "site", "note"],
   labResult: ["wbcPerUl", "ferritinNgMl", "crpMgDl", "astUL", "altUL", "plateletsPerUl"],
+  // お薬手帳は複数件抽出になるため、この単一項目編集UIでは扱わない(専用UIを別途持つ)
+  medicationNotebook: [],
 };
-
-function fileToBase64(file: File): Promise<{ base64: string; mediaType: string }> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      const [meta, base64] = result.split(",");
-      const mediaType = meta.match(/data:(.*);base64/)?.[1] ?? file.type;
-      resolve({ base64, mediaType });
-    };
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
 
 export default function PhotoCaptureButton({ kind, label, onConfirm }: Props) {
   const [status, setStatus] = useState<Status>({ step: "idle" });

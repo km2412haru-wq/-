@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { generateId } from "@/lib/id";
 import PhotoCaptureButton from "@/components/PhotoCaptureButton";
 import { savePhotoBlob } from "@/lib/photoStore";
 import { useSpeechToText } from "@/lib/useSpeechToText";
 import { useEnvironment } from "@/lib/useEnvironment";
+import { useMedications } from "@/lib/useMedications";
 import {
   ACTIVITY_TAGS,
   JOINT_SITES,
   LOAD_LEVELS,
-  MEDICATION_TYPES,
   MOOD_REASON_TAGS,
   type ActivityTag,
   type JointPainEntry,
@@ -78,8 +78,31 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [platelets, setPlatelets] = useState("");
   const [labsPhotoId, setLabsPhotoId] = useState<string | undefined>(undefined);
   const [medications, setMedications] = useState<MedicationRecord[]>([]);
+  const [medicationChecklist, setMedicationChecklist] = useState<Record<string, boolean>>({});
   const [topicalMedications, setTopicalMedications] = useState<TopicalMedicationRecord[]>([]);
   const [memo, setMemo] = useState("");
+
+  const { registeredMedications } = useMedications();
+  const activeRegularMedications = registeredMedications.filter(
+    (m) => m.active && m.type === "regular"
+  );
+
+  // 定期薬チェックリスト(3-2): 登録済みの定期薬は既定でチェック済み(服用した)扱いにする。
+  // 既にユーザーがチェックを操作した項目は上書きしない
+  useEffect(() => {
+    setMedicationChecklist((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const m of activeRegularMedications) {
+        if (!(m.id in next)) {
+          next[m.id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registeredMedications]);
 
   const { supported: speechSupported, listening, start, stop } = useSpeechToText((text) => {
     setMemo((prev) => (prev ? `${prev} ${text}` : text));
@@ -127,9 +150,10 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   };
 
   const addMedicationRow = () => {
+    // 定期薬はチェックリスト方式に移行したため、手動追加は頓服専用
     setMedications((prev) => [
       ...prev,
-      { id: generateId(), name: "", type: "regular" as MedicationType },
+      { id: generateId(), name: "", type: "asNeeded" as MedicationType },
     ]);
   };
 
@@ -185,6 +209,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setPlatelets("");
     setLabsPhotoId(undefined);
     setMedications([]);
+    setMedicationChecklist({});
     setTopicalMedications([]);
     setMemo("");
   };
@@ -227,7 +252,17 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
             sourcePhotoId: labsPhotoId,
           }
         : undefined,
-      medications: medications.filter((m) => m.name.trim().length > 0),
+      medications: [
+        ...activeRegularMedications.map((m) => ({
+          id: generateId(),
+          name: m.name,
+          dose: m.dose,
+          type: "regular" as MedicationType,
+          registeredMedicationId: m.id,
+          taken: medicationChecklist[m.id] ?? true,
+        })),
+        ...medications.filter((m) => m.name.trim().length > 0),
+      ],
       topicalMedications: topicalMedications.filter((t) => t.name.trim().length > 0),
       memo: memo.trim() || undefined,
     };
@@ -539,7 +574,30 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       </div>
 
       <div className="field">
-        <label>服薬記録</label>
+        <label>定期薬(服用した薬のチェックを外してください)</label>
+        {activeRegularMedications.length === 0 ? (
+          <p className="field-hint">
+            登録済みの定期薬がありません。「服薬管理」画面から登録できます。
+          </p>
+        ) : (
+          activeRegularMedications.map((m) => (
+            <label key={m.id} style={{ display: "block", marginBottom: 6 }}>
+              <input
+                type="checkbox"
+                checked={medicationChecklist[m.id] ?? true}
+                onChange={(e) =>
+                  setMedicationChecklist((prev) => ({ ...prev, [m.id]: e.target.checked }))
+                }
+              />{" "}
+              {m.name}
+              {m.dose && <span className="muted"> ({m.dose})</span>}
+            </label>
+          ))
+        )}
+      </div>
+
+      <div className="field">
+        <label>頓服(その場で追加)</label>
         {medications.map((m) => (
           <div key={m.id} className="row" style={{ marginBottom: 6 }}>
             <input
@@ -556,25 +614,13 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
               onChange={(e) => updateMedication(m.id, { dose: e.target.value })}
               style={{ flex: 1 }}
             />
-            <select
-              value={m.type}
-              onChange={(e) =>
-                updateMedication(m.id, { type: e.target.value as MedicationType })
-              }
-            >
-              {MEDICATION_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t === "regular" ? "定期薬" : "頓服"}
-                </option>
-              ))}
-            </select>
             <button type="button" className="btn-ghost" onClick={() => removeMedication(m.id)}>
               削除
             </button>
           </div>
         ))}
         <button type="button" className="btn-secondary" onClick={addMedicationRow}>
-          ＋ 服薬を追加
+          ＋ 頓服を追加
         </button>
         <PhotoCaptureButton
           kind="medication"

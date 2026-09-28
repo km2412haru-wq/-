@@ -99,7 +99,11 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                 <div className="muted" style={{ fontSize: "0.85rem", marginTop: 4 }}>
                   服薬:{" "}
                   {log.medications
-                    .map((m) => `${m.name}${m.dose ? `(${m.dose})` : ""}`)
+                    .map((m) => {
+                      const takenMark =
+                        m.registeredMedicationId != null ? (m.taken === false ? "✗未服用 " : "✓") : "";
+                      return `${takenMark}${m.name}${m.dose ? `(${m.dose})` : ""}`;
+                    })
                     .join(", ")}
                 </div>
               )}

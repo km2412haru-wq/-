@@ -63,12 +63,17 @@ export async function tagMemo(memo: string): Promise<string[]> {
 const EXTRACT_TOOLS: Record<PhotoCaptureKind, Anthropic.Tool> = {
   medication: {
     name: "extract_medication",
-    description: "薬のパッケージ・お薬シート・説明書の写真から薬品名と用量を抽出する",
+    description: "薬のパッケージ・お薬シート・説明書・処方箋の写真から薬品名・用量・日付を抽出する",
     input_schema: {
       type: "object",
       properties: {
         name: { type: "string", description: "薬品名。読み取れない場合は省略" },
         dose: { type: "string", description: "用量(単位込みの自由記述、例: '5mg')。読み取れない場合は省略" },
+        documentDate: {
+          type: "string",
+          description:
+            "処方箋等に印字された日付(処方日)。YYYY-MM-DD形式で。写っていない・薬パッケージ写真等で該当しない場合は省略",
+        },
       },
     },
   },
@@ -86,7 +91,7 @@ const EXTRACT_TOOLS: Record<PhotoCaptureKind, Anthropic.Tool> = {
   },
   labResult: {
     name: "extract_lab_result",
-    description: "血液検査結果票の写真から数値を抽出する。数値は単位を除いた数値のみ返す",
+    description: "血液検査結果票の写真から数値と採血日を抽出する。数値は単位を除いた数値のみ返す",
     input_schema: {
       type: "object",
       properties: {
@@ -96,7 +101,39 @@ const EXTRACT_TOOLS: Record<PhotoCaptureKind, Anthropic.Tool> = {
         astUL: { type: "number", description: "AST(U/L)" },
         altUL: { type: "number", description: "ALT(U/L)" },
         plateletsPerUl: { type: "number", description: "血小板数(/μL)" },
+        documentDate: {
+          type: "string",
+          description: "採血日/検査日。YYYY-MM-DD形式で。写っていなければ省略",
+        },
       },
+    },
+  },
+  medicationNotebook: {
+    name: "extract_medication_notebook",
+    description:
+      "お薬手帳の写真から、複数の薬・複数の受診日がテーブル状に並んでいる場合も含めて、" +
+      "薬品名・用量・処方日の組を全て抽出する",
+    input_schema: {
+      type: "object",
+      properties: {
+        entries: {
+          type: "array",
+          description: "読み取れた薬の一覧。読み取れなかった薬は含めない",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string", description: "薬品名" },
+              dose: { type: "string", description: "用量(単位込みの自由記述)。読み取れない場合は省略" },
+              documentDate: {
+                type: "string",
+                description: "処方日/受診日。YYYY-MM-DD形式で。読み取れない場合は省略",
+              },
+            },
+            required: ["name"],
+          },
+        },
+      },
+      required: ["entries"],
     },
   },
 };
