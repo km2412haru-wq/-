@@ -7,6 +7,7 @@ import {
   type SelfExperiment,
   type TaperingEvent,
   type VitalogStore,
+  type Visit,
 } from "@/types/vitalog";
 
 const STORAGE_KEY = "vitalog:store";
@@ -20,6 +21,7 @@ function emptyStore(): VitalogStore {
     taperingEvents: [],
     hypotheses: [],
     selfExperiments: [],
+    visits: [],
   };
 }
 
@@ -87,6 +89,15 @@ export function loadSelfExperiments(): SelfExperiment[] {
 export function saveSelfExperiments(selfExperiments: SelfExperiment[]): void {
   const store = loadStore();
   saveStore({ ...store, selfExperiments });
+}
+
+export function loadVisits(): Visit[] {
+  return loadStore().visits;
+}
+
+export function saveVisits(visits: Visit[]): void {
+  const store = loadStore();
+  saveStore({ ...store, visits });
 }
 
 /** F8: JSONエクスポート(バックアップ・医師向け提出等の土台) */

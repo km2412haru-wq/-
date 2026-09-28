@@ -6,6 +6,7 @@ import {
   type SelfExperiment,
   type TaperingEvent,
   type VitalogStore,
+  type Visit,
 } from "@/types/vitalog";
 
 /**
@@ -25,6 +26,7 @@ export function migrateToLatest(raw: unknown): VitalogStore {
     taperingEvents: [],
     hypotheses: [],
     selfExperiments: [],
+    visits: [],
   };
 
   if (!raw || typeof raw !== "object") {
@@ -38,6 +40,7 @@ export function migrateToLatest(raw: unknown): VitalogStore {
     taperingEvents?: unknown;
     hypotheses?: unknown;
     selfExperiments?: unknown;
+    visits?: unknown;
   };
 
   // バージョン番号が無い(=最初期のスキーマより前)データはここで空扱いにする。
@@ -59,6 +62,7 @@ export function migrateToLatest(raw: unknown): VitalogStore {
     selfExperiments: Array.isArray(data.selfExperiments)
       ? data.selfExperiments.map(normalizeSelfExperiment)
       : [],
+    visits: Array.isArray(data.visits) ? data.visits.map(normalizeVisit) : [],
   };
 }
 
@@ -138,5 +142,19 @@ function normalizeSelfExperiment(raw: unknown): SelfExperiment {
     startDate: entry.startDate ?? "",
     endDate: entry.endDate,
     createdAt: entry.createdAt ?? new Date().toISOString(),
+  };
+}
+
+function normalizeVisit(raw: unknown): Visit {
+  const entry = raw as Partial<Visit>;
+  return {
+    id: entry.id ?? "",
+    visitDate: entry.visitDate ?? "",
+    hospitalName: entry.hospitalName,
+    department: entry.department,
+    memo: entry.memo,
+    nextVisitDate: entry.nextVisitDate,
+    createdAt: entry.createdAt ?? new Date().toISOString(),
+    updatedAt: entry.updatedAt ?? new Date().toISOString(),
   };
 }

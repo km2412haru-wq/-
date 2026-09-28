@@ -87,6 +87,19 @@ export interface TaperingEvent {
   createdAt: string;
 }
 
+/** 通院記録1件。検査値は対象日=受診日としてDailyLog.labsにも反映される(bulkImport.ts経由) */
+export interface Visit {
+  id: string;
+  visitDate: string;
+  hospitalName?: string;
+  department?: string;
+  memo?: string;
+  /** 次回受診予定日(任意) */
+  nextVisitDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const ACTIVITY_TAGS = [
   "授業",
   "バイト",
@@ -238,6 +251,7 @@ export interface VitalogStoreV1 {
   taperingEvents: TaperingEvent[];
   hypotheses: Hypothesis[];
   selfExperiments: SelfExperiment[];
+  visits: Visit[];
 }
 
 export type VitalogStore = VitalogStoreV1;

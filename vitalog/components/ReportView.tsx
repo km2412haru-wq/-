@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useDailyLogs } from "@/lib/useDailyLogs";
+import { useVisits } from "@/lib/useVisits";
 import { DATE_RANGE_OPTIONS, filterByRange, type DateRangeKey } from "@/lib/trendData";
 import { buildReport } from "@/lib/report";
 
@@ -14,12 +15,14 @@ const RANGE_LABELS: Record<DateRangeKey, string> = {
 
 export default function ReportView() {
   const { dailyLogs, ready } = useDailyLogs();
+  const { visits, ready: visitsReady } = useVisits();
   const [range, setRange] = useState<DateRangeKey>("30d");
 
   const filtered = useMemo(() => filterByRange(dailyLogs, range), [dailyLogs, range]);
   const report = useMemo(() => buildReport(filtered), [filtered]);
+  const recentVisits = useMemo(() => visits.slice(0, 5), [visits]);
 
-  if (!ready) return null;
+  if (!ready || !visitsReady) return null;
 
   return (
     <div>
@@ -98,6 +101,22 @@ export default function ReportView() {
             ? report.topicalMedicationNames.join(", ")
             : "記録なし"}
         </p>
+
+        <h3>直近の通院履歴</h3>
+        {recentVisits.length === 0 ? (
+          <p className="muted">記録なし</p>
+        ) : (
+          <ul>
+            {recentVisits.map((v) => (
+              <li key={v.id}>
+                <strong>{v.visitDate}</strong> {v.hospitalName}
+                {v.department && ` / ${v.department}`}
+                {v.memo && ` — ${v.memo}`}
+                {v.nextVisitDate && `(次回: ${v.nextVisitDate})`}
+              </li>
+            ))}
+          </ul>
+        )}
 
         <h3>自由メモ</h3>
         {report.memoEntries.length === 0 ? (
