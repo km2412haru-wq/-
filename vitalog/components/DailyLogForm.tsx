@@ -4,11 +4,15 @@ import { useMemo, useState } from "react";
 import { generateId } from "@/lib/id";
 import { useSpeechToText } from "@/lib/useSpeechToText";
 import {
+  ACTIVITY_TAGS,
   JOINT_SITES,
+  LOAD_LEVELS,
   MEDICATION_TYPES,
   MOOD_REASON_TAGS,
+  type ActivityTag,
   type JointPainEntry,
   type JointSite,
+  type LoadLevel,
   type MedicationRecord,
   type MedicationType,
   type MoodReasonTag,
@@ -37,6 +41,11 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [soreThroatNote, setSoreThroatNote] = useState("");
   const [moodScore, setMoodScore] = useState(7);
   const [moodReasonTags, setMoodReasonTags] = useState<MoodReasonTag[]>([]);
+  const [fatigueUnusual, setFatigueUnusual] = useState(false);
+  const [loadLevel, setLoadLevel] = useState<LoadLevel | undefined>(undefined);
+  const [activityTags, setActivityTags] = useState<ActivityTag[]>([]);
+  const [customActivityTag, setCustomActivityTag] = useState("");
+  const [sleepHours, setSleepHours] = useState(7);
   const [showOptional, setShowOptional] = useState(false);
   const [musclePainOn, setMusclePainOn] = useState(false);
   const [musclePainSeverity, setMusclePainSeverity] = useState<1 | 2 | 3 | 4 | 5>(2);
@@ -45,6 +54,9 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [rashOn, setRashOn] = useState(false);
   const [rashNote, setRashNote] = useState("");
   const [rashPhoto, setRashPhoto] = useState<string | undefined>(undefined);
+  const [labsOn, setLabsOn] = useState(false);
+  const [ferritin, setFerritin] = useState("");
+  const [platelets, setPlatelets] = useState("");
   const [medications, setMedications] = useState<MedicationRecord[]>([]);
   const [memo, setMemo] = useState("");
 
@@ -72,6 +84,19 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     );
   };
 
+  const toggleActivityTag = (tag: ActivityTag) => {
+    setActivityTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const addCustomActivityTag = () => {
+    const tag = customActivityTag.trim();
+    if (!tag || activityTags.includes(tag)) return;
+    setActivityTags((prev) => [...prev, tag]);
+    setCustomActivityTag("");
+  };
+
   const addMedicationRow = () => {
     setMedications((prev) => [
       ...prev,
@@ -96,12 +121,20 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setSoreThroatNote("");
     setMoodScore(7);
     setMoodReasonTags([]);
+    setFatigueUnusual(false);
+    setLoadLevel(undefined);
+    setActivityTags([]);
+    setCustomActivityTag("");
+    setSleepHours(7);
     setMusclePainOn(false);
     setLymphNoteOn(false);
     setLymphNote("");
     setRashOn(false);
     setRashNote("");
     setRashPhoto(undefined);
+    setLabsOn(false);
+    setFerritin("");
+    setPlatelets("");
     setMedications([]);
     setMemo("");
   };
@@ -124,9 +157,19 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
         : undefined,
       moodScore,
       moodReasonTags: showMoodReason ? moodReasonTags : [],
+      fatigueUnusual: fatigueUnusual || undefined,
+      loadLevel,
+      activityTags,
+      sleepHours,
       rash: rashOn ? { note: rashNote || undefined, photoDataUrl: rashPhoto } : undefined,
       musclePain: musclePainOn ? { severity: musclePainSeverity } : undefined,
       lymphNodeSwelling: lymphNoteOn ? { note: lymphNote || undefined } : undefined,
+      labs: labsOn
+        ? {
+            ferritinNgMl: ferritin ? Number(ferritin) : undefined,
+            plateletsPerUl: platelets ? Number(platelets) : undefined,
+          }
+        : undefined,
       medications: medications.filter((m) => m.name.trim().length > 0),
       memo: memo.trim() || undefined,
     };
@@ -295,6 +338,91 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       </div>
 
       <div className="field">
+        <label>
+          <input
+            type="checkbox"
+            checked={fatigueUnusual}
+            onChange={(e) => setFatigueUnusual(e.target.checked)}
+          />{" "}
+          普段と違う強い倦怠感がある
+        </label>
+        <div className="field-hint">MAS等の重篤な合併症の早期発見に使う重要な項目です</div>
+      </div>
+
+      <div className="field">
+        <label>今日の負荷感</label>
+        <div className="row">
+          {LOAD_LEVELS.map((level) => (
+            <button
+              type="button"
+              key={level}
+              className="chip"
+              data-active={loadLevel === level}
+              onClick={() => setLoadLevel(loadLevel === level ? undefined : level)}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="field">
+        <label>活動タグ</label>
+        <div className="row">
+          {ACTIVITY_TAGS.map((tag) => (
+            <button
+              type="button"
+              key={tag}
+              className="chip"
+              data-active={activityTags.includes(tag)}
+              onClick={() => toggleActivityTag(tag)}
+            >
+              {tag}
+            </button>
+          ))}
+          {activityTags
+            .filter((t) => !(ACTIVITY_TAGS as readonly string[]).includes(t))
+            .map((tag) => (
+              <button
+                type="button"
+                key={tag}
+                className="chip"
+                data-active
+                onClick={() => toggleActivityTag(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+        </div>
+        <div className="row" style={{ marginTop: 8 }}>
+          <input
+            type="text"
+            placeholder="タグを追加(任意)"
+            value={customActivityTag}
+            onChange={(e) => setCustomActivityTag(e.target.value)}
+          />
+          <button type="button" className="btn-secondary" onClick={addCustomActivityTag}>
+            追加
+          </button>
+        </div>
+      </div>
+
+      <div className="field">
+        <label htmlFor="sleepHours">
+          睡眠時間(時間) <span className="slider-value">{sleepHours}</span>
+        </label>
+        <input
+          id="sleepHours"
+          type="range"
+          min={0}
+          max={14}
+          step={0.5}
+          value={sleepHours}
+          onChange={(e) => setSleepHours(Number(e.target.value))}
+        />
+      </div>
+
+      <div className="field">
         <label>服薬記録</label>
         {medications.map((m) => (
           <div key={m.id} className="row" style={{ marginBottom: 6 }}>
@@ -425,6 +553,31 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
                   onChange={(e) => handleRashPhoto(e.target.files?.[0] ?? null)}
                 />
               </>
+            )}
+
+            <label style={{ display: "block", marginTop: 12, marginBottom: 8 }}>
+              <input
+                type="checkbox"
+                checked={labsOn}
+                onChange={(e) => setLabsOn(e.target.checked)}
+              />{" "}
+              採血結果の入力あり(任意・重篤な合併症の早期検知に利用)
+            </label>
+            {labsOn && (
+              <div className="row">
+                <input
+                  type="number"
+                  placeholder="フェリチン(ng/mL)"
+                  value={ferritin}
+                  onChange={(e) => setFerritin(e.target.value)}
+                />
+                <input
+                  type="number"
+                  placeholder="血小板数(/μL)"
+                  value={platelets}
+                  onChange={(e) => setPlatelets(e.target.value)}
+                />
+              </div>
             )}
           </div>
         )}

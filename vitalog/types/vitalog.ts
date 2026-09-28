@@ -38,6 +38,49 @@ export interface MedicationRecord {
 }
 
 /**
+ * F2: 登録済みの定期薬・頓服マスタ。
+ * DailyLogのmedications(その日実際に飲んだ記録)とは別に、
+ * 「普段飲んでいる薬」を管理してリマインダーの元データにする。
+ */
+export interface RegisteredMedication {
+  id: string;
+  name: string;
+  dose?: string;
+  type: MedicationType;
+  /** リマインダーを出す時刻(HH:mm)。頓服は空でよい */
+  reminderTime?: string;
+  /** 服用終了済み(減薬完了・中止)の薬は非表示にできるようfalseにする */
+  active: boolean;
+  createdAt: string;
+}
+
+/** F2: 減薬・増薬(テーパリング)履歴1件 */
+export interface TaperingEvent {
+  id: string;
+  medicationName: string;
+  date: string;
+  /** 変更後の用量(自由記述) */
+  newDose: string;
+  note?: string;
+  createdAt: string;
+}
+
+export const ACTIVITY_TAGS = [
+  "授業",
+  "バイト",
+  "部活",
+  "ゼミ",
+  "資格勉強",
+  "仕事",
+  "通勤",
+  "シフト",
+] as const;
+export type ActivityTag = (typeof ACTIVITY_TAGS)[number] | string;
+
+export const LOAD_LEVELS = ["暇", "普通", "過密"] as const;
+export type LoadLevel = (typeof LOAD_LEVELS)[number];
+
+/**
  * F1: 毎日の体調記録。
  * 「いつでも記録可能」「後入力・スキップ可」の方針のため、
  * 記録対象日(targetDate)と実際の入力時刻(recordedAt)を分けて持つ。
@@ -67,6 +110,17 @@ export interface DailyLog {
   moodScore?: number;
   /** moodScore が低い時のみ入力される理由タグ */
   moodReasonTags: MoodReasonTag[];
+  /**
+   * F10向け: 「普段と違う強い倦怠感」の有無。
+   * conditionScoreだけでは拾えない質的な違和感を単独フラグとして残す。
+   */
+  fatigueUnusual?: boolean;
+
+  // --- F9: スケジュール・負荷管理(時間単位ではなくざっくり記録) ---
+  loadLevel?: LoadLevel;
+  activityTags: ActivityTag[];
+  /** 睡眠時間(時間、0.5刻み) */
+  sleepHours?: number;
 
   // --- 任意・低優先度項目 ---
   /** 皮疹。写真は実験的機能のためdata URLとして保存(将来Driveバックアップの対象からは除外予定) */
@@ -81,6 +135,14 @@ export interface DailyLog {
   lymphNodeSwelling?: {
     note?: string;
   };
+  /**
+   * F10向け検査値(採血結果を受け取った時だけ任意入力)。
+   * MAS等の重篤合併症の急変検知にのみ使う、通常のトレンドには出さない値。
+   */
+  labs?: {
+    ferritinNgMl?: number;
+    plateletsPerUl?: number;
+  };
 
   medications: MedicationRecord[];
 
@@ -93,10 +155,16 @@ export interface DailyLog {
   updatedAt: string;
 }
 
-/** localStorageに保存する際の実データ形式(バージョン付き) */
+/**
+ * localStorageに保存する際の実データ形式(バージョン付き)。
+ * registeredMedications/taperingEventsはv1に対する後方互換な追加フィールド
+ * (旧データには存在しないため、読み込み時に空配列で補う。lib/migrate.ts参照)。
+ */
 export interface VitalogStoreV1 {
   version: 1;
   dailyLogs: DailyLog[];
+  registeredMedications: RegisteredMedication[];
+  taperingEvents: TaperingEvent[];
 }
 
 export type VitalogStore = VitalogStoreV1;

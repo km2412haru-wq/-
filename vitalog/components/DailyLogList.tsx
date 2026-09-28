@@ -58,6 +58,22 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                     {t}
                   </span>
                 ))}
+                {log.fatigueUnusual && <span className="tag">⚠︎普段と違う倦怠感</span>}
+                {log.loadLevel && <span className="tag">負荷:{log.loadLevel}</span>}
+                {typeof log.sleepHours === "number" && (
+                  <span className="tag">睡眠 {log.sleepHours}h</span>
+                )}
+                {log.activityTags.map((t) => (
+                  <span key={t} className="tag">
+                    {t}
+                  </span>
+                ))}
+                {log.labs?.ferritinNgMl != null && (
+                  <span className="tag">フェリチン {log.labs.ferritinNgMl}</span>
+                )}
+                {log.labs?.plateletsPerUl != null && (
+                  <span className="tag">血小板 {log.labs.plateletsPerUl}</span>
+                )}
               </div>
 
               {log.medications.length > 0 && (

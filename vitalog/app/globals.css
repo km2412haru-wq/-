@@ -6,6 +6,11 @@
   --color-primary: #2f6feb;
   --color-danger: #d9534f;
   --color-border: #e3e5eb;
+  /* dataviz skillの検証済みカテゴリカルパレット(スロット1・2)とステータス色 */
+  --series-condition: #2a78d6;
+  --series-mood: #eb6834;
+  --status-critical: #d03b3b;
+  --status-critical-bg: #fdecec;
   color-scheme: light;
 }
 
@@ -191,4 +196,56 @@ nav.tabs a[data-active="true"] {
   border-radius: 999px;
   padding: 2px 8px;
   margin: 2px 4px 2px 0;
+}
+
+.emergency-banner {
+  border: 2px solid var(--status-critical);
+  background: var(--status-critical-bg);
+  color: #7a1f1f;
+}
+
+/* トレンドチャート */
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stat-tile {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.stat-tile-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.stat-tile-label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
 }

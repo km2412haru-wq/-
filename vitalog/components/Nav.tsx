@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 
 const TABS = [
   { href: "/", label: "毎日の記録" },
-  { href: "/roadmap", label: "今後の機能(F2〜F12)" },
+  { href: "/trends", label: "トレンド" },
+  { href: "/medications", label: "服薬管理" },
+  { href: "/backup", label: "バックアップ" },
+  { href: "/roadmap", label: "今後の機能" },
 ];
 
 export default function Nav() {
