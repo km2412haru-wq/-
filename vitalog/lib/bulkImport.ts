@@ -68,51 +68,77 @@ export function applyBulkMedication(
 
 /**
  * 処方箋/お薬手帳の内容を「登録済みの薬」に反映する。
- * 同名の有効な薬が既にあれば用量変更として扱いテーパリング履歴に追記、
- * なければ新規登録する。3-1(処方箋インポート)・3-3(お薬手帳更新)で共用する。
+ * 3-1(処方箋インポート)・3-3(お薬手帳更新)で共用する。
+ *
+ * 名寄せの優先順位:
+ * 1. 同名のactiveな薬があれば、用量変更として扱いテーパリング履歴に追記(updated)
+ * 2. 同名のactive=falseな薬(中止済み)があれば、新規レコードを作らずそれを再利用して
+ *    再開扱いにする(resumed)。減薬後に同じ薬が再処方されるケースで重複登録を防ぐため
+ * 3. どちらにも一致しなければ新規登録(created)
  */
 export function applyPrescriptionToRegisteredMedications(
   name: string,
   dose: string | undefined,
   date: string
-): "created" | "updated" | "unchanged" {
+): "created" | "updated" | "resumed" | "unchanged" {
   const meds = loadRegisteredMedications();
-  const existing = meds.find((m) => m.name === name && m.active);
+  const existingActive = meds.find((m) => m.name === name && m.active);
 
-  if (!existing) {
-    meds.unshift({
+  if (existingActive) {
+    if (existingActive.dose === dose) {
+      return "unchanged";
+    }
+    const events = loadTaperingEvents();
+    events.unshift({
       id: generateId(),
-      name,
-      dose,
-      type: "regular",
-      active: true,
-      // 処方箋/お薬手帳から読み取った日付を処方開始日とする。
-      // これによりバックフィル入力時、この日より前の対象日ではチェックリストに出ない
-      startDate: date,
+      medicationName: name,
+      date,
+      newDose: dose ?? "(用量不明)",
+      note: "お薬手帳/処方箋インポートによる自動記録",
       createdAt: new Date().toISOString(),
     });
+    saveTaperingEvents(events);
+
+    existingActive.dose = dose;
     saveRegisteredMedications(meds);
-    return "created";
+    return "updated";
   }
 
-  if (existing.dose === dose) {
-    return "unchanged";
+  const existingInactive = meds.find((m) => m.name === name && !m.active);
+  if (existingInactive) {
+    const events = loadTaperingEvents();
+    events.unshift({
+      id: generateId(),
+      medicationName: name,
+      date,
+      newDose: dose ?? "(用量不明)",
+      note: "お薬手帳/処方箋インポートによる自動記録(再開)",
+      createdAt: new Date().toISOString(),
+    });
+    saveTaperingEvents(events);
+
+    existingInactive.active = true;
+    existingInactive.endDate = undefined;
+    // 再処方なので処方開始日を今回読み取った日付に更新する
+    existingInactive.startDate = date;
+    existingInactive.dose = dose;
+    saveRegisteredMedications(meds);
+    return "resumed";
   }
 
-  const events = loadTaperingEvents();
-  events.unshift({
+  meds.unshift({
     id: generateId(),
-    medicationName: name,
-    date,
-    newDose: dose ?? "(用量不明)",
-    note: "お薬手帳/処方箋インポートによる自動記録",
+    name,
+    dose,
+    type: "regular",
+    active: true,
+    // 処方箋/お薬手帳から読み取った日付を処方開始日とする。
+    // これによりバックフィル入力時、この日より前の対象日ではチェックリストに出ない
+    startDate: date,
     createdAt: new Date().toISOString(),
   });
-  saveTaperingEvents(events);
-
-  existing.dose = dose;
   saveRegisteredMedications(meds);
-  return "updated";
+  return "created";
 }
 
 /** お薬手帳インポートで「リストに無くなった薬」を中止扱いにする(自動削除はしない) */

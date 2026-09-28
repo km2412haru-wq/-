@@ -9,7 +9,7 @@ import {
 import type { RegisteredMedication } from "@/types/vitalog";
 import type { ExtractedNotebookEntry, ExtractPhotoResponse } from "@/types/photoCapture";
 
-type DiffKind = "new" | "changed" | "discontinued";
+type DiffKind = "new" | "changed" | "resumed" | "discontinued";
 
 interface DiffItem {
   kind: DiffKind;
@@ -42,25 +42,43 @@ export default function MedicationNotebookUpdater({ registeredMedications }: Pro
 
     for (const entry of entries) {
       if (!entry.name) continue;
-      const existing = activeMeds.find((m) => m.name === entry.name);
-      if (!existing) {
-        items.push({
-          kind: "new",
-          name: entry.name,
-          newDose: entry.dose,
-          documentDate: entry.documentDate,
-          checked: true,
-        });
-      } else if (existing.dose !== entry.dose) {
-        items.push({
-          kind: "changed",
-          name: entry.name,
-          oldDose: existing.dose,
-          newDose: entry.dose,
-          documentDate: entry.documentDate,
-          checked: true,
-        });
+      const activeMatch = activeMeds.find((m) => m.name === entry.name);
+      if (activeMatch) {
+        if (activeMatch.dose !== entry.dose) {
+          items.push({
+            kind: "changed",
+            name: entry.name,
+            oldDose: activeMatch.dose,
+            newDose: entry.dose,
+            documentDate: entry.documentDate,
+            checked: true,
+          });
+        }
+        continue;
       }
+
+      // active一致が無ければ、中止済みの同名薬が無いか探す(減薬→再処方の名寄せ)。
+      // 一致すれば新規レコードを作らずそれを再利用して「再開」扱いにする
+      const inactiveMatch = registeredMedications.find((m) => !m.active && m.name === entry.name);
+      if (inactiveMatch) {
+        items.push({
+          kind: "resumed",
+          name: entry.name,
+          oldDose: inactiveMatch.dose,
+          newDose: entry.dose,
+          documentDate: entry.documentDate,
+          checked: true,
+        });
+        continue;
+      }
+
+      items.push({
+        kind: "new",
+        name: entry.name,
+        newDose: entry.dose,
+        documentDate: entry.documentDate,
+        checked: true,
+      });
     }
 
     for (const med of activeMeds) {
@@ -165,9 +183,10 @@ export default function MedicationNotebookUpdater({ registeredMedications }: Pro
                 <span className="tag">新規</span>
               )}
               {item.kind === "changed" && <span className="tag">用量変更</span>}
+              {item.kind === "resumed" && <span className="tag">再開</span>}
               {item.kind === "discontinued" && <span className="tag">中止候補</span>}{" "}
               <strong>{item.name}</strong>{" "}
-              {item.kind === "changed" && (
+              {(item.kind === "changed" || item.kind === "resumed") && (
                 <span className="muted">
                   {item.oldDose ?? "(不明)"} → {item.newDose ?? "(不明)"}
                 </span>
