@@ -3,15 +3,20 @@
  *
  * OAuth(Google Identity Services)でアクセストークンを取得し、Drive APIの
  * appDataFolder(そのアプリ専用の隠しフォルダ、ユーザーの他のDriveファイルには
- * 一切アクセスしないスコープ)にJSONバックアップを1ファイルとして保存/復元する。
+ * 一切アクセスしないスコープ)にJSONバックアップを保存/復元する。
  * サーバーは経由しない(トークン取得もアップロードも全部ブラウザ内で完結)。
+ *
+ * 世代管理: 単一ファイルへの無条件上書きは、誤って壊れたデータで上書きされる
+ * リスクがあるため、日付付きファイル名(vitalog-backup-YYYY-MM-DD.json)で
+ * 毎回新規ファイルとして保存し、直近5世代だけを残して古いものは削除する。
  *
  * 利用にはGoogle Cloud ConsoleでOAuthクライアントIDを発行し、
  * NEXT_PUBLIC_GOOGLE_CLIENT_ID として設定する必要がある(README参照)。
  * 未設定の場合はこの機能全体を無効表示にする。
  */
 
-const BACKUP_FILE_NAME = "vitalog-backup.json";
+const BACKUP_FILE_PREFIX = "vitalog-backup-";
+const MAX_GENERATIONS = 5;
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 
 declare global {
@@ -83,23 +88,36 @@ export async function requestAccessToken(): Promise<string> {
   });
 }
 
-async function findBackupFileId(token: string): Promise<string | null> {
+interface DriveFile {
+  id: string;
+  name: string;
+  createdTime: string;
+}
+
+async function listBackupFiles(token: string): Promise<DriveFile[]> {
   const url =
     `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder` +
-    `&q=name='${BACKUP_FILE_NAME}'&fields=files(id,name)`;
+    `&q=name contains '${BACKUP_FILE_PREFIX}'` +
+    `&fields=files(id,name,createdTime)&orderBy=createdTime desc`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error("Google Driveの検索に失敗しました");
   const data = await res.json();
-  return data.files?.[0]?.id ?? null;
+  return (data.files ?? []) as DriveFile[];
+}
+
+async function deleteFile(token: string, fileId: string): Promise<void> {
+  await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 export async function uploadBackupToDrive(token: string, json: string): Promise<void> {
-  const existingId = await findBackupFileId(token);
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const fileName = `${BACKUP_FILE_PREFIX}${dateStr}.json`;
 
   const boundary = "vitalog-backup-boundary";
-  const metadata = existingId
-    ? {}
-    : { name: BACKUP_FILE_NAME, parents: ["appDataFolder"] };
+  const metadata = { name: fileName, parents: ["appDataFolder"] };
   const body =
     `--${boundary}\r\n` +
     `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
@@ -109,29 +127,41 @@ export async function uploadBackupToDrive(token: string, json: string): Promise<
     `${json}\r\n` +
     `--${boundary}--`;
 
-  const url = existingId
-    ? `https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=multipart`
-    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
-
-  const res = await fetch(url, {
-    method: existingId ? "PATCH" : "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": `multipart/related; boundary=${boundary}`,
-    },
-    body,
-  });
+  const res = await fetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": `multipart/related; boundary=${boundary}`,
+      },
+      body,
+    }
+  );
   if (!res.ok) throw new Error("Google Driveへのアップロードに失敗しました");
+
+  // 直近MAX_GENERATIONS世代だけ残し、古いバックアップは削除する
+  const files = await listBackupFiles(token);
+  const stale = files.slice(MAX_GENERATIONS);
+  for (const f of stale) {
+    await deleteFile(token, f.id);
+  }
 }
 
 export async function downloadBackupFromDrive(token: string): Promise<string> {
-  const fileId = await findBackupFileId(token);
-  if (!fileId) throw new Error("Google Drive上にバックアップが見つかりませんでした");
+  const files = await listBackupFiles(token);
+  const latest = files[0];
+  if (!latest) throw new Error("Google Drive上にバックアップが見つかりませんでした");
 
   const res = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+    `https://www.googleapis.com/drive/v3/files/${latest.id}?alt=media`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   if (!res.ok) throw new Error("Google Driveからの復元に失敗しました");
   return res.text();
+}
+
+/** バックアップ管理画面で世代一覧を表示するために使う */
+export async function listDriveBackups(token: string): Promise<DriveFile[]> {
+  return listBackupFiles(token);
 }

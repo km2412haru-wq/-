@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { generateId } from "@/lib/id";
 import PhotoCaptureButton from "@/components/PhotoCaptureButton";
+import { savePhotoBlob } from "@/lib/photoStore";
 import { useSpeechToText } from "@/lib/useSpeechToText";
 import { useEnvironment } from "@/lib/useEnvironment";
 import {
@@ -65,8 +66,9 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [lymphNoteOn, setLymphNoteOn] = useState(false);
   const [lymphNote, setLymphNote] = useState("");
   const [rashOn, setRashOn] = useState(false);
+  const [rashPhotoSaving, setRashPhotoSaving] = useState(false);
   const [rashNote, setRashNote] = useState("");
-  const [rashPhoto, setRashPhoto] = useState<string | undefined>(undefined);
+  const [rashPhotoId, setRashPhotoId] = useState<string | undefined>(undefined);
   const [labsOn, setLabsOn] = useState(false);
   const [wbc, setWbc] = useState("");
   const [ferritin, setFerritin] = useState("");
@@ -173,7 +175,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setLymphNote("");
     setRashOn(false);
     setRashNote("");
-    setRashPhoto(undefined);
+    setRashPhotoId(undefined);
     setLabsOn(false);
     setWbc("");
     setFerritin("");
@@ -211,7 +213,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       sleepHours,
       productivityScore: productivityOn ? productivityScore : undefined,
       environment: environment ?? undefined,
-      rash: rashOn ? { note: rashNote || undefined, photoDataUrl: rashPhoto } : undefined,
+      rash: rashOn ? { note: rashNote || undefined, sourcePhotoId: rashPhotoId } : undefined,
       musclePain: musclePainOn ? { severity: musclePainSeverity } : undefined,
       lymphNodeSwelling: lymphNoteOn ? { note: lymphNote || undefined } : undefined,
       labs: labsOn
@@ -233,14 +235,22 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     reset();
   };
 
-  const handleRashPhoto = (file: File | null) => {
+  const handleRashPhoto = async (file: File | null) => {
     if (!file) {
-      setRashPhoto(undefined);
+      setRashPhotoId(undefined);
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setRashPhoto(reader.result as string);
-    reader.readAsDataURL(file);
+    setRashPhotoSaving(true);
+    try {
+      const id = generateId();
+      await savePhotoBlob(id, file);
+      setRashPhotoId(id);
+    } catch (err) {
+      console.error("皮疹写真の保存に失敗しました:", err);
+      setRashPhotoId(undefined);
+    } finally {
+      setRashPhotoSaving(false);
+    }
   };
 
   return (
@@ -742,6 +752,10 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
                   accept="image/*"
                   onChange={(e) => handleRashPhoto(e.target.files?.[0] ?? null)}
                 />
+                {rashPhotoSaving && <p className="field-hint">写真を保存しています...</p>}
+                {rashPhotoId && !rashPhotoSaving && (
+                  <p className="field-hint">写真を保存しました(この端末にのみ保存されます)</p>
+                )}
               </>
             )}
 

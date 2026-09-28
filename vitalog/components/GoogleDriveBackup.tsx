@@ -65,8 +65,11 @@ export default function GoogleDriveBackup() {
     <div className="card">
       <h2>Google Driveへのバックアップ</h2>
       <p className="field-hint">
-        このアプリ専用の隠しフォルダ(appDataFolder)にJSONバックアップを保存します。
-        あなたのDrive上の他のファイルには一切アクセスしません。
+        このアプリ専用の隠しフォルダ(appDataFolder)に、日付付きのファイル名(例:
+        vitalog-backup-2026-09-28.json)でバックアップを保存します。直近5世代だけ残し、
+        古いものは自動削除されます。あなたのDrive上の他のファイルには一切アクセスしません。
+        復元前には現在のデータが1世代だけ自動退避されるので、誤って古い世代を復元しても
+        バックアップ画面から直前の状態に戻せます。
       </p>
       <div className="row" style={{ marginTop: 12 }}>
         <button type="button" className="btn-secondary" onClick={handleBackup} disabled={busy}>

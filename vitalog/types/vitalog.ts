@@ -173,10 +173,14 @@ export interface DailyLog {
   };
 
   // --- 任意・低優先度項目 ---
-  /** 皮疹。写真は実験的機能のためdata URLとして保存(将来Driveバックアップの対象からは除外予定) */
+  /**
+   * 皮疹(実験的機能)。写真はlocalStorageの容量制限(5〜10MB程度)を圧迫しないよう、
+   * 他の写真機能と同様にIndexedDB(lib/photoStore.ts)に保存し、ここには参照IDのみ持つ。
+   * 旧バージョンで直接埋め込まれていたphotoDataUrlは読み込み時に無視する(データは残るが表示はされない)。
+   */
   rash?: {
     note?: string;
-    photoDataUrl?: string;
+    sourcePhotoId?: string;
   };
   musclePain?: {
     severity: 1 | 2 | 3 | 4 | 5;

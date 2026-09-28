@@ -10,6 +10,7 @@ import {
 } from "@/types/vitalog";
 
 const STORAGE_KEY = "vitalog:store";
+const PRE_RESTORE_SNAPSHOT_KEY = "vitalog:pre-restore-snapshot";
 
 function emptyStore(): VitalogStore {
   return {
@@ -93,9 +94,39 @@ export function exportStoreAsJson(): string {
   return JSON.stringify(loadStore(), null, 2);
 }
 
-/** F8: 旧データを破棄せず取り込むための復元(常にmigrateToLatestを通す) */
+/**
+ * F8: 旧データを破棄せず取り込むための復元(常にmigrateToLatestを通す)。
+ * 復元は無条件の上書きなので、実行直前の状態を1世代だけ退避してから上書きする
+ * (誤操作でおかしなバックアップを復元してしまった場合に restorePreRestoreSnapshot で戻せる)。
+ */
 export function importStoreFromJson(json: string): VitalogStore {
+  if (typeof window !== "undefined") {
+    const current = window.localStorage.getItem(STORAGE_KEY);
+    if (current) {
+      try {
+        window.localStorage.setItem(PRE_RESTORE_SNAPSHOT_KEY, current);
+      } catch (err) {
+        console.error("復元前スナップショットの保存に失敗しました:", err);
+      }
+    }
+  }
   const store = migrateToLatest(JSON.parse(json));
   saveStore(store);
+  return store;
+}
+
+export function hasPreRestoreSnapshot(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(PRE_RESTORE_SNAPSHOT_KEY) !== null;
+}
+
+/** 直前の復元操作で上書きされる前の状態に戻す(1世代のみ) */
+export function restorePreRestoreSnapshot(): VitalogStore | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(PRE_RESTORE_SNAPSHOT_KEY);
+  if (!raw) return null;
+  const store = migrateToLatest(JSON.parse(raw));
+  saveStore(store);
+  window.localStorage.removeItem(PRE_RESTORE_SNAPSHOT_KEY);
   return store;
 }

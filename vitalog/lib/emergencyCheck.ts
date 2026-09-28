@@ -16,6 +16,13 @@ const FEVER_THRESHOLD_C = 38.0;
 const SUSTAINED_DAYS = 3;
 const FERRITIN_THRESHOLD_NG_ML = 500;
 const PLATELET_LOW_THRESHOLD = 100_000;
+/**
+ * 判定対象を実際の「今日」から見て直近この日数以内の記録に限定する。
+ * これが無いと、過去の処方箋・検査結果を後から一括インポートした際に、
+ * それが記録全体の中で最新の日付だった場合、何年も前の重い数値が
+ * 「現在の状態」として誤って警告を出してしまう(発病当初のデータ等)。
+ */
+const EMERGENCY_LOOKBACK_DAYS = 14;
 
 export interface EmergencyCheckResult {
   triggered: boolean;
@@ -24,6 +31,10 @@ export interface EmergencyCheckResult {
 
 function daysBetween(a: string, b: string): number {
   return Math.abs((new Date(a).getTime() - new Date(b).getTime()) / 86_400_000);
+}
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 /** 直近の記録から連続した(1日以上空かない)日数分を取り出す */
@@ -53,8 +64,9 @@ export function checkEmergency(dailyLogs: DailyLog[]): EmergencyCheckResult {
   const sustainedDaysThreshold = sensitive ? SUSTAINED_DAYS - 1 : SUSTAINED_DAYS;
   const fatigueDaysThreshold = sensitive ? 1 : 2;
 
+  const today = todayIso();
   const nonSkipped = dailyLogs
-    .filter((l) => !l.skipped)
+    .filter((l) => !l.skipped && daysBetween(l.targetDate, today) <= EMERGENCY_LOOKBACK_DAYS)
     .sort((a, b) => (a.targetDate < b.targetDate ? 1 : -1));
 
   const recent = takeConsecutiveRecent(nonSkipped, sustainedDaysThreshold);

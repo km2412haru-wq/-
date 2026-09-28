@@ -139,6 +139,9 @@ export default function MedicationsManager() {
               onChange={(e) => setReminderTime(e.target.value)}
             />
           </div>
+          <p className="field-hint">
+            ※通知はアプリ(このタブ)を開いている間のみ動作します。閉じている間や画面ロック中は届きません。
+          </p>
           <button type="submit" className="btn-secondary">
             ＋ 薬を登録
           </button>
