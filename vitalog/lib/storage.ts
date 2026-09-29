@@ -31,44 +31,87 @@ function emptyStore(): VitalogStore {
   };
 }
 
+/** 文字列がJSONとしてparse可能かを確認する(整合性検証用) */
+function isValidJson(raw: string | null): raw is string {
+  if (raw === null) return false;
+  try {
+    JSON.parse(raw);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 破損した本キーからの自動復旧を試みる。
+ * 復旧の優先順位:
+ *   1. TEMP_KEY … 保存の途中でクラッシュした場合、ここに「書き込もうとしていた最新の状態」が残る
+ *   2. BACKUP_KEY … 直前に正常保存できた状態(最後の既知の正常データ)
+ * どちらかから復旧できたらRECOVERY_FLAG_KEYを立て、次回起動時にユーザーへ通知する。
+ */
+function recoverStore(): VitalogStore | null {
+  const temp = window.localStorage.getItem(TEMP_KEY);
+  const backup = window.localStorage.getItem(BACKUP_KEY);
+  for (const raw of [temp, backup]) {
+    if (isValidJson(raw)) {
+      try {
+        const recovered = migrateToLatest(JSON.parse(raw));
+        // 復旧した内容を本キーへ書き戻す(次回以降は正常読み込みになる)
+        window.localStorage.setItem(STORAGE_KEY, raw);
+        window.localStorage.setItem(RECOVERY_FLAG_KEY, "1");
+        return recovered;
+      } catch (err) {
+        console.error("復旧候補データのmigrateに失敗しました。次の候補を試みます:", err);
+      }
+    }
+  }
+  return null;
+}
+
 export function loadStore(): VitalogStore {
   if (typeof window === "undefined") return emptyStore();
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (raw === null) return emptyStore();
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyStore();
     return migrateToLatest(JSON.parse(raw));
   } catch (err) {
     console.error("Vitalogデータの読み込みに失敗しました。バックアップからの復旧を試みます:", err);
-    try {
-      const backupRaw = window.localStorage.getItem(BACKUP_KEY);
-      if (backupRaw) {
-        const recoveredStore = migrateToLatest(JSON.parse(backupRaw));
-        window.localStorage.setItem(STORAGE_KEY, backupRaw);
-        window.localStorage.setItem(RECOVERY_FLAG_KEY, "1");
-        return recoveredStore;
-      }
-    } catch (recoverErr) {
-      console.error("バックアップからの復旧にも失敗しました:", recoverErr);
-    }
+    const recovered = recoverStore();
+    if (recovered) return recovered;
+    console.error("復旧できるバックアップが見つかりませんでした。");
     return emptyStore();
   }
 }
 
 /**
- * 保存直前の状態をBACKUP_KEYに退避してから、一時キー(TEMP_KEY)に書き込み、
- * 成功を確認してから本キー(STORAGE_KEY)にコピーする2段階の保存にする。
- * localStorage.setItem自体はキー単位でアトミックだが、想定外の原因で本キーが
- * 壊れる/消える事態に備え、loadStore側でBACKUP_KEYからの自動復旧を行えるようにする。
+ * 破損耐性を持たせた保存フロー。localStorage.setItem自体はキー単位でアトミックだが、
+ * 想定外の原因で本キー(STORAGE_KEY)が壊れる・消える事態に備えて多重化する。
+ *
+ * 手順:
+ *   1. 保存直前の本キーの値がparse可能なら BACKUP_KEY へ退避する
+ *      (壊れた値でbackupを上書きせず、最後の既知の正常データを守る)
+ *   2. 一時キー(TEMP_KEY)へ新データを書き込む
+ *   3. TEMP_KEYを読み戻してparse検証する(書き込みが健全に完了したことの確認)
+ *   4. 検証OKなら本キー(STORAGE_KEY)へ反映し、TEMP_KEYを掃除する
+ *   5. 検証NGなら本キーには一切触れない(既存データを守り、次回復旧に備えてTEMPは残す)
  */
 export function saveStore(store: VitalogStore): void {
   if (typeof window === "undefined") return;
   try {
     const json = JSON.stringify(store);
+
     const current = window.localStorage.getItem(STORAGE_KEY);
-    if (current) {
+    if (isValidJson(current)) {
       window.localStorage.setItem(BACKUP_KEY, current);
     }
+
     window.localStorage.setItem(TEMP_KEY, json);
+    const writtenBack = window.localStorage.getItem(TEMP_KEY);
+    if (writtenBack !== json || !isValidJson(writtenBack)) {
+      console.error("保存データの検証に失敗したため、本データへの反映を中止しました。");
+      return;
+    }
+
     window.localStorage.setItem(STORAGE_KEY, json);
     window.localStorage.removeItem(TEMP_KEY);
   } catch (err) {
@@ -86,6 +129,11 @@ export function consumeRecoveryNotice(): boolean {
   if (!flag) return false;
   window.localStorage.removeItem(RECOVERY_FLAG_KEY);
   return true;
+}
+
+/** 複数タブ同時編集の検知に使う、本データのlocalStorageキー(storageイベントの識別用) */
+export function getStorageKey(): string {
+  return STORAGE_KEY;
 }
 
 export function loadDailyLogs(): DailyLog[] {

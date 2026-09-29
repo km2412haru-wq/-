@@ -1,6 +1,7 @@
 "use client";
 
 import { checkEmergency } from "@/lib/emergencyCheck";
+import { useMedications } from "@/lib/useMedications";
 import type { DailyLog } from "@/types/vitalog";
 
 interface Props {
@@ -8,7 +9,8 @@ interface Props {
 }
 
 export default function EmergencyBanner({ dailyLogs }: Props) {
-  const { triggered, reasonGroups } = checkEmergency(dailyLogs);
+  const { registeredMedications } = useMedications();
+  const { triggered, reasonGroups } = checkEmergency(dailyLogs, registeredMedications);
   if (!triggered) return null;
 
   return (

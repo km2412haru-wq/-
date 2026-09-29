@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import RecoveryNoticeBanner from "@/components/RecoveryNoticeBanner";
+import StoreSyncBanner from "@/components/StoreSyncBanner";
 
 export const metadata: Metadata = {
   title: "Vitalog",
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body>
         <ServiceWorkerRegister />
         <RecoveryNoticeBanner />
+        <StoreSyncBanner />
         {children}
       </body>
     </html>
