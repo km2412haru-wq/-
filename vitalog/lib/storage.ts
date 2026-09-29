@@ -12,6 +12,12 @@ import {
 
 const STORAGE_KEY = "vitalog:store";
 const PRE_RESTORE_SNAPSHOT_KEY = "vitalog:pre-restore-snapshot";
+/** 保存直前の状態を常に退避しておくバックアップキー(本キーが壊れた場合の自動復旧用) */
+const BACKUP_KEY = "vitalog:store:backup";
+/** 保存の一時キー。本キーへの書き込み前にここへ書いてから本キーへコピーする(2段階保存) */
+const TEMP_KEY = "vitalog:store:temp";
+/** 直前のloadStoreでバックアップからの自動復旧が発生したことを示すフラグ(一度だけ通知するため) */
+const RECOVERY_FLAG_KEY = "vitalog:store:recovered-flag";
 
 function emptyStore(): VitalogStore {
   return {
@@ -32,18 +38,54 @@ export function loadStore(): VitalogStore {
     if (!raw) return emptyStore();
     return migrateToLatest(JSON.parse(raw));
   } catch (err) {
-    console.error("Vitalogデータの読み込みに失敗しました:", err);
+    console.error("Vitalogデータの読み込みに失敗しました。バックアップからの復旧を試みます:", err);
+    try {
+      const backupRaw = window.localStorage.getItem(BACKUP_KEY);
+      if (backupRaw) {
+        const recoveredStore = migrateToLatest(JSON.parse(backupRaw));
+        window.localStorage.setItem(STORAGE_KEY, backupRaw);
+        window.localStorage.setItem(RECOVERY_FLAG_KEY, "1");
+        return recoveredStore;
+      }
+    } catch (recoverErr) {
+      console.error("バックアップからの復旧にも失敗しました:", recoverErr);
+    }
     return emptyStore();
   }
 }
 
+/**
+ * 保存直前の状態をBACKUP_KEYに退避してから、一時キー(TEMP_KEY)に書き込み、
+ * 成功を確認してから本キー(STORAGE_KEY)にコピーする2段階の保存にする。
+ * localStorage.setItem自体はキー単位でアトミックだが、想定外の原因で本キーが
+ * 壊れる/消える事態に備え、loadStore側でBACKUP_KEYからの自動復旧を行えるようにする。
+ */
 export function saveStore(store: VitalogStore): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    const json = JSON.stringify(store);
+    const current = window.localStorage.getItem(STORAGE_KEY);
+    if (current) {
+      window.localStorage.setItem(BACKUP_KEY, current);
+    }
+    window.localStorage.setItem(TEMP_KEY, json);
+    window.localStorage.setItem(STORAGE_KEY, json);
+    window.localStorage.removeItem(TEMP_KEY);
   } catch (err) {
     console.error("Vitalogデータの保存に失敗しました:", err);
   }
+}
+
+/**
+ * loadStoreがバックアップから自動復旧した直後かどうかを確認し、フラグを消費する
+ * (アプリ起動時に一度だけユーザーへ通知するため。RecoveryNoticeBanner専用)
+ */
+export function consumeRecoveryNotice(): boolean {
+  if (typeof window === "undefined") return false;
+  const flag = window.localStorage.getItem(RECOVERY_FLAG_KEY);
+  if (!flag) return false;
+  window.localStorage.removeItem(RECOVERY_FLAG_KEY);
+  return true;
 }
 
 export function loadDailyLogs(): DailyLog[] {
