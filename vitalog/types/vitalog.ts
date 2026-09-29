@@ -215,6 +215,13 @@ export interface DailyLog {
   activityTags: ActivityTag[];
   /** 睡眠時間(時間、0.5刻み) */
   sleepHours?: number;
+  /**
+   * 入眠時刻(HH:mm)。任意。
+   * 起床時刻ではなく入眠時刻+睡眠時間の組み合わせで記録することで、
+   * 日をまたぐ睡眠(23時就寝→翌7時起床等)でも起床時刻側の日付があいまいにならないようにする。
+   * 起床時刻が必要な場面ではUI側で入眠時刻+睡眠時間から算出して表示する(保存はしない)。
+   */
+  sleepStartTime?: string;
 
   /** F12-5: 健康×生産性相関記録(任意)。その日の成果実感 1〜10 */
   productivityScore?: number;

@@ -63,7 +63,10 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                 {log.fatigueUnusual && <span className="tag">⚠︎普段と違う倦怠感</span>}
                 {log.loadLevel && <span className="tag">負荷:{log.loadLevel}</span>}
                 {typeof log.sleepHours === "number" && (
-                  <span className="tag">睡眠 {log.sleepHours}h</span>
+                  <span className="tag">
+                    睡眠 {log.sleepStartTime ? `${log.sleepStartTime}〜 ` : ""}
+                    {log.sleepHours}h
+                  </span>
                 )}
                 {typeof log.productivityScore === "number" && (
                   <span className="tag">成果実感 {log.productivityScore}/10</span>

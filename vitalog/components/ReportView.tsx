@@ -84,7 +84,7 @@ export default function ReportView() {
           </ul>
         )}
 
-        <h3>症状(記録日数)</h3>
+        <h3>症状別の記録日数(その症状があった日数)</h3>
         {report.symptomCounts.length === 0 ? (
           <p className="muted">記録なし</p>
         ) : (
@@ -104,6 +104,29 @@ export default function ReportView() {
           <p>
             {report.symptomUnusualEntries.map((e) => `${e.date}(${e.name})`).join(", ")}
           </p>
+        )}
+
+        <h3>睡眠と翌日の体調の関連</h3>
+        <p className="field-hint">
+          睡眠時間が{report.sleepCorrelation.thresholdHours}時間未満だった日と、それ以外の日とで、
+          翌日に何らかの症状(症状記録・関節痛・普段と違う倦怠感のいずれか)があった割合を比較します。
+          記録日数が少ないうちは参考程度にご覧ください。
+        </p>
+        {report.sleepCorrelation.lowSleepDays === 0 && report.sleepCorrelation.normalSleepDays === 0 ? (
+          <p className="muted">睡眠時間と翌日の記録が揃っている日がありません</p>
+        ) : (
+          <ul>
+            <li>
+              睡眠不足({report.sleepCorrelation.thresholdHours}時間未満)の翌日に症状あり:{" "}
+              {report.sleepCorrelation.lowSleepFollowedByIssuePercent ?? "-"}%
+              ({report.sleepCorrelation.lowSleepDays}日中)
+            </li>
+            <li>
+              それ以外の睡眠の翌日に症状あり:{" "}
+              {report.sleepCorrelation.normalSleepFollowedByIssuePercent ?? "-"}%
+              ({report.sleepCorrelation.normalSleepDays}日中)
+            </li>
+          </ul>
         )}
 
         <h3>服薬</h3>

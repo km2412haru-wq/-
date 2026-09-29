@@ -7,6 +7,7 @@ import { savePhotoBlob } from "@/lib/photoStore";
 import { useSpeechToText } from "@/lib/useSpeechToText";
 import { useEnvironment } from "@/lib/useEnvironment";
 import { useMedications } from "@/lib/useMedications";
+import { useDailyLogs } from "@/lib/useDailyLogs";
 import { isMedicationApplicableOnDate } from "@/lib/medicationApplicability";
 import {
   ACTIVITY_TAGS,
@@ -30,6 +31,16 @@ const MOOD_LOW_THRESHOLD = 4;
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** 入眠時刻+睡眠時間から起床目安時刻(HH:mm)を算出する。表示用のみで保存はしない */
+function estimateWakeTime(startTime: string, durationHours: number): string {
+  const [h, m] = startTime.split(":").map(Number);
+  const totalMinutes = h * 60 + m + Math.round(durationHours * 60);
+  const wakeMinutes = ((totalMinutes % 1440) + 1440) % 1440;
+  const wakeH = Math.floor(wakeMinutes / 60);
+  const wakeM = wakeMinutes % 60;
+  return `${String(wakeH).padStart(2, "0")}:${String(wakeM).padStart(2, "0")}`;
 }
 
 /** スライダーが「数字が大きいほど良い」方向であることを一目で伝えるための補助ラベル(極端な値のみ表示) */
@@ -62,6 +73,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [activityTags, setActivityTags] = useState<ActivityTag[]>([]);
   const [customActivityTag, setCustomActivityTag] = useState("");
   const [sleepHours, setSleepHours] = useState(7);
+  const [sleepStartTime, setSleepStartTime] = useState("");
   const [showOptional, setShowOptional] = useState(false);
   const [productivityOn, setProductivityOn] = useState(false);
   const [productivityScore, setProductivityScore] = useState(5);
@@ -85,6 +97,43 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [memo, setMemo] = useState("");
 
   const { registeredMedications } = useMedications();
+  const { dailyLogs: historyLogs } = useDailyLogs();
+
+  // 症状チップの並び順・自由入力のチップ昇格・入力候補は、過去の記録頻度から算出する
+  const symptomFrequency = useMemo(() => {
+    const freq: Record<string, number> = {};
+    for (const log of historyLogs) {
+      if (log.skipped) continue;
+      for (const s of log.symptoms) {
+        freq[s.name] = (freq[s.name] ?? 0) + 1;
+      }
+    }
+    return freq;
+  }, [historyLogs]);
+
+  // 2回以上記録された自由入力の症状は、既定候補と同様に常設チップとして扱う
+  const promotedSymptomNames = useMemo(
+    () =>
+      Object.keys(symptomFrequency).filter(
+        (name) => !(DEFAULT_SYMPTOM_NAMES as readonly string[]).includes(name) && symptomFrequency[name] >= 2
+      ),
+    [symptomFrequency]
+  );
+
+  // 常設チップ(既定候補+頻出の自由入力)は記録頻度が高い順に並べる
+  const orderedChipNames = useMemo(() => {
+    const names = Array.from(new Set<string>([...DEFAULT_SYMPTOM_NAMES, ...promotedSymptomNames]));
+    return names.sort((a, b) => (symptomFrequency[b] ?? 0) - (symptomFrequency[a] ?? 0));
+  }, [promotedSymptomNames, symptomFrequency]);
+
+  // 自由入力欄の入力候補: 過去に記録した症状名のうち、まだ常設チップ化されていないもの
+  const symptomSuggestions = useMemo(
+    () =>
+      Object.keys(symptomFrequency)
+        .filter((name) => !orderedChipNames.includes(name))
+        .sort((a, b) => symptomFrequency[b] - symptomFrequency[a]),
+    [symptomFrequency, orderedChipNames]
+  );
   // バックフィル対応: 対象日の時点でまだ処方されていなかった薬・既に中止していた薬は
   // チェックリストに出さない(startDate/endDateで判定。旧データはいつでも表示可)
   const activeRegularMedications = registeredMedications.filter(
@@ -226,6 +275,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setActivityTags([]);
     setCustomActivityTag("");
     setSleepHours(7);
+    setSleepStartTime("");
     setProductivityOn(false);
     setProductivityScore(5);
     setLymphNoteOn(false);
@@ -271,6 +321,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       loadLevel,
       activityTags,
       sleepHours,
+      sleepStartTime: sleepStartTime || undefined,
       productivityScore: productivityOn ? productivityScore : undefined,
       environment: environment ?? undefined,
       rash: rashOn ? { note: rashNote || undefined, sourcePhotoId: rashPhotoId } : undefined,
@@ -442,7 +493,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       <div className="field">
         <label>症状</label>
         <div className="row">
-          {DEFAULT_SYMPTOM_NAMES.map((name) => (
+          {orderedChipNames.map((name) => (
             <button
               type="button"
               key={name}
@@ -454,7 +505,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
             </button>
           ))}
           {symptomNames
-            .filter((n) => !(DEFAULT_SYMPTOM_NAMES as readonly string[]).includes(n))
+            .filter((n) => !orderedChipNames.includes(n))
             .map((name) => (
               <button
                 type="button"
@@ -473,7 +524,13 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
             placeholder="症状を追加(任意)"
             value={customSymptomName}
             onChange={(e) => setCustomSymptomName(e.target.value)}
+            list="symptom-suggestions"
           />
+          <datalist id="symptom-suggestions">
+            {symptomSuggestions.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
           <button type="button" className="btn-secondary" onClick={addCustomSymptom}>
             追加
           </button>
@@ -630,8 +687,24 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       </div>
 
       <div className="field">
-        <label htmlFor="sleepHours">
+        <label htmlFor="sleepStartTime">入眠時刻(任意)</label>
+        <input
+          id="sleepStartTime"
+          type="time"
+          value={sleepStartTime}
+          onChange={(e) => setSleepStartTime(e.target.value)}
+        />
+        <div className="field-hint">
+          日をまたぐ睡眠でも起床時刻の日付が曖昧にならないよう、入眠時刻と睡眠時間の組み合わせで記録します
+        </div>
+        <label htmlFor="sleepHours" style={{ marginTop: 12, display: "block" }}>
           睡眠時間(時間) <span className="slider-value">{sleepHours}</span>
+          {sleepStartTime && (
+            <span className="muted" style={{ fontSize: "0.85rem" }}>
+              {" "}
+              (起床目安 {estimateWakeTime(sleepStartTime, sleepHours)})
+            </span>
+          )}
         </label>
         <input
           id="sleepHours"

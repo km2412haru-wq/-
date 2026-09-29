@@ -86,6 +86,7 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     loadLevel: entry.loadLevel,
     activityTags: Array.isArray(entry.activityTags) ? entry.activityTags : [],
     sleepHours: entry.sleepHours,
+    sleepStartTime: entry.sleepStartTime,
     productivityScore: entry.productivityScore,
     environment: entry.environment,
     rash: entry.rash,
