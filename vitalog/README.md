@@ -75,6 +75,21 @@ npm run dev
 - 自由メモの自動タグ付け・写真からの自動記録には `ANTHROPIC_API_KEY` が必要（未設定でも他機能は動作し、自動入力機能だけ手動入力にフォールバックする）
 - Google Driveへのバックアップには `NEXT_PUBLIC_GOOGLE_CLIENT_ID` が必要。Google Cloud ConsoleでDrive APIを有効化し、OAuthクライアントID(ウェブアプリケーション)を発行して、承認済みのJavaScript生成元にデプロイ先URLと`http://localhost:3000`を登録する（未設定でも他機能は動作し、Driveバックアップだけ「未設定」表示になる）
 
+## テスト
+
+安全性に直結する部分(F10緊急検知 `lib/emergencyCheck.ts`、保存・自動復旧 `lib/storage.ts`、複数タブ検知 `components/StoreSyncBanner.tsx`)は、Vitest(jsdom)でユニットテストを整備している。
+
+```bash
+npm test
+```
+
+- `tests/emergencyCheck.test.ts`: ルートA〜Dの発火/非発火(境界値ちょうど含む)、解熱薬服用中・ライフステージ移行期間中の敏感化、検査値の14日窓、ストリークの連続性と7日固定窓、複数ルート同時成立時の理由表示
+- `tests/storage.test.ts`: 保存↔読み込みの往復、temp検証失敗時に本キーが不変であること、temp→backupの順の自動復旧、壊れた本キーでbackupを上書きしないこと
+- `tests/StoreSyncBanner.test.tsx`: 他タブ更新の検知時に通知のみで自動リロードしないこと
+- `@/`エイリアスは `vitest.config.ts` で解決している。アプリ本体のコードはテストのために変更していない
+- 「今日」は `vi.setSystemTime` で固定、ライフステージ移行期間は `vi.mock("@/lib/lifeStage")` で切り替えており、実日付・設定値に依存しない
+- 実装を意図的に壊して(閾値の変更・分岐の削除など26パターン)テストが失敗することを確認済み(ミューテーション検証)
+
 ## Vercelへのデプロイ
 
 このリポジトリの他アプリと同様、Vercelプロジェクトの **Root Directory** を `vitalog` に設定してデプロイする。
