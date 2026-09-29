@@ -129,6 +129,35 @@ export default function ReportView() {
           </ul>
         )}
 
+        <h3>危険な症状(Danger層)が記録された日</h3>
+        {report.dangerSymptomEntries.length === 0 ? (
+          <p className="muted">記録なし</p>
+        ) : (
+          <ul>
+            {report.dangerSymptomEntries.map((e) => (
+              <li key={e.date}>
+                {e.date}: {e.symptoms.join("、")}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <h3>定期薬の服用状況(記録日数)</h3>
+        <p className="field-hint">
+          「未確認」は、飲まなかったという意味ではなく、その日に服用を確認・記録しなかった日です。
+        </p>
+        {report.medicationAdherence.length === 0 ? (
+          <p className="muted">記録なし</p>
+        ) : (
+          <ul>
+            {report.medicationAdherence.map((m) => (
+              <li key={m.name}>
+                {m.name}: 服用 {m.taken}日 / 未服用 {m.notTaken}日 / 未確認 {m.unconfirmed}日
+              </li>
+            ))}
+          </ul>
+        )}
+
         <h3>服薬</h3>
         <p>
           定期薬・頓服: {report.medicationNames.length ? report.medicationNames.join(", ") : "記録なし"}

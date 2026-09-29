@@ -12,7 +12,18 @@ export interface SleepSymptomCorrelation {
   normalSleepFollowedByIssuePercent?: number;
 }
 
+export interface MedicationAdherence {
+  name: string;
+  taken: number;
+  notTaken: number;
+  unconfirmed: number;
+}
+
 export interface ReportSummary {
+  /** 定期薬ごとの服用/未服用/未確認の記録日数(未確認は「飲んでいない」ではなく「確認していない」) */
+  medicationAdherence: MedicationAdherence[];
+  /** 危険症状(Danger層)が記録された日 */
+  dangerSymptomEntries: { date: string; symptoms: string[] }[];
   entryCount: number;
   avgConditionScore?: number;
   avgMoodScore?: number;
@@ -121,6 +132,29 @@ export function buildReport(logs: DailyLog[]): ReportSummary {
     new Set(nonSkipped.flatMap((l) => l.topicalMedications.map((t) => t.name)).filter(Boolean))
   );
 
+  const adherenceByName = new Map<string, MedicationAdherence>();
+  for (const l of nonSkipped) {
+    for (const m of l.medications) {
+      if (m.type !== "regular" || !m.name) continue;
+      const row = adherenceByName.get(m.name) ?? {
+        name: m.name,
+        taken: 0,
+        notTaken: 0,
+        unconfirmed: 0,
+      };
+      if (m.intake === "notTaken") row.notTaken += 1;
+      else if (m.intake === "unconfirmed") row.unconfirmed += 1;
+      else row.taken += 1;
+      adherenceByName.set(m.name, row);
+    }
+  }
+  const medicationAdherence = Array.from(adherenceByName.values());
+
+  const dangerSymptomEntries = nonSkipped
+    .filter((l) => (l.dangerSymptoms?.length ?? 0) > 0)
+    .map((l) => ({ date: l.targetDate, symptoms: l.dangerSymptoms as string[] }))
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
+
   const memoEntries = nonSkipped
     .filter((l) => l.memo)
     .map((l) => ({ date: l.targetDate, memo: l.memo as string }))
@@ -137,6 +171,8 @@ export function buildReport(logs: DailyLog[]): ReportSummary {
     symptomUnusualEntries,
     fatigueUnusualCount,
     sleepCorrelation,
+    medicationAdherence,
+    dangerSymptomEntries,
     medicationNames,
     topicalMedicationNames,
     memoEntries,

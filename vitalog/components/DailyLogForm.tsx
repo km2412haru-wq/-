@@ -11,6 +11,7 @@ import { useDailyLogs } from "@/lib/useDailyLogs";
 import { isMedicationApplicableOnDate } from "@/lib/medicationApplicability";
 import {
   ACTIVITY_TAGS,
+  DANGER_SYMPTOMS,
   DEFAULT_SYMPTOM_NAMES,
   JOINT_SITES,
   LOAD_LEVELS,
@@ -19,6 +20,7 @@ import {
   type JointPainEntry,
   type JointSite,
   type LoadLevel,
+  type MedicationIntake,
   type MedicationRecord,
   type MedicationType,
   type MoodReasonTag,
@@ -92,7 +94,9 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const [platelets, setPlatelets] = useState("");
   const [labsPhotoId, setLabsPhotoId] = useState<string | undefined>(undefined);
   const [medications, setMedications] = useState<MedicationRecord[]>([]);
-  const [medicationChecklist, setMedicationChecklist] = useState<Record<string, boolean>>({});
+  // 定期薬の確認状態。未操作(キーなし)は「未確認」として扱い、既定で服用済みにはしない
+  const [medicationChecklist, setMedicationChecklist] = useState<Record<string, MedicationIntake>>({});
+  const [dangerSymptoms, setDangerSymptoms] = useState<string[]>([]);
   const [topicalMedications, setTopicalMedications] = useState<TopicalMedicationRecord[]>([]);
   const [memo, setMemo] = useState("");
 
@@ -139,24 +143,6 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const activeRegularMedications = registeredMedications.filter(
     (m) => m.type === "regular" && isMedicationApplicableOnDate(m, targetDate)
   );
-
-  // 定期薬チェックリスト(3-2): 登録済みの定期薬は既定でチェック済み(服用した)扱いにする。
-  // 既にユーザーがチェックを操作した項目は上書きしない。対象日を変えて新たに
-  // 適用対象になった薬にも既定値を補う
-  useEffect(() => {
-    setMedicationChecklist((prev) => {
-      const next = { ...prev };
-      let changed = false;
-      for (const m of activeRegularMedications) {
-        if (!(m.id in next)) {
-          next[m.id] = true;
-          changed = true;
-        }
-      }
-      return changed ? next : prev;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registeredMedications, targetDate]);
 
   const { supported: speechSupported, listening, start, stop } = useSpeechToText((text) => {
     setMemo((prev) => (prev ? `${prev} ${text}` : text));
@@ -293,6 +279,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
     setLabsPhotoId(undefined);
     setMedications([]);
     setMedicationChecklist({});
+    setDangerSymptoms([]);
     setTopicalMedications([]);
     setMemo("");
   };
@@ -315,6 +302,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           unusualNote: d.unusualOn ? d.unusualNote || "いつもと違う感覚あり" : undefined,
         };
       }),
+      dangerSymptoms,
       moodScore,
       moodReasonTags: showMoodReason ? moodReasonTags : [],
       fatigueUnusual: fatigueUnusual || undefined,
@@ -344,9 +332,12 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           dose: m.dose,
           type: "regular" as MedicationType,
           registeredMedicationId: m.id,
-          taken: medicationChecklist[m.id] ?? true,
+          intake: medicationChecklist[m.id] ?? ("unconfirmed" as MedicationIntake),
         })),
-        ...medications.filter((m) => m.name.trim().length > 0),
+        // 頓服・写真から追加した薬は、その場で記録した=服用したものとして扱う
+        ...medications
+          .filter((m) => m.name.trim().length > 0)
+          .map((m) => ({ ...m, intake: m.intake ?? ("taken" as MedicationIntake) })),
       ],
       topicalMedications: topicalMedications.filter((t) => t.name.trim().length > 0),
       memo: memo.trim() || undefined,
@@ -579,6 +570,27 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       </div>
 
       <div className="field">
+        <label>危険な症状(当てはまるものがあれば選択)</label>
+        <div className="field-hint">
+          選択すると、AOSDの再燃判定とは別に、医療機関への相談をご検討いただく通知を表示します
+        </div>
+        {DANGER_SYMPTOMS.map((name) => (
+          <label key={name} style={{ display: "block", marginTop: 6 }}>
+            <input
+              type="checkbox"
+              checked={dangerSymptoms.includes(name)}
+              onChange={(e) =>
+                setDangerSymptoms((prev) =>
+                  e.target.checked ? [...prev, name] : prev.filter((n) => n !== name)
+                )
+              }
+            />{" "}
+            {name}
+          </label>
+        ))}
+      </div>
+
+      <div className="field">
         <label htmlFor="moodScore">
           気分スコア(1〜10) <span className="slider-value">{moodScore}</span>{" "}
           {scaleLabel(moodScore, "沈んでいる", "最高") && (
@@ -718,7 +730,8 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
       </div>
 
       <div className="field">
-        <label>定期薬(服用した薬のチェックを外してください)</label>
+        <label>定期薬(服用の確認)</label>
+        <div className="field-hint">確認していない薬は「未確認」のまま記録されます(服用したことにはなりません)</div>
         {registeredMedications.some((m) => m.type === "regular") &&
           activeRegularMedications.length <
             registeredMedications.filter((m) => m.type === "regular").length && (
@@ -732,19 +745,52 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
             登録済みの定期薬がありません。「服薬管理」画面から登録できます。
           </p>
         ) : (
-          activeRegularMedications.map((m) => (
-            <label key={m.id} style={{ display: "block", marginBottom: 6 }}>
-              <input
-                type="checkbox"
-                checked={medicationChecklist[m.id] ?? true}
-                onChange={(e) =>
-                  setMedicationChecklist((prev) => ({ ...prev, [m.id]: e.target.checked }))
-                }
-              />{" "}
-              {m.name}
-              {m.dose && <span className="muted"> ({m.dose})</span>}
-            </label>
-          ))
+          <>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ marginBottom: 8 }}
+              onClick={() =>
+                setMedicationChecklist(
+                  Object.fromEntries(
+                    activeRegularMedications.map((m) => [m.id, "taken" as MedicationIntake])
+                  )
+                )
+              }
+            >
+              ✓ いつも通り全部服用した
+            </button>
+            {activeRegularMedications.map((m) => {
+              const current: MedicationIntake = medicationChecklist[m.id] ?? "unconfirmed";
+              return (
+                <div key={m.id} style={{ marginBottom: 8 }}>
+                  <div>
+                    {m.name}
+                    {m.dose && <span className="muted"> ({m.dose})</span>}
+                  </div>
+                  <div className="row" style={{ marginTop: 4 }}>
+                    {(
+                      [
+                        ["taken", "服用"],
+                        ["notTaken", "未服用"],
+                        ["unconfirmed", "未確認"],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <button
+                        type="button"
+                        key={value}
+                        className="chip"
+                        data-active={current === value}
+                        onClick={() => setMedicationChecklist((prev) => ({ ...prev, [m.id]: value }))}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </>
         )}
       </div>
 

@@ -26,6 +26,29 @@ export type MoodReasonTag = (typeof MOOD_REASON_TAGS)[number];
 export const MEDICATION_TYPES = ["regular", "asNeeded"] as const;
 export type MedicationType = (typeof MEDICATION_TYPES)[number];
 
+/**
+ * 服薬の確認状態。「飲んだ」「飲まなかった」に加えて「確認していない」を区別する。
+ * 2値だと、記録し忘れ・確認していない日が「服用済み」に見えてしまい、
+ * 医師向けレポートでも服薬状況を誤って伝えてしまうため。
+ */
+export const MEDICATION_INTAKES = ["taken", "notTaken", "unconfirmed"] as const;
+export type MedicationIntake = (typeof MEDICATION_INTAKES)[number];
+
+/**
+ * Danger層: AOSDの再燃判定(F10)とは独立して、記録された時点で医療機関への相談を
+ * 促す危険症状。診断ではなく、該当したら相談を検討するための一覧。
+ */
+export const DANGER_SYMPTOMS = [
+  "息苦しさ・呼吸困難",
+  "胸痛・胸部圧迫感",
+  "失神・意識がおかしい",
+  "強い動悸",
+  "急激なむくみ",
+  "強い腹痛",
+  "異常な出血・黒色便",
+  "急激な全身状態の悪化",
+] as const;
+
 export interface MedicationRecord {
   id: string;
   name: string;
@@ -43,8 +66,13 @@ export interface MedicationRecord {
    */
   registeredMedicationId?: string;
   /**
-   * registeredMedicationId経由の場合の服用有無。既定はチェック済み(服用した)で、
-   * 外した場合はfalseとして明示的に記録する(記録が無い状態にはしない。アドヒアランス確認のため)。
+   * 服薬の確認状態(服用/未服用/未確認)。フォームの既定は「未確認」。
+   * 旧データ(intakeなし)はlib/migrate.tsが読み込み時にtakenから合成する。
+   */
+  intake?: MedicationIntake;
+  /**
+   * @deprecated intakeに置き換えられた(true=服用、false=未服用の2値だった)。
+   * 旧データの読み込み互換のためのみ型に残している。新規データはintakeを使うこと。
    */
   taken?: boolean;
 }
@@ -200,6 +228,11 @@ export interface DailyLog {
     severity: 1 | 2 | 3 | 4 | 5;
     unusualNote?: string;
   };
+  /**
+   * Danger層の危険症状(DANGER_SYMPTOMSから選択)。1つでもあれば、AOSDの再燃判定とは
+   * 独立して医療機関への相談を促す。未選択(空配列)が既定。
+   */
+  dangerSymptoms?: string[];
   /** 気分スコア 1〜10。常時表示 */
   moodScore?: number;
   /** moodScore が低い時のみ入力される理由タグ */

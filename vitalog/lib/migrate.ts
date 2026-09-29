@@ -2,6 +2,7 @@ import {
   SCHEMA_VERSION,
   type DailyLog,
   type Hypothesis,
+  type MedicationRecord,
   type RegisteredMedication,
   type SelfExperiment,
   type SymptomEntry,
@@ -79,6 +80,7 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     conditionScore: entry.conditionScore,
     jointPain: Array.isArray(entry.jointPain) ? entry.jointPain : [],
     symptoms: normalizeSymptoms(entry),
+    dangerSymptoms: Array.isArray(entry.dangerSymptoms) ? entry.dangerSymptoms : [],
     soreThroat: entry.soreThroat,
     moodScore: entry.moodScore,
     moodReasonTags: Array.isArray(entry.moodReasonTags) ? entry.moodReasonTags : [],
@@ -93,7 +95,9 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     musclePain: entry.musclePain,
     lymphNodeSwelling: entry.lymphNodeSwelling,
     labs: entry.labs,
-    medications: Array.isArray(entry.medications) ? entry.medications : [],
+    medications: Array.isArray(entry.medications)
+      ? entry.medications.map(normalizeMedicationRecord)
+      : [],
     topicalMedications: Array.isArray(entry.topicalMedications) ? entry.topicalMedications : [],
     memo: entry.memo,
     memoTags: entry.memoTags,
@@ -127,6 +131,20 @@ function normalizeSymptoms(entry: Partial<DailyLog>): SymptomEntry[] {
     });
   }
   return synthesized;
+}
+
+/**
+ * 服薬記録の2値(taken: true/false)から3値(intake)への移行。
+ * - 既にintakeがあればそのまま使う
+ * - 旧データでtaken === false(明示的に外された)なら「未服用」
+ * - それ以外(takenがtrueまたは未設定=服用として記録されたもの、旧・手動記録を含む)は「服用」
+ * 旧データは「未確認」という概念が無く、記録がある=服用として扱うのが当時の意味に最も近い。
+ */
+function normalizeMedicationRecord(raw: MedicationRecord): MedicationRecord {
+  if (raw.intake === "taken" || raw.intake === "notTaken" || raw.intake === "unconfirmed") {
+    return raw;
+  }
+  return { ...raw, intake: raw.taken === false ? "notTaken" : "taken" };
 }
 
 function normalizeRegisteredMedication(raw: unknown): RegisteredMedication {

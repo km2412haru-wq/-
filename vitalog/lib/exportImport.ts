@@ -32,6 +32,7 @@ const CSV_COLUMNS: (keyof DailyLog | string)[] = [
   "activityTags",
   "jointPain",
   "symptoms",
+  "dangerSymptoms",
   "soreThroat",
   "medications",
   "topicalMedications",

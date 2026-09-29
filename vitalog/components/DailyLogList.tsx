@@ -60,6 +60,11 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                     {t}
                   </span>
                 ))}
+                {(log.dangerSymptoms ?? []).map((d) => (
+                  <span key={d} className="tag" style={{ borderColor: "#8f1414", color: "#8f1414" }}>
+                    🚨{d}
+                  </span>
+                ))}
                 {log.fatigueUnusual && <span className="tag">⚠︎普段と違う倦怠感</span>}
                 {log.loadLevel && <span className="tag">負荷:{log.loadLevel}</span>}
                 {typeof log.sleepHours === "number" && (
@@ -103,7 +108,13 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
                   {log.medications
                     .map((m) => {
                       if (m.registeredMedicationId != null) {
-                        const takenMark = m.taken === false ? "✗未服用 " : "✓";
+                        // 3状態: 服用(✓) / 未服用(✗) / 未確認(？)。intakeが無い旧データはmigrate前提で服用扱い
+                        const takenMark =
+                          m.intake === "notTaken"
+                            ? "✗未服用 "
+                            : m.intake === "unconfirmed"
+                              ? "？未確認 "
+                              : "✓";
                         return `${takenMark}${m.name}${m.dose ? `(${m.dose})` : ""}`;
                       }
                       // チェックリスト方式導入前に手動で「定期薬」として記録された過去データは、

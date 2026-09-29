@@ -3,6 +3,7 @@
 import Nav from "@/components/Nav";
 import DailyLogForm from "@/components/DailyLogForm";
 import DailyLogList from "@/components/DailyLogList";
+import DangerBanner from "@/components/DangerBanner";
 import EmergencyBanner from "@/components/EmergencyBanner";
 import LifeStageBanner from "@/components/LifeStageBanner";
 import { useDailyLogs, type DailyLogDraft } from "@/lib/useDailyLogs";
@@ -38,6 +39,7 @@ export default function Home() {
       skipped: true,
       jointPain: [],
       symptoms: [],
+      dangerSymptoms: [],
       moodReasonTags: [],
       activityTags: [],
       medications: [],
@@ -51,6 +53,7 @@ export default function Home() {
       <Nav />
       {ready && (
         <>
+          <DangerBanner dailyLogs={dailyLogs} />
           <EmergencyBanner dailyLogs={dailyLogs} />
           <LifeStageBanner />
           <DailyLogForm onSubmit={handleSubmit} onSkip={handleSkip} />

@@ -37,6 +37,10 @@ function makeLog(daysAgo: number, overrides: Partial<DailyLog> = {}): DailyLog {
   };
 }
 
+function daysBetweenToday(date: string): number {
+  return Math.round((new Date(`${TODAY}T00:00:00Z`).getTime() - new Date(`${date}T00:00:00Z`).getTime()) / 86_400_000);
+}
+
 function makeMed(name: string, active = true): RegisteredMedication {
   return { id: `med-${name}`, name, type: "regular", active, createdAt: "2026-01-01T00:00:00Z" };
 }
@@ -408,10 +412,12 @@ describe("共通: 複数ルート同時・理由表示", () => {
     expect(r.reasons).toEqual(r.reasonGroups.flatMap((g) => g.reasons));
   });
 
-  it("フェリチンと血小板が両方異常なら検査値カテゴリに2件の理由が出る", () => {
+  it("フェリチンと血小板が両方異常なら、個別の理由2件に加えて複数異常の注意喚起が出る", () => {
     const r = checkEmergency([makeLog(0, { labs: { ferritinNgMl: 900, plateletsPerUl: 50_000 } })]);
     const lab = r.reasonGroups.find((g) => g.category === "検査値");
-    expect(lab?.reasons).toHaveLength(2);
+    expect(lab?.reasons).toHaveLength(3);
+    expect(lab?.reasons[0]).toContain("複数の検査値");
+    expect(r.multipleLabAbnormal).toBe(true);
   });
 
   it("Aが成立している時、Dの重複メッセージは出さない(発熱・倦怠感カテゴリは1件)", () => {
@@ -425,15 +431,56 @@ describe("共通: 複数ルート同時・理由表示", () => {
 
   it("発火していない時は理由もグループも空", () => {
     const r = checkEmergency(consecutiveLogs(3, () => ({ temperature: 36.5 })));
-    expect(r).toEqual({ triggered: false, reasons: [], reasonGroups: [] });
+    expect(r.triggered).toBe(false);
+    expect(r.reasons).toEqual([]);
+    expect(r.reasonGroups).toEqual([]);
+    expect(r.multipleLabAbnormal).toBe(false);
   });
 });
 
 describe("共通: ストリーク判定(連続性・7日固定窓)", () => {
-  it("1日空く(日付差2日)とストリークが途切れ、それより古い倦怠感は数えない", () => {
-    // 0,1日前に倦怠感、2日前は記録なし、3,4日前に倦怠感 → 直近ストリークは2日分のみ
+  it("1日空いても判定が途切れない(欠測日は数えず、7日窓内の記録日だけを数える)", () => {
+    // 0,1,3,4日前に倦怠感、2日前は記録なし → 窓内の倦怠感は4日
     const logs = [0, 1, 3, 4].map((d) => makeLog(d, { fatigueUnusual: true }));
+    expect(checkEmergency(logs).triggered).toBe(true);
+  });
+
+  it("体調が悪い日にスキップしても、他の日の倦怠感の積み上げが途切れない", () => {
+    const logs = [
+      ...[0, 1, 3, 4].map((d) => makeLog(d, { fatigueUnusual: true })),
+      makeLog(2, { skipped: true }),
+    ];
+    expect(checkEmergency(logs).triggered).toBe(true);
+  });
+
+  it("欠測日を「症状なし」として数えない(記録が3日だけなら倦怠感3日のまま、規定の4日に満たない)", () => {
+    const logs = [0, 3, 6].map((d) => makeLog(d, { fatigueUnusual: true }));
     expect(checkEmergency(logs).triggered).toBe(false);
+  });
+
+  it("7日窓の外(7日以上前)の倦怠感は、間に記録が連なっていても数えない", () => {
+    // 7〜10日前の4日連続。窓(0〜6日前)には1件も入らない
+    const logs = [7, 8, 9, 10].map((d) => makeLog(d, { fatigueUnusual: true }));
+    expect(checkEmergency(logs).triggered).toBe(false);
+  });
+
+  it("最新記録が古い(10日以上前で止まっている)場合、その倦怠感を「今」の警告にしない", () => {
+    const logs = [10, 11, 12, 13].map((d) => makeLog(d, { fatigueUnusual: true }));
+    expect(checkEmergency(logs).triggered).toBe(false);
+  });
+
+  it("症状の急変(ルートC)も、最新記録が4日以上前なら評価しない", () => {
+    const jp5 = [{ site: "膝" as const, severity: 5 as const }];
+    const jp1 = [{ site: "膝" as const, severity: 1 as const }];
+    const stale = [
+      makeLog(4, { jointPain: jp5 }),
+      makeLog(5, { jointPain: jp1 }),
+      makeLog(6, { jointPain: jp1 }),
+      makeLog(7, { jointPain: jp1 }),
+    ];
+    expect(checkEmergency(stale).triggered).toBe(false);
+    const fresh = stale.map((l) => ({ ...l, targetDate: dateAgo(daysBetweenToday(l.targetDate) - 4) }));
+    expect(checkEmergency(fresh).triggered).toBe(true);
   });
 
   it("空白なく連続していれば4日分をまとめて数える", () => {
@@ -460,5 +507,121 @@ describe("共通: ストリーク判定(連続性・7日固定窓)", () => {
   it("14日より古い記録は対象外(判定窓の外)", () => {
     const logs = [15, 16, 17, 18].map((d) => makeLog(d, { fatigueUnusual: true }));
     expect(checkEmergency(logs).triggered).toBe(false);
+  });
+});
+
+describe("ルートB: WBC・AST/ALTの追加(暫定閾値・要確認)", () => {
+  it("WBC 3,500/μLちょうどで単独発火する(境界値)", () => {
+    const r = checkEmergency([makeLog(0, { labs: { wbcPerUl: 3_500 } })]);
+    expect(r.triggered).toBe(true);
+    expect(r.reasonGroups.map((g) => g.category)).toEqual(["検査値"]);
+    expect(r.reasons[0]).toContain("WBC");
+    expect(r.multipleLabAbnormal).toBe(false);
+  });
+
+  it("WBC 3,501では発火しない", () => {
+    expect(checkEmergency([makeLog(0, { labs: { wbcPerUl: 3_501 } })]).triggered).toBe(false);
+  });
+
+  it("WBC高値は単独では発火しない(ステロイド服用中の警告疲れを避けるため)", () => {
+    expect(checkEmergency([makeLog(0, { labs: { wbcPerUl: 25_000 } })]).triggered).toBe(false);
+  });
+
+  it("AST 100 U/Lちょうどで単独発火する(境界値)、99では発火しない", () => {
+    expect(checkEmergency([makeLog(0, { labs: { astUL: 100 } })]).triggered).toBe(true);
+    expect(checkEmergency([makeLog(0, { labs: { astUL: 99 } })]).triggered).toBe(false);
+  });
+
+  it("ALT 100 U/Lちょうどで単独発火する(境界値)、99では発火しない", () => {
+    expect(checkEmergency([makeLog(0, { labs: { altUL: 100 } })]).triggered).toBe(true);
+    expect(checkEmergency([makeLog(0, { labs: { altUL: 99 } })]).triggered).toBe(false);
+  });
+
+  it("ASTとALTが両方高くても肝酵素は1系統なので、複数異常の注意喚起にはならない", () => {
+    const r = checkEmergency([makeLog(0, { labs: { astUL: 150, altUL: 160 } })]);
+    expect(r.triggered).toBe(true);
+    expect(r.reasons).toHaveLength(1);
+    expect(r.reasons[0]).toContain("AST 150");
+    expect(r.reasons[0]).toContain("ALT 160");
+    expect(r.multipleLabAbnormal).toBe(false);
+  });
+
+  it("2系統以上(WBC低下+肝酵素上昇)が同時に異常なら、主治医への共有を促す強い注意喚起が先頭に出る", () => {
+    const r = checkEmergency([makeLog(0, { labs: { wbcPerUl: 2_800, astUL: 180 } })]);
+    expect(r.multipleLabAbnormal).toBe(true);
+    const lab = r.reasonGroups.find((g) => g.category === "検査値");
+    expect(lab?.reasons[0]).toContain("複数の検査値");
+    expect(lab?.reasons[0]).toContain("主治医へ共有");
+    expect(lab?.reasons).toHaveLength(3);
+  });
+
+  it("フェリチン+WBCのように既存項目との組み合わせでも複数異常になる", () => {
+    const r = checkEmergency([makeLog(0, { labs: { ferritinNgMl: 900, wbcPerUl: 3_000 } })]);
+    expect(r.multipleLabAbnormal).toBe(true);
+  });
+
+  it("異常が1系統だけなら複数異常の注意喚起は出ない", () => {
+    const r = checkEmergency([makeLog(0, { labs: { ferritinNgMl: 900 } })]);
+    expect(r.multipleLabAbnormal).toBe(false);
+    expect(r.reasons).toHaveLength(1);
+  });
+
+  it("別の日に測った検査値でも、14日窓内の各項目の最新値を組み合わせて複数異常を判定する", () => {
+    const logs = [
+      makeLog(1, { labs: { wbcPerUl: 3_000 } }),
+      makeLog(6, { labs: { astUL: 200 } }),
+    ];
+    expect(checkEmergency(logs).multipleLabAbnormal).toBe(true);
+  });
+
+  it("14日窓の外のWBC・AST・ALTは使わない", () => {
+    const logs = [makeLog(0), makeLog(15, { labs: { wbcPerUl: 2_000, astUL: 300, altUL: 300 } })];
+    expect(checkEmergency(logs).triggered).toBe(false);
+  });
+});
+
+describe("未来日付の記録", () => {
+  it("未来日付の倦怠感は観察窓に含めず、記録日数にも数えない", () => {
+    const logs = [-1, -2, -3, -4].map((d) => makeLog(d, { fatigueUnusual: true }));
+    const r = checkEmergency(logs);
+    expect(r.triggered).toBe(false);
+    expect(r.dataQuality.recordedDays).toBe(0);
+  });
+});
+
+describe("データの充足状況(記録なし≠症状なし)", () => {
+  it("記録がまったく無ければ、発火はせず記録日数0・データ不足として返す", () => {
+    const r = checkEmergency([]);
+    expect(r.triggered).toBe(false);
+    expect(r.dataQuality).toEqual({ windowDays: 7, recordedDays: 0, missingDays: 7, insufficient: true });
+  });
+
+  it("7日窓内の記録が3日ならデータ不足、4日なら十分", () => {
+    expect(checkEmergency([0, 1, 2].map((d) => makeLog(d))).dataQuality.insufficient).toBe(true);
+    const four = checkEmergency([0, 1, 2, 3].map((d) => makeLog(d))).dataQuality;
+    expect(four.insufficient).toBe(false);
+    expect(four.recordedDays).toBe(4);
+    expect(four.missingDays).toBe(3);
+  });
+
+  it("スキップした日は記録日数に数えない", () => {
+    const logs = [0, 1, 2, 3].map((d) => makeLog(d, { skipped: d >= 2 }));
+    expect(checkEmergency(logs).dataQuality.recordedDays).toBe(2);
+  });
+
+  it("7日窓の外の記録は記録日数に数えない", () => {
+    const logs = [0, 7, 8, 9].map((d) => makeLog(d));
+    expect(checkEmergency(logs).dataQuality.recordedDays).toBe(1);
+  });
+
+  it("同じ日に複数の記録があっても1日として数える", () => {
+    const logs = [makeLog(0), { ...makeLog(0), id: "dup" }];
+    expect(checkEmergency(logs).dataQuality.recordedDays).toBe(1);
+  });
+
+  it("発火している時も、データ不足の情報は併せて返される", () => {
+    const r = checkEmergency([makeLog(0, { labs: { ferritinNgMl: 900 } })]);
+    expect(r.triggered).toBe(true);
+    expect(r.dataQuality.insufficient).toBe(true);
   });
 });

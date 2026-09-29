@@ -20,6 +20,7 @@ function makeLog(id: string, targetDate: string, overrides: Partial<DailyLog> = 
     skipped: false,
     jointPain: [],
     symptoms: [],
+    dangerSymptoms: [],
     moodReasonTags: [],
     activityTags: [],
     medications: [],

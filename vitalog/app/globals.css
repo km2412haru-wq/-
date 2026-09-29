@@ -211,6 +211,19 @@ nav.tabs a[data-active="true"] {
   color: #7a1f1f;
 }
 
+/* Danger層(危険症状)。F10のバナーと区別できるよう、太い実線+濃い背景で表示する */
+.danger-banner {
+  border: 4px solid #8f1414;
+  background: #fde0e0;
+  color: #5c0a0a;
+}
+
+/* F10が発火していない時の中立表示(安全宣言に読めないよう控えめにする) */
+.status-note {
+  border: 1px dashed var(--color-border);
+  font-size: 0.9rem;
+}
+
 /* トレンドチャート */
 .chart-legend {
   display: flex;
