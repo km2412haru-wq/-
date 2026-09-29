@@ -41,20 +41,23 @@ const DONE_FEATURES = [
     name: "通院管理",
     note: "受診日・病院名・検査結果/お薬手帳の写真・メモ・次回受診予定をまとめて記録(/visits)。レポート画面にも連携",
   },
-];
-
-const PLANNED_FEATURES = [
   {
     id: "F5/F6/F11",
-    name: "相関分析・アラート予測",
-    note: "ラグ相関分析で症状の伝播パターンを検出。データ量に応じて段階解禁(30/90/365日)する設計のため、データ蓄積後に着手",
-  },
-  {
-    id: "F12-3",
-    name: "年次振り返りレビュー",
-    note: "LLM生成の物語的サマリー。1年分のデータが前提のため、データ蓄積後に着手",
+    name: "相関分析・アラート予測(叩き台)",
+    note:
+      "ラグ相関分析(トレンド画面下部)。30/90/365日での段階解禁ではなく、記録があるだけ常に" +
+      "計算し、サンプル数に応じた信頼度ラベル(参考程度/傾向あり/一定の信頼度)を添えて表示する" +
+      "方針に変更。コアロジックは本人によるレビュー・手直しを前提とした叩き台の位置づけ",
   },
 ];
+
+const PLANNED_FEATURES: { id: string; name: string; note: string }[] = [];
+
+/**
+ * F12-3(年次振り返りレビュー)は要件定義書の候補機能だったが、
+ * 本人の判断で「不要かもしれない」と方針転換されたため、今後の機能一覧から除外した。
+ * 復活させる場合はdocs/requirements.mdのF12-3の節を参照。
+ */
 
 export default function RoadmapPage() {
   return (
@@ -74,24 +77,21 @@ export default function RoadmapPage() {
           </div>
         ))}
       </div>
-      <div className="card">
-        <h2>今後の機能(データ蓄積待ち)</h2>
-        <p className="muted">
-          要件定義書(<code>docs/requirements.md</code>)の設計思想通り、データ量に応じて
-          段階的に解禁する前提の機能。今作ってもデータが無く意味を持たないため、記録を
-          続けながら着手時期を判断する。
-        </p>
-        {PLANNED_FEATURES.map((f) => (
-          <div key={f.id} className="log-entry">
-            <strong>
-              {f.id} {f.name}
-            </strong>
-            <div className="muted" style={{ fontSize: "0.85rem" }}>
-              {f.note}
+      {PLANNED_FEATURES.length > 0 && (
+        <div className="card">
+          <h2>今後の機能(データ蓄積待ち)</h2>
+          {PLANNED_FEATURES.map((f) => (
+            <div key={f.id} className="log-entry">
+              <strong>
+                {f.id} {f.name}
+              </strong>
+              <div className="muted" style={{ fontSize: "0.85rem" }}>
+                {f.note}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }
