@@ -69,7 +69,7 @@ export default function DailyLogList({ dailyLogs, onDelete, onAppend }: Props) {
                 ))}
                 {log.symptoms.map((s) => (
                   <span key={s.name} className="tag">
-                    {s.name}({s.severity}){s.unusualNote ? " ⚠︎普段と違う" : ""}
+                    {s.name}({s.severity}){s.onsetDate && s.onsetDate < log.targetDate ? `・${s.onsetDate}から` : ""}{s.unusualNote ? " ⚠︎普段と違う" : ""}
                   </span>
                 ))}
                 {log.moodReasonTags.map((t) => (

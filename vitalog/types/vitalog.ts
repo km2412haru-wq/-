@@ -177,6 +177,11 @@ export interface SymptomEntry {
   severity: 1 | 2 | 3 | 4 | 5;
   /** 「普段と違う感覚」があった場合のメモ */
   unusualNote?: string;
+  /**
+   * その症状が始まった日(YYYY-MM-DD)。日次記録より前から続いている症状(「3日前から」)を
+   * 遡って表せる。未設定は「この記録の日から」。前駆症状の順序(lib/symptomSequence.ts)の元データ。
+   */
+  onsetDate?: string;
 }
 
 /** F12-1: 自分で登録する仮説(例:「気圧低下を3日後に関節痛」) */

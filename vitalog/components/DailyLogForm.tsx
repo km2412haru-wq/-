@@ -8,6 +8,7 @@ import { useSpeechToText } from "@/lib/useSpeechToText";
 import { useEnvironment } from "@/lib/useEnvironment";
 import { useMedications } from "@/lib/useMedications";
 import { computeSymptomChips } from "@/lib/symptomStats";
+import { choiceFromOnsetDate, onsetDateFromChoice, type OnsetChoice } from "@/lib/onsetChoice";
 import FerritinEsrRatioNote from "@/components/FerritinEsrRatioNote";
 import { useDailyLogs } from "@/lib/useDailyLogs";
 import { isMedicationApplicableOnDate } from "@/lib/medicationApplicability";
@@ -55,6 +56,23 @@ function scaleLabel(score: number, low: string, high: string): string {
   return "";
 }
 
+interface SymptomDetail {
+  severity: 1 | 2 | 3 | 4 | 5;
+  unusualOn: boolean;
+  unusualNote: string;
+  /** 「いつから」の選択。既定は「この記録の日から」(保存する発症日は無し) */
+  onset: OnsetChoice;
+  onsetCustomDate: string;
+}
+
+const NEW_SYMPTOM_DETAIL: SymptomDetail = {
+  severity: 3,
+  unusualOn: false,
+  unusualNote: "",
+  onset: "same",
+  onsetCustomDate: "",
+};
+
 interface Props {
   onSubmit: (draft: DailyLogDraft) => void;
   onSkip: (targetDate: string) => void;
@@ -71,9 +89,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
   const [jointPain, setJointPain] = useState<JointPainEntry[]>([]);
   const [symptomNames, setSymptomNames] = useState<string[]>([]);
   const [customSymptomName, setCustomSymptomName] = useState("");
-  const [symptomDetails, setSymptomDetails] = useState<
-    Record<string, { severity: 1 | 2 | 3 | 4 | 5; unusualOn: boolean; unusualNote: string }>
-  >({});
+  const [symptomDetails, setSymptomDetails] = useState<Record<string, SymptomDetail>>({});
   const [moodScore, setMoodScore] = useState(7);
   const [moodReasonTags, setMoodReasonTags] = useState<MoodReasonTag[]>([]);
   const [fatigueUnusual, setFatigueUnusual] = useState(false);
@@ -128,10 +144,19 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
     setSymptomNames(appendTo.symptoms.map((sym) => sym.name));
     setSymptomDetails(
       Object.fromEntries(
-        appendTo.symptoms.map((sym) => [
-          sym.name,
-          { severity: sym.severity, unusualOn: !!sym.unusualNote, unusualNote: sym.unusualNote ?? "" },
-        ])
+        appendTo.symptoms.map((sym) => {
+          const onset = choiceFromOnsetDate(appendTo.targetDate, sym.onsetDate);
+          return [
+            sym.name,
+            {
+              severity: sym.severity,
+              unusualOn: !!sym.unusualNote,
+              unusualNote: sym.unusualNote ?? "",
+              onset: onset.choice,
+              onsetCustomDate: onset.customDate,
+            },
+          ];
+        })
       )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,7 +225,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
     });
     setSymptomDetails((prev) => {
       if (prev[name]) return prev;
-      return { ...prev, [name]: { severity: 3, unusualOn: false, unusualNote: "" } };
+      return { ...prev, [name]: NEW_SYMPTOM_DETAIL };
     });
   };
 
@@ -208,17 +233,17 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
     const name = customSymptomName.trim();
     if (!name || symptomNames.includes(name)) return;
     setSymptomNames((prev) => [...prev, name]);
-    setSymptomDetails((prev) => ({ ...prev, [name]: { severity: 3, unusualOn: false, unusualNote: "" } }));
+    setSymptomDetails((prev) => ({ ...prev, [name]: NEW_SYMPTOM_DETAIL }));
     setCustomSymptomName("");
   };
 
   const updateSymptomDetail = (
     name: string,
-    changes: Partial<{ severity: 1 | 2 | 3 | 4 | 5; unusualOn: boolean; unusualNote: string }>
+    changes: Partial<SymptomDetail>
   ) => {
     setSymptomDetails((prev) => ({
       ...prev,
-      [name]: { ...(prev[name] ?? { severity: 3, unusualOn: false, unusualNote: "" }), ...changes },
+      [name]: { ...(prev[name] ?? NEW_SYMPTOM_DETAIL), ...changes },
     }));
   };
 
@@ -300,11 +325,12 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
       conditionScore,
       jointPain,
       symptoms: symptomNames.map((name): SymptomEntry => {
-        const d = symptomDetails[name] ?? { severity: 3, unusualOn: false, unusualNote: "" };
+        const d = symptomDetails[name] ?? NEW_SYMPTOM_DETAIL;
         return {
           name,
           severity: d.severity,
           unusualNote: d.unusualOn ? d.unusualNote || "いつもと違う感覚あり" : undefined,
+          onsetDate: onsetDateFromChoice(targetDate, d.onset, d.onsetCustomDate),
         };
       }),
       dangerSymptoms,
@@ -544,7 +570,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
         </div>
 
         {symptomNames.map((name) => {
-          const d = symptomDetails[name] ?? { severity: 3, unusualOn: false, unusualNote: "" };
+          const d = symptomDetails[name] ?? NEW_SYMPTOM_DETAIL;
           return (
             <div key={name} style={{ marginTop: 12 }}>
               <strong>{name}</strong>
@@ -562,6 +588,36 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
                   }
                 />
                 <span className="slider-value">{d.severity}</span>
+              </div>
+              <div className="row" style={{ marginTop: 8 }}>
+                <span>いつから</span>
+                {(
+                  [
+                    ["same", "この日から"],
+                    ["1", "1日前から"],
+                    ["2", "2日前から"],
+                    ["custom", "日付を指定"],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button
+                    type="button"
+                    key={value}
+                    className="chip"
+                    data-active={d.onset === value}
+                    onClick={() => updateSymptomDetail(name, { onset: value })}
+                  >
+                    {label}
+                  </button>
+                ))}
+                {d.onset === "custom" && (
+                  <input
+                    type="date"
+                    aria-label={`${name}の始まった日`}
+                    value={d.onsetCustomDate}
+                    max={targetDate}
+                    onChange={(e) => updateSymptomDetail(name, { onsetCustomDate: e.target.value })}
+                  />
+                )}
               </div>
               <label style={{ marginTop: 8, display: "block" }}>
                 <input
