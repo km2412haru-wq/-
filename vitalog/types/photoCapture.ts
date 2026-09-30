@@ -38,6 +38,7 @@ export interface ExtractedLabFields {
   astUL?: number;
   altUL?: number;
   plateletsPerUl?: number;
+  esrMmH?: number;
   /** 採血日。書類の一括インポート時のみ使う */
   documentDate?: string;
 }

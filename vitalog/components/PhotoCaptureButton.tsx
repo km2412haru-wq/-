@@ -38,6 +38,7 @@ const FIELD_LABELS: Record<string, string> = {
   astUL: "AST(U/L)",
   altUL: "ALT(U/L)",
   plateletsPerUl: "血小板数(/μL)",
+  esrMmH: "ESR(赤沈1時間値, mm/h)",
 };
 
 const NUMBER_FIELDS = new Set([
@@ -47,12 +48,13 @@ const NUMBER_FIELDS = new Set([
   "astUL",
   "altUL",
   "plateletsPerUl",
+  "esrMmH",
 ]);
 
 const FIELDS_BY_KIND: Record<PhotoCaptureKind, string[]> = {
   medication: ["name", "dose"],
   topical: ["name", "site", "note"],
-  labResult: ["wbcPerUl", "ferritinNgMl", "crpMgDl", "astUL", "altUL", "plateletsPerUl"],
+  labResult: ["wbcPerUl", "ferritinNgMl", "crpMgDl", "astUL", "altUL", "plateletsPerUl", "esrMmH"],
   // お薬手帳は複数件抽出になるため、この単一項目編集UIでは扱わない(専用UIを別途持つ)
   medicationNotebook: [],
 };

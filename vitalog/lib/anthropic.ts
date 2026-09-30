@@ -101,6 +101,7 @@ const EXTRACT_TOOLS: Record<PhotoCaptureKind, Anthropic.Tool> = {
         astUL: { type: "number", description: "AST(U/L)" },
         altUL: { type: "number", description: "ALT(U/L)" },
         plateletsPerUl: { type: "number", description: "血小板数(/μL)" },
+        esrMmH: { type: "number", description: "ESR(赤血球沈降速度・赤沈の1時間値, mm/h)" },
         documentDate: {
           type: "string",
           description: "採血日/検査日。YYYY-MM-DD形式で。写っていなければ省略",

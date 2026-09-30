@@ -29,6 +29,7 @@ interface DocRow {
   ast: string;
   alt: string;
   platelets: string;
+  esr: string;
   documentDate: string;
   keepPhoto: boolean;
   applyToRegistered: boolean;
@@ -48,6 +49,7 @@ function newRow(file: File): DocRow {
     ast: "",
     alt: "",
     platelets: "",
+    esr: "",
     documentDate: "",
     keepPhoto: false,
     applyToRegistered: true,
@@ -99,6 +101,7 @@ export default function BulkImportManager() {
         ast: typeof f.astUL === "number" ? String(f.astUL) : "",
         alt: typeof f.altUL === "number" ? String(f.altUL) : "",
         platelets: typeof f.plateletsPerUl === "number" ? String(f.plateletsPerUl) : "",
+        esr: typeof f.esrMmH === "number" ? String(f.esrMmH) : "",
         documentDate: typeof f.documentDate === "string" ? f.documentDate : "",
       });
     } catch (err) {
@@ -152,6 +155,7 @@ export default function BulkImportManager() {
           astUL: row.ast ? Number(row.ast) : undefined,
           altUL: row.alt ? Number(row.alt) : undefined,
           plateletsPerUl: row.platelets ? Number(row.platelets) : undefined,
+          esrMmH: row.esr ? Number(row.esr) : undefined,
           sourcePhotoId: photoId,
         });
       }
@@ -305,6 +309,12 @@ export default function BulkImportManager() {
                     placeholder="血小板"
                     value={row.platelets}
                     onChange={(e) => updateRow(row.id, { platelets: e.target.value })}
+                  />
+                  <input
+                    type="number"
+                    placeholder="ESR"
+                    value={row.esr}
+                    onChange={(e) => updateRow(row.id, { esr: e.target.value })}
                   />
                 </div>
               )}

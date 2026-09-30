@@ -8,6 +8,7 @@ import { useSpeechToText } from "@/lib/useSpeechToText";
 import { useEnvironment } from "@/lib/useEnvironment";
 import { useMedications } from "@/lib/useMedications";
 import { computeSymptomChips } from "@/lib/symptomStats";
+import FerritinEsrRatioNote from "@/components/FerritinEsrRatioNote";
 import { useDailyLogs } from "@/lib/useDailyLogs";
 import { isMedicationApplicableOnDate } from "@/lib/medicationApplicability";
 import {
@@ -97,6 +98,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
   const [ast, setAst] = useState("");
   const [alt, setAlt] = useState("");
   const [platelets, setPlatelets] = useState("");
+  const [esr, setEsr] = useState("");
   const [labsPhotoId, setLabsPhotoId] = useState<string | undefined>(undefined);
   const [medications, setMedications] = useState<MedicationRecord[]>([]);
   // 定期薬の確認状態。未操作(キーなし)は「未確認」として扱い、既定で服用済みにはしない
@@ -278,6 +280,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
     setAst("");
     setAlt("");
     setPlatelets("");
+    setEsr("");
     setLabsPhotoId(undefined);
     setMedications([]);
     setMedicationChecklist({});
@@ -324,6 +327,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
             astUL: ast ? Number(ast) : undefined,
             altUL: alt ? Number(alt) : undefined,
             plateletsPerUl: platelets ? Number(platelets) : undefined,
+            esrMmH: esr ? Number(esr) : undefined,
             sourcePhotoId: labsPhotoId,
           }
         : undefined,
@@ -1040,7 +1044,19 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
                     value={platelets}
                     onChange={(e) => setPlatelets(e.target.value)}
                   />
+                  <input
+                    type="number"
+                    placeholder="ESR(mm/h)"
+                    value={esr}
+                    onChange={(e) => setEsr(e.target.value)}
+                  />
                 </div>
+                <FerritinEsrRatioNote
+                  labs={{
+                    ferritinNgMl: ferritin ? Number(ferritin) : undefined,
+                    esrMmH: esr ? Number(esr) : undefined,
+                  }}
+                />
                 <PhotoCaptureButton
                   kind="labResult"
                   label="📷 検査結果票の写真から読み取る"
@@ -1051,6 +1067,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
                     if (fields.astUL != null) setAst(String(fields.astUL));
                     if (fields.altUL != null) setAlt(String(fields.altUL));
                     if (fields.plateletsPerUl != null) setPlatelets(String(fields.plateletsPerUl));
+                    if (fields.esrMmH != null) setEsr(String(fields.esrMmH));
                     setLabsPhotoId(photoId);
                   }}
                 />

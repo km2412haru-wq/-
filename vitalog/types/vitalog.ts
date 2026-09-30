@@ -313,6 +313,8 @@ export interface DailyLog {
     astUL?: number;
     altUL?: number;
     plateletsPerUl?: number;
+    /** ESR(赤血球沈降速度、1時間値、mm/h)。フェリチン/ESR比(参考値)の計算にのみ使う */
+    esrMmH?: number;
     /** 写真から自動入力した場合、元になった検査結果票の写真ID(ユーザーが保持を選んだ場合のみ) */
     sourcePhotoId?: string;
   };

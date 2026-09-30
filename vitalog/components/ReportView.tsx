@@ -5,6 +5,10 @@ import { useDailyLogs } from "@/lib/useDailyLogs";
 import { useVisits } from "@/lib/useVisits";
 import { DATE_RANGE_OPTIONS, filterByRange, type DateRangeKey } from "@/lib/trendData";
 import { buildReport } from "@/lib/report";
+import {
+  FERRITIN_ESR_RATIO_REFERENCE,
+  formatRatio,
+} from "@/lib/ferritinEsrRatio";
 
 const RANGE_LABELS: Record<DateRangeKey, string> = {
   "7d": "過去7日間",
@@ -140,6 +144,25 @@ export default function ReportView() {
               </li>
             ))}
           </ul>
+        )}
+
+        {report.ferritinEsrRatios.length > 0 && (
+          <>
+            <h3>フェリチン/ESR比(参考値)</h3>
+            <p className="field-hint">
+              同じ日にフェリチンとESRが揃っている検査の比です。{FERRITIN_ESR_RATIO_REFERENCE}は小児の全身型若年性特発性関節炎の
+              MASで報告された基準で、成人のAOSDでの有効性は確認できていません。診断や判定の根拠ではなく、
+              主治医と共有するための参考情報です。
+            </p>
+            <ul>
+              {report.ferritinEsrRatios.map((e) => (
+                <li key={e.date}>
+                  {e.date}: {formatRatio(e.ratio)}
+                  {e.exceeds && `(参考値${FERRITIN_ESR_RATIO_REFERENCE}を超えています)`}
+                </li>
+              ))}
+            </ul>
+          </>
         )}
 
         <h3>定期薬の服用状況(記録日数)</h3>

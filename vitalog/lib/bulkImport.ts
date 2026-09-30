@@ -47,7 +47,9 @@ function findOrCreateLog(logs: DailyLog[], targetDate: string): DailyLog {
 export function applyBulkLabResult(targetDate: string, labs: NonNullable<DailyLog["labs"]>): void {
   const logs = loadDailyLogs();
   const log = findOrCreateLog(logs, targetDate);
-  log.labs = { ...log.labs, ...labs };
+  // 読み取れなかった項目(undefined)で、その日の既存の検査値を消さない(「上書きせず追記」)
+  const provided = Object.fromEntries(Object.entries(labs).filter(([, v]) => v !== undefined));
+  log.labs = { ...log.labs, ...provided };
   log.updatedAt = new Date().toISOString();
   saveDailyLogs(logs);
 }

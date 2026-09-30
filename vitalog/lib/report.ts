@@ -1,3 +1,4 @@
+import { computeFerritinEsrRatio } from "@/lib/ferritinEsrRatio";
 import { JOINT_SITES, type DailyLog } from "@/types/vitalog";
 
 /** 「睡眠不足の翌日は症状が出やすいか」の目安として使う閾値(時間) */
@@ -22,6 +23,8 @@ export interface MedicationAdherence {
 export interface ReportSummary {
   /** 定期薬ごとの服用/未服用/未確認の記録日数(未確認は「飲んでいない」ではなく「確認していない」) */
   medicationAdherence: MedicationAdherence[];
+  /** フェリチンとESRが同じ日に揃っている日の比(参考値。判定には使わない) */
+  ferritinEsrRatios: { date: string; ratio: number; exceeds: boolean }[];
   /** 危険症状(Danger層)が記録された日 */
   dangerSymptomEntries: { date: string; symptoms: string[] }[];
   entryCount: number;
@@ -158,6 +161,12 @@ export function buildReport(logs: DailyLog[]): ReportSummary {
     .map((l) => ({ date: l.targetDate, symptoms: l.dangerSymptoms as string[] }))
     .sort((a, b) => (a.date < b.date ? -1 : 1));
 
+  const ferritinEsrRatios = nonSkipped
+    .map((l) => ({ date: l.targetDate, r: computeFerritinEsrRatio(l.labs) }))
+    .filter((x): x is { date: string; r: NonNullable<typeof x.r> } => x.r !== null)
+    .map((x) => ({ date: x.date, ratio: x.r.ratio, exceeds: x.r.exceeds }))
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
+
   const memoEntries = nonSkipped
     .filter((l) => l.memo)
     .map((l) => ({ date: l.targetDate, memo: l.memo as string }))
@@ -176,6 +185,7 @@ export function buildReport(logs: DailyLog[]): ReportSummary {
     sleepCorrelation,
     medicationAdherence,
     dangerSymptomEntries,
+    ferritinEsrRatios,
     medicationNames,
     topicalMedicationNames,
     memoEntries,

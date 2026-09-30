@@ -21,6 +21,7 @@ const LAB_LABELS: { key: keyof NonNullable<DailyLog["labs"]>; label: string }[] 
   { key: "astUL", label: "AST" },
   { key: "altUL", label: "ALT" },
   { key: "plateletsPerUl", label: "血小板" },
+  { key: "esrMmH", label: "ESR" },
 ];
 
 export default function VisitsManager() {
@@ -123,6 +124,7 @@ export default function VisitsManager() {
                   astUL: fields.astUL ?? prev.astUL,
                   altUL: fields.altUL ?? prev.altUL,
                   plateletsPerUl: fields.plateletsPerUl ?? prev.plateletsPerUl,
+                  esrMmH: fields.esrMmH ?? prev.esrMmH,
                 }));
               }}
             />

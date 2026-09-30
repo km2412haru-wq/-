@@ -1,5 +1,6 @@
 "use client";
 
+import FerritinEsrRatioNote from "@/components/FerritinEsrRatioNote";
 import type { DailyLog } from "@/types/vitalog";
 
 interface Props {
@@ -116,7 +117,10 @@ export default function DailyLogList({ dailyLogs, onDelete, onAppend }: Props) {
                 {log.labs?.plateletsPerUl != null && (
                   <span className="tag">血小板 {log.labs.plateletsPerUl}</span>
                 )}
+                {log.labs?.esrMmH != null && <span className="tag">ESR {log.labs.esrMmH}</span>}
               </div>
+
+              <FerritinEsrRatioNote labs={log.labs} />
 
               {log.medications.length > 0 && (
                 <div className="muted" style={{ fontSize: "0.85rem", marginTop: 4 }}>
