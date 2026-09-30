@@ -40,5 +40,20 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日はしんどい(簡易入力)",
+      "short_name": "簡易入力",
+      "description": "体調が悪い日に、最低限の項目だけをすばやく記録します",
+      "url": "/?mode=quick",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

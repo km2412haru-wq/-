@@ -78,12 +78,16 @@ function confidenceLabel(n: number): CorrelationConfidence {
   return "参考程度";
 }
 
-function jointPainAvgSeverity(log: DailyLog): number {
+/** 簡易入力は関節痛を聞いていない(=0ではなく未入力)ので、結果変数の値として使わない */
+function jointPainAvgSeverity(log: DailyLog): number | undefined {
+  if (log.entryMode === "quick") return undefined;
   if (log.jointPain.length === 0) return 0;
   return log.jointPain.reduce((sum, p) => sum + p.severity, 0) / log.jointPain.length;
 }
 
-function symptomsSeveritySum(log: DailyLog): number {
+/** 簡易入力の症状は強さを聞かず既定値を入れているため、強さの合計には使わない */
+function symptomsSeveritySum(log: DailyLog): number | undefined {
+  if (log.entryMode === "quick") return undefined;
   return log.symptoms.reduce((sum, s) => sum + s.severity, 0);
 }
 

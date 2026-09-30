@@ -68,6 +68,9 @@ function buildSleepCorrelation(logs: DailyLog[]): SleepSymptomCorrelation {
     if (!nextLog) continue;
     const hasIssue =
       nextLog.symptoms.length > 0 || nextLog.jointPain.length > 0 || !!nextLog.fatigueUnusual;
+    // 簡易入力は関節痛を聞いていないため、症状・倦怠感が無くても「症状なし」とは言えない。
+    // その日は比較の材料にしない(あるときだけ「症状あり」として使う)
+    if (!hasIssue && nextLog.entryMode === "quick") continue;
     if (log.sleepHours < LOW_SLEEP_THRESHOLD_HOURS) {
       lowSleepDays += 1;
       if (hasIssue) lowSleepIssueDays += 1;

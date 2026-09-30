@@ -14,7 +14,11 @@ export type DailyLogDraft = Omit<
 export function useDailyLogs() {
   const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
   const [ready, setReady] = useState(false);
-  const isFirstLoad = useRef(true);
+  // 変更操作(add/update/delete等)を行ったインスタンスだけが保存する。
+  // 読み込んだだけのインスタンスが保存すると、他のインスタンスが直前に保存した最新の内容を
+  // 「読み込み時点の古い内容」で上書きして消してしまう(表示専用の利用側が後から
+  // マウントされた場合に起きる)ため、変更していないインスタンスは保存しない。
+  const dirty = useRef(false);
 
   useEffect(() => {
     setDailyLogs(loadDailyLogs());
@@ -22,12 +26,7 @@ export function useDailyLogs() {
   }, []);
 
   useEffect(() => {
-    if (isFirstLoad.current) {
-      // 初回ロード直後の空配列での上書き保存を防ぐ
-      isFirstLoad.current = false;
-      return;
-    }
-    if (!ready) return;
+    if (!ready || !dirty.current) return;
     saveDailyLogs(dailyLogs);
   }, [dailyLogs, ready]);
 
@@ -40,6 +39,7 @@ export function useDailyLogs() {
       createdAt: now,
       updatedAt: now,
     };
+    dirty.current = true;
     setDailyLogs((prev) =>
       [...prev, entry].sort((a, b) => (a.targetDate < b.targetDate ? 1 : -1))
     );
@@ -47,6 +47,7 @@ export function useDailyLogs() {
   }, []);
 
   const updateLog = useCallback((id: string, changes: Partial<DailyLog>) => {
+    dirty.current = true;
     setDailyLogs((prev) =>
       prev.map((log) =>
         log.id === id
@@ -57,6 +58,7 @@ export function useDailyLogs() {
   }, []);
 
   const deleteLog = useCallback((id: string) => {
+    dirty.current = true;
     setDailyLogs((prev) => prev.filter((log) => log.id !== id));
   }, []);
 

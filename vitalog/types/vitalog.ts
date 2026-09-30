@@ -152,6 +152,15 @@ export const ACTIVITY_TAGS = [
 ] as const;
 export type ActivityTag = (typeof ACTIVITY_TAGS)[number] | string;
 
+/**
+ * 記録の入力方式。"quick"は体調が悪い日向けの簡易入力(体調スコア・倦怠感・症状の有無・
+ * 危険症状・体温のみ)。未設定は"full"(通常入力)として扱う。
+ * 簡易記録は「入力していない項目=なし」ではなく「未入力」なので、判定や集計で
+ * 「症状なし」の根拠に使ってはいけない(関節痛・睡眠・服薬の詳細などが空になる)。
+ */
+export const ENTRY_MODES = ["quick", "full"] as const;
+export type EntryMode = (typeof ENTRY_MODES)[number];
+
 export const LOAD_LEVELS = ["暇", "普通", "過密"] as const;
 export type LoadLevel = (typeof LOAD_LEVELS)[number];
 
@@ -202,6 +211,9 @@ export interface DailyLog {
   recordedAt: string;
   /** この日は「スキップ」を選んだ記録かどうか。trueの場合、他の値は無視してよい */
   skipped: boolean;
+
+  /** 入力方式(簡易入力かどうか)。未設定は通常入力 */
+  entryMode?: EntryMode;
 
   // --- 必須項目 ---
   /**

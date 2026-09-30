@@ -9,7 +9,11 @@ import type { Hypothesis } from "@/types/vitalog";
 export function useHypotheses() {
   const [hypotheses, setHypotheses] = useState<Hypothesis[]>([]);
   const [ready, setReady] = useState(false);
-  const isFirstLoad = useRef(true);
+  // 変更操作(add/update/delete等)を行ったインスタンスだけが保存する。
+  // 読み込んだだけのインスタンスが保存すると、他のインスタンスが直前に保存した最新の内容を
+  // 「読み込み時点の古い内容」で上書きして消してしまう(表示専用の利用側が後から
+  // マウントされた場合に起きる)ため、変更していないインスタンスは保存しない。
+  const dirty = useRef(false);
 
   useEffect(() => {
     setHypotheses(loadHypotheses());
@@ -17,11 +21,7 @@ export function useHypotheses() {
   }, []);
 
   useEffect(() => {
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false;
-      return;
-    }
-    if (!ready) return;
+    if (!ready || !dirty.current) return;
     saveHypotheses(hypotheses);
   }, [hypotheses, ready]);
 
@@ -31,15 +31,18 @@ export function useHypotheses() {
       statement,
       createdAt: new Date().toISOString(),
     };
+    dirty.current = true;
     setHypotheses((prev) => [entry, ...prev]);
     return entry;
   }, []);
 
   const updateHypothesisNote = useCallback((id: string, note: string) => {
+    dirty.current = true;
     setHypotheses((prev) => prev.map((h) => (h.id === id ? { ...h, note } : h)));
   }, []);
 
   const deleteHypothesis = useCallback((id: string) => {
+    dirty.current = true;
     setHypotheses((prev) => prev.filter((h) => h.id !== id));
   }, []);
 

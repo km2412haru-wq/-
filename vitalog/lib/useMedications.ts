@@ -15,7 +15,11 @@ export function useMedications() {
   const [registeredMedications, setRegisteredMedications] = useState<RegisteredMedication[]>([]);
   const [taperingEvents, setTaperingEvents] = useState<TaperingEvent[]>([]);
   const [ready, setReady] = useState(false);
-  const isFirstLoad = useRef(true);
+  // 変更操作(add/update/delete等)を行ったインスタンスだけが保存する。
+  // 読み込んだだけのインスタンスが保存すると、他のインスタンスが直前に保存した最新の内容を
+  // 「読み込み時点の古い内容」で上書きして消してしまう(表示専用の利用側が後から
+  // マウントされた場合に起きる)ため、変更していないインスタンスは保存しない。
+  const dirty = useRef(false);
 
   useEffect(() => {
     setRegisteredMedications(loadRegisteredMedications());
@@ -24,11 +28,7 @@ export function useMedications() {
   }, []);
 
   useEffect(() => {
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false;
-      return;
-    }
-    if (!ready) return;
+    if (!ready || !dirty.current) return;
     saveRegisteredMedications(registeredMedications);
     saveTaperingEvents(taperingEvents);
   }, [registeredMedications, taperingEvents, ready]);
@@ -41,6 +41,7 @@ export function useMedications() {
         active: true,
         createdAt: new Date().toISOString(),
       };
+      dirty.current = true;
       setRegisteredMedications((prev) => [entry, ...prev]);
       return entry;
     },
@@ -48,12 +49,14 @@ export function useMedications() {
   );
 
   const updateMedication = useCallback((id: string, changes: Partial<RegisteredMedication>) => {
+    dirty.current = true;
     setRegisteredMedications((prev) =>
       prev.map((m) => (m.id === id ? { ...m, ...changes } : m))
     );
   }, []);
 
   const deleteMedication = useCallback((id: string) => {
+    dirty.current = true;
     setRegisteredMedications((prev) => prev.filter((m) => m.id !== id));
   }, []);
 
@@ -64,6 +67,7 @@ export function useMedications() {
         id: generateId(),
         createdAt: new Date().toISOString(),
       };
+      dirty.current = true;
       setTaperingEvents((prev) =>
         [entry, ...prev].sort((a, b) => (a.date < b.date ? 1 : -1))
       );
@@ -73,6 +77,7 @@ export function useMedications() {
   );
 
   const deleteTaperingEvent = useCallback((id: string) => {
+    dirty.current = true;
     setTaperingEvents((prev) => prev.filter((e) => e.id !== id));
   }, []);
 

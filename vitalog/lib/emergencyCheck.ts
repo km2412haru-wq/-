@@ -291,11 +291,15 @@ export function checkEmergency(
 
   // --- ルートC: 症状の急変(関節痛の急増・重い新規部位・皮疹の新規出現) ---
   // ベースラインは直近の記録(latest)より前のBASELINE_LOG_COUNT件。
+  // 簡易入力(entryMode: "quick")の記録は関節痛・皮疹を聞いていないため「なし」の根拠にならない。
+  // 比較の基準(ベースライン)にも、変化を見る最新の記録にも使わない
+  // (使うと、関節痛が空のベースラインとの比較で新規部位を誤検知する)。
+  const detailedLogs = nonSkipped.filter((l) => l.entryMode !== "quick");
   // 最新の記録が古い(STALE_LATEST_DAYS超)場合は、その時点の変化を「今」の変化として扱わない
-  const newest = nonSkipped[0];
+  const newest = detailedLogs[0];
   const latest =
     newest && daysAgo(today, newest.targetDate) <= STALE_LATEST_DAYS ? newest : undefined;
-  const baseline = nonSkipped.slice(1, 1 + BASELINE_LOG_COUNT);
+  const baseline = detailedLogs.slice(1, 1 + BASELINE_LOG_COUNT);
   const symptomChangeReasons: string[] = [];
 
   // 関節痛の急増・新規部位: 平均severityの比較にはベースラインが2件以上必要

@@ -5,9 +5,11 @@ import type { DailyLog } from "@/types/vitalog";
 interface Props {
   dailyLogs: DailyLog[];
   onDelete: (id: string) => void;
+  /** 簡易記録に「詳細を追記」する */
+  onAppend?: (log: DailyLog) => void;
 }
 
-export default function DailyLogList({ dailyLogs, onDelete }: Props) {
+export default function DailyLogList({ dailyLogs, onDelete, onAppend }: Props) {
   if (dailyLogs.length === 0) {
     return (
       <div className="card">
@@ -22,10 +24,24 @@ export default function DailyLogList({ dailyLogs, onDelete }: Props) {
       {dailyLogs.map((log) => (
         <div key={log.id} className="log-entry">
           <div className="row" style={{ justifyContent: "space-between" }}>
-            <strong>{log.targetDate}</strong>
-            <button className="btn-ghost" onClick={() => onDelete(log.id)}>
-              削除
-            </button>
+            <strong>
+              {log.targetDate}
+              {log.entryMode === "quick" && (
+                <span className="tag" style={{ marginLeft: 8 }}>
+                  簡易記録
+                </span>
+              )}
+            </strong>
+            <span>
+              {log.entryMode === "quick" && onAppend && (
+                <button className="btn-secondary" onClick={() => onAppend(log)}>
+                  詳細を追記
+                </button>
+              )}
+              <button className="btn-ghost" onClick={() => onDelete(log.id)}>
+                削除
+              </button>
+            </span>
           </div>
 
           {log.skipped ? (

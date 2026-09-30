@@ -7,6 +7,7 @@ import { savePhotoBlob } from "@/lib/photoStore";
 import { useSpeechToText } from "@/lib/useSpeechToText";
 import { useEnvironment } from "@/lib/useEnvironment";
 import { useMedications } from "@/lib/useMedications";
+import { computeSymptomChips } from "@/lib/symptomStats";
 import { useDailyLogs } from "@/lib/useDailyLogs";
 import { isMedicationApplicableOnDate } from "@/lib/medicationApplicability";
 import {
@@ -23,6 +24,7 @@ import {
   type MedicationIntake,
   type MedicationRecord,
   type MedicationType,
+  type DailyLog,
   type MoodReasonTag,
   type SymptomEntry,
   type TopicalMedicationRecord,
@@ -55,9 +57,12 @@ function scaleLabel(score: number, low: string, high: string): string {
 interface Props {
   onSubmit: (draft: DailyLogDraft) => void;
   onSkip: (targetDate: string) => void;
+  /** 簡易記録への「詳細を追記」。指定すると、簡易入力でカバーした項目をプリフィルする */
+  appendTo?: DailyLog | null;
+  onCancelAppend?: () => void;
 }
 
-export default function DailyLogForm({ onSubmit, onSkip }: Props) {
+export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppend }: Props) {
   const [targetDate, setTargetDate] = useState(todayIso());
   const [temperature, setTemperature] = useState("");
   const [temperatureUnmeasured, setTemperatureUnmeasured] = useState(false);
@@ -103,40 +108,37 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
   const { registeredMedications } = useMedications();
   const { dailyLogs: historyLogs } = useDailyLogs();
 
-  // 症状チップの並び順・自由入力のチップ昇格・入力候補は、過去の記録頻度から算出する
-  const symptomFrequency = useMemo(() => {
-    const freq: Record<string, number> = {};
-    for (const log of historyLogs) {
-      if (log.skipped) continue;
-      for (const s of log.symptoms) {
-        freq[s.name] = (freq[s.name] ?? 0) + 1;
-      }
+  // 簡易記録への追記: 簡易入力でカバーした項目(体調スコア・倦怠感・体温・症状・危険症状)を
+  // プリフィルする。追記後の値(空を含む)が利用者の意図として優先されるため、消した項目は消える
+  useEffect(() => {
+    if (!appendTo) return;
+    setTargetDate(appendTo.targetDate);
+    if (typeof appendTo.conditionScore === "number") setConditionScore(appendTo.conditionScore);
+    setFatigueUnusual(!!appendTo.fatigueUnusual);
+    if (appendTo.temperature === "unmeasured") {
+      setTemperatureUnmeasured(true);
+      setTemperature("");
+    } else if (typeof appendTo.temperature === "number") {
+      setTemperatureUnmeasured(false);
+      setTemperature(String(appendTo.temperature));
     }
-    return freq;
-  }, [historyLogs]);
+    setDangerSymptoms(appendTo.dangerSymptoms ?? []);
+    setSymptomNames(appendTo.symptoms.map((sym) => sym.name));
+    setSymptomDetails(
+      Object.fromEntries(
+        appendTo.symptoms.map((sym) => [
+          sym.name,
+          { severity: sym.severity, unusualOn: !!sym.unusualNote, unusualNote: sym.unusualNote ?? "" },
+        ])
+      )
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appendTo?.id]);
 
-  // 2回以上記録された自由入力の症状は、既定候補と同様に常設チップとして扱う
-  const promotedSymptomNames = useMemo(
-    () =>
-      Object.keys(symptomFrequency).filter(
-        (name) => !(DEFAULT_SYMPTOM_NAMES as readonly string[]).includes(name) && symptomFrequency[name] >= 2
-      ),
-    [symptomFrequency]
-  );
-
-  // 常設チップ(既定候補+頻出の自由入力)は記録頻度が高い順に並べる
-  const orderedChipNames = useMemo(() => {
-    const names = Array.from(new Set<string>([...DEFAULT_SYMPTOM_NAMES, ...promotedSymptomNames]));
-    return names.sort((a, b) => (symptomFrequency[b] ?? 0) - (symptomFrequency[a] ?? 0));
-  }, [promotedSymptomNames, symptomFrequency]);
-
-  // 自由入力欄の入力候補: 過去に記録した症状名のうち、まだ常設チップ化されていないもの
-  const symptomSuggestions = useMemo(
-    () =>
-      Object.keys(symptomFrequency)
-        .filter((name) => !orderedChipNames.includes(name))
-        .sort((a, b) => symptomFrequency[b] - symptomFrequency[a]),
-    [symptomFrequency, orderedChipNames]
+  // 症状チップの並び順・自由入力のチップ昇格・入力候補は、過去の記録頻度から算出する
+  const { chipNames: orderedChipNames, suggestions: symptomSuggestions } = useMemo(
+    () => computeSymptomChips(historyLogs),
+    [historyLogs]
   );
   // バックフィル対応: 対象日の時点でまだ処方されていなかった薬・既に中止していた薬は
   // チェックリストに出さない(startDate/endDateで判定。旧データはいつでも表示可)
@@ -366,7 +368,16 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
 
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>今日の記録</h2>
+      <h2>{appendTo ? `${appendTo.targetDate}の簡易記録に詳細を追記` : "今日の記録"}</h2>
+      {appendTo && (
+        <div className="field-hint" style={{ marginBottom: 8 }}>
+          簡易入力で記録した内容が入力済みです。詳しい項目を足して「記録する」を押すと、この日の記録が
+          通常の記録に更新されます(簡易入力の内容は消えません)。{" "}
+          <button type="button" className="btn-ghost" onClick={onCancelAppend}>
+            追記をやめる
+          </button>
+        </div>
+      )}
 
       <div className="field">
         <label htmlFor="targetDate">対象日</label>
@@ -376,6 +387,7 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           value={targetDate}
           onChange={(e) => setTargetDate(e.target.value)}
           max={todayIso()}
+          disabled={!!appendTo}
         />
         <div className="field-hint">後日入力の場合はここを過去日にしてください</div>
       </div>
@@ -1053,14 +1065,16 @@ export default function DailyLogForm({ onSubmit, onSkip }: Props) {
           記録する
         </button>
       </div>
-      <button
-        type="button"
-        className="btn-ghost"
-        style={{ marginTop: 8 }}
-        onClick={() => onSkip(targetDate)}
-      >
-        今日はスキップ
-      </button>
+      {!appendTo && (
+        <button
+          type="button"
+          className="btn-ghost"
+          style={{ marginTop: 8 }}
+          onClick={() => onSkip(targetDate)}
+        >
+          今日はスキップ
+        </button>
+      )}
     </form>
   );
 }

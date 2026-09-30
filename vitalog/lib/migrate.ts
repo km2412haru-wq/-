@@ -76,6 +76,7 @@ function normalizeDailyLog(raw: unknown): DailyLog {
     targetDate: entry.targetDate ?? "",
     recordedAt: entry.recordedAt ?? new Date().toISOString(),
     skipped: entry.skipped ?? false,
+    entryMode: entry.entryMode === "quick" || entry.entryMode === "full" ? entry.entryMode : undefined,
     temperature: entry.temperature,
     conditionScore: entry.conditionScore,
     jointPain: Array.isArray(entry.jointPain) ? entry.jointPain : [],
