@@ -1,13 +1,27 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { downloadCsvBackup, downloadJsonBackup, restoreFromJsonFile } from "@/lib/exportImport";
-import { hasPreRestoreSnapshot, restorePreRestoreSnapshot } from "@/lib/storage";
+import {
+  clearCorruptSnapshot,
+  getCorruptSnapshot,
+  hasPreRestoreSnapshot,
+  loadStore,
+  restorePreRestoreSnapshot,
+} from "@/lib/storage";
 import GoogleDriveBackup from "@/components/GoogleDriveBackup";
 
 export default function BackupManager() {
   const [message, setMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [hasCorruptSnapshot, setHasCorruptSnapshot] = useState(false);
+
+  // 破損データの退避は、データを読み込んだ時に作られる。描画時に確認すると、起動時の
+  // 整合性チェック(RecoveryNoticeBanner)より先に描画されて見落とすため、マウント後に確認する
+  useEffect(() => {
+    loadStore();
+    setHasCorruptSnapshot(getCorruptSnapshot() !== null);
+  }, []);
 
   const handleRestore = async (file: File | null) => {
     if (!file) return;
@@ -27,6 +41,24 @@ export default function BackupManager() {
       console.error(err);
       setMessage("復元に失敗しました。ファイルが破損している可能性があります。");
     }
+  };
+
+  const handleDownloadCorrupt = () => {
+    const raw = getCorruptSnapshot();
+    if (!raw) return;
+    const blob = new Blob([raw], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `vitalog-corrupt-data-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDiscardCorrupt = () => {
+    if (!window.confirm("退避してある破損データを削除します。書き出していない場合は二度と取り戻せません。よろしいですか?")) return;
+    clearCorruptSnapshot();
+    window.location.reload();
   };
 
   const handleUndoRestore = () => {
@@ -78,6 +110,24 @@ export default function BackupManager() {
         )}
         {message && <p className="muted" style={{ marginTop: 8 }}>{message}</p>}
       </div>
+
+      {hasCorruptSnapshot && (
+        <div className="card emergency-banner">
+          <h2>破損したデータの退避</h2>
+          <p className="field-hint">
+            保存データが壊れて読み込めなかった時に、元のテキストをそのまま端末内に退避してあります。
+            自動では削除されません。書き出して保管しておけば、あとから手作業で救出できる場合があります。
+          </p>
+          <div className="row" style={{ marginTop: 8 }}>
+            <button type="button" className="btn-secondary" onClick={handleDownloadCorrupt}>
+              退避データを書き出す
+            </button>
+            <button type="button" className="btn-ghost" onClick={handleDiscardCorrupt}>
+              退避データを削除
+            </button>
+          </div>
+        </div>
+      )}
 
       <GoogleDriveBackup />
     </>

@@ -3,6 +3,7 @@ import "./globals.css";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import RecoveryNoticeBanner from "@/components/RecoveryNoticeBanner";
 import StoreSyncBanner from "@/components/StoreSyncBanner";
+import SaveFailureBanner from "@/components/SaveFailureBanner";
 
 export const metadata: Metadata = {
   title: "Vitalog",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <RecoveryNoticeBanner />
         <StoreSyncBanner />
+        <SaveFailureBanner />
         {children}
       </body>
     </html>
