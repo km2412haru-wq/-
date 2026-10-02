@@ -9,7 +9,7 @@ import { DANGER_SYMPTOMS, type DailyLog } from "@/types/vitalog";
 
 interface Props {
   historyLogs: DailyLog[];
-  onSubmit: (draft: DailyLogDraft) => void;
+  onSubmit: (draft: DailyLogDraft) => boolean;
   onCancel: () => void;
 }
 

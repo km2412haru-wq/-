@@ -1,4 +1,5 @@
 import { DEFAULT_SYMPTOM_NAMES, type DailyLog } from "@/types/vitalog";
+import { isRecordedDay } from "@/lib/logKind";
 
 /**
  * 簡易入力で「症状あり」だけを選び、症状名を選ばなかった場合に記録する名前。
@@ -19,7 +20,7 @@ export interface SymptomChipData {
 export function computeSymptomChips(logs: DailyLog[]): SymptomChipData {
   const frequency: Record<string, number> = {};
   for (const log of logs) {
-    if (log.skipped) continue;
+    if (!isRecordedDay(log)) continue;
     for (const s of log.symptoms) {
       if (s.name === UNSPECIFIED_SYMPTOM_NAME) continue;
       frequency[s.name] = (frequency[s.name] ?? 0) + 1;

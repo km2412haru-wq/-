@@ -121,6 +121,7 @@ export default function BulkImportManager() {
     if (readyRows.length === 0) return;
     setMessage(null);
 
+    let failed = 0;
     for (const row of readyRows) {
       let photoId: string | undefined;
       if (row.keepPhoto) {
@@ -135,20 +136,22 @@ export default function BulkImportManager() {
 
       if (row.kind === "medication") {
         if (!row.name.trim()) continue;
-        applyBulkMedication(row.documentDate, {
+        const savedLog = applyBulkMedication(row.documentDate, {
           name: row.name.trim(),
           dose: row.dose.trim() || undefined,
           sourcePhotoId: photoId,
         });
+        if (!savedLog) failed += 1;
         if (row.applyToRegistered) {
-          applyPrescriptionToRegisteredMedications(
+          const result = applyPrescriptionToRegisteredMedications(
             row.name.trim(),
             row.dose.trim() || undefined,
             row.documentDate
           );
+          if (result === "failed") failed += 1;
         }
       } else {
-        applyBulkLabResult(row.documentDate, {
+        const savedLabs = applyBulkLabResult(row.documentDate, {
           wbcPerUl: row.wbc ? Number(row.wbc) : undefined,
           ferritinNgMl: row.ferritin ? Number(row.ferritin) : undefined,
           crpMgDl: row.crp ? Number(row.crp) : undefined,
@@ -158,13 +161,17 @@ export default function BulkImportManager() {
           esrMmH: row.esr ? Number(row.esr) : undefined,
           sourcePhotoId: photoId,
         });
+        if (!savedLabs) failed += 1;
       }
     }
 
-    setMessage(`${readyRows.length}件を記録しました。ページを再読み込みします。`);
-    // 「登録済みの薬」等はReactの状態管理を経由せず直接storageを更新しているため、
-    // 画面表示を最新化するために再読み込みする
-    setTimeout(() => window.location.reload(), 1200);
+    // 画面の一覧は保存の完了イベントで自動的に最新になるため、再読み込みは不要
+    if (failed > 0) {
+      setMessage(`${failed}件を保存できませんでした。取り込み済みの分は反映されています。保存容量を確認してやり直してください。`);
+      return;
+    }
+    setRows([]);
+    setMessage(`${readyRows.length}件を記録しました。`);
   };
 
   return (

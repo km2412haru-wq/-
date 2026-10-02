@@ -1,4 +1,5 @@
 import { isInLifeStageTransitionWindow } from "@/lib/lifeStage";
+import { isRecordedDay } from "@/lib/logKind";
 import type { DailyLog, RegisteredMedication } from "@/types/vitalog";
 
 /**
@@ -193,9 +194,13 @@ export function checkEmergency(
     : JOINT_PAIN_SPIKE_SEVERITY_DELTA;
 
   const today = todayIso();
-  const nonSkipped = dailyLogs
+  // 検査値は、検査値だけを取り込んだ日(labsOnly)の記録からも読む。
+  // 一方、記録日数・発熱/倦怠感の日数・症状の急変は、その日の体調を記録した日だけで数える
+  // (検査値だけの日を「症状なしの記録日」にしない)。
+  const labLogs = dailyLogs
     .filter((l) => !l.skipped && daysBetween(l.targetDate, today) <= EMERGENCY_LOOKBACK_DAYS)
     .sort((a, b) => (a.targetDate < b.targetDate ? 1 : -1));
+  const nonSkipped = labLogs.filter(isRecordedDay);
 
   // 観察窓(今日を含む直近OBSERVATION_WINDOW_DAYS暦日)の中で、記録がある日だけを数える。
   // 記録が無い日(スキップ・欠測)は「症状なし」とは扱わず、分子にも分母にも入れない。
@@ -246,7 +251,7 @@ export function checkEmergency(
   const latestLab = <K extends "ferritinNgMl" | "plateletsPerUl" | "wbcPerUl" | "astUL" | "altUL">(
     key: K
   ): number | undefined => {
-    const v = nonSkipped.find((l) => typeof l.labs?.[key] === "number")?.labs?.[key];
+    const v = labLogs.find((l) => typeof l.labs?.[key] === "number")?.labs?.[key];
     return typeof v === "number" ? v : undefined;
   };
   const latestFerritin = latestLab("ferritinNgMl");

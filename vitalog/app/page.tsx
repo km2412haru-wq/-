@@ -42,24 +42,28 @@ export default function Home() {
       });
   };
 
-  const handleSubmit = (draft: DailyLogDraft) => {
+  // 保存できたかを返す(失敗時はフォームの入力を残し、成功の表示も出さない)
+  const handleSubmit = (draft: DailyLogDraft): boolean => {
     if (appendTarget) {
-      updateLog(appendTarget.id, mergeAppendedLog(appendTarget, draft));
+      if (!updateLog(appendTarget.id, mergeAppendedLog(appendTarget, draft))) return false;
       tagMemo(appendTarget.id, draft.memo);
       setAppendTarget(null);
       setNotice(`${appendTarget.targetDate}の記録に詳細を追記しました。`);
-      return;
+      return true;
     }
     const entry = addLog(draft);
+    if (!entry) return false;
     tagMemo(entry.id, entry.memo);
+    return true;
   };
 
-  const handleQuickSubmit = (draft: DailyLogDraft) => {
-    addLog(draft);
+  const handleQuickSubmit = (draft: DailyLogDraft): boolean => {
+    if (!addLog(draft)) return false;
     setQuickMode(false);
     setNotice(
       "簡易記録を保存しました。体調が落ち着いたら、記録履歴の「詳細を追記」から続きを入力できます。"
     );
+    return true;
   };
 
   const handleAppend = (log: DailyLog) => {

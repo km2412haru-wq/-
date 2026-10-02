@@ -1,5 +1,6 @@
 import { computeFerritinEsrRatio } from "@/lib/ferritinEsrRatio";
 import { JOINT_SITES, type DailyLog } from "@/types/vitalog";
+import { isRecordedDay } from "@/lib/logKind";
 
 /** 「睡眠不足の翌日は症状が出やすいか」の目安として使う閾値(時間) */
 const LOW_SLEEP_THRESHOLD_HOURS = 6;
@@ -98,7 +99,7 @@ function buildSleepCorrelation(logs: DailyLog[]): SleepSymptomCorrelation {
 
 /** F7: 医師向けレポートの元になる集計。生データではなく統計サマリーとして扱う */
 export function buildReport(logs: DailyLog[]): ReportSummary {
-  const nonSkipped = logs.filter((l) => !l.skipped);
+  const nonSkipped = logs.filter(isRecordedDay);
 
   const conditionScores = nonSkipped
     .map((l) => l.conditionScore)

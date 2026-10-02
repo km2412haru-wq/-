@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  CURRENT_STORE_REVISION,
   SAVE_FAILED_EVENT,
   consumeStorageNotice,
   getCorruptSnapshot,
@@ -60,6 +61,8 @@ const STORE_C = makeStore([
 ]);
 
 const json = (s: VitalogStore) => JSON.stringify(s);
+/** saveStoreが書き込む形(書き込み世代の刻印つき) */
+const saved = (s: VitalogStore) => JSON.stringify({ ...s, storeRevision: CURRENT_STORE_REVISION });
 const ids = (s: VitalogStore) => s.dailyLogs.map((l) => l.id);
 
 beforeEach(() => {
@@ -82,7 +85,7 @@ describe("正常な保存と読み込み", () => {
   it("保存後にtempキーは残らない", () => {
     saveStore(STORE_A);
     expect(window.localStorage.getItem(TEMP)).toBeNull();
-    expect(window.localStorage.getItem(MAIN)).toBe(json(STORE_A));
+    expect(window.localStorage.getItem(MAIN)).toBe(saved(STORE_A));
   });
 
   it("初回保存(本キーが無い)時はbackupを作らない", () => {
@@ -93,10 +96,10 @@ describe("正常な保存と読み込み", () => {
   it("2回目以降の保存では、直前の本キーの内容がbackupに退避される", () => {
     saveStore(STORE_A);
     saveStore(STORE_B);
-    expect(window.localStorage.getItem(BACKUP)).toBe(json(STORE_A));
-    expect(window.localStorage.getItem(MAIN)).toBe(json(STORE_B));
+    expect(window.localStorage.getItem(BACKUP)).toBe(saved(STORE_A));
+    expect(window.localStorage.getItem(MAIN)).toBe(saved(STORE_B));
     saveStore(STORE_C);
-    expect(window.localStorage.getItem(BACKUP)).toBe(json(STORE_B));
+    expect(window.localStorage.getItem(BACKUP)).toBe(saved(STORE_B));
   });
 
   it("データが何も無ければ空のストアを返し、復旧通知も出ない", () => {
@@ -220,7 +223,7 @@ describe("保存直前の本キーが壊れている場合、backupを守る", (
     window.localStorage.setItem(MAIN, "{broken json");
     saveStore(STORE_B);
     expect(window.localStorage.getItem(BACKUP)).toBe(json(STORE_A));
-    expect(window.localStorage.getItem(MAIN)).toBe(json(STORE_B));
+    expect(window.localStorage.getItem(MAIN)).toBe(saved(STORE_B));
   });
 
   it("本キーが正常ならbackupは更新される(対照)", () => {
@@ -311,7 +314,7 @@ describe("穴2: 復旧不能な破損時に元データを残して通知する"
     saveStore(loadStore());
     saveStore(STORE_A);
     expect(getCorruptSnapshot()).toBe("{corrupt-but-maybe-salvageable");
-    expect(window.localStorage.getItem(MAIN)).toBe(json(STORE_A));
+    expect(window.localStorage.getItem(MAIN)).toBe(saved(STORE_A));
   });
 
   it("復旧できた場合も、破損した元のテキストは退避される", () => {

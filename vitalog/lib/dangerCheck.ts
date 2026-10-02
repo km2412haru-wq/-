@@ -1,4 +1,5 @@
 import type { DailyLog } from "@/types/vitalog";
+import { isRecordedDay } from "@/lib/logKind";
 
 /**
  * Danger層: 記録された危険症状に基づく、医療機関への相談の促し。
@@ -38,7 +39,7 @@ export function checkDanger(dailyLogs: DailyLog[]): DangerCheckResult {
   const today = todayIso();
   const entries = dailyLogs
     .filter((l) => {
-      if (l.skipped) return false;
+      if (!isRecordedDay(l)) return false;
       const diff = daysBefore(today, l.targetDate);
       return diff >= 0 && diff <= DANGER_LOOKBACK_DAYS;
     })

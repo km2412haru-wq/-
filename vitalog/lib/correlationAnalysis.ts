@@ -1,4 +1,5 @@
 import type { DailyLog, LoadLevel } from "@/types/vitalog";
+import { isRecordedDay } from "@/lib/logKind";
 
 /**
  * F5/F6/F11: ラグ相関分析(叩き台)。
@@ -92,7 +93,7 @@ function symptomsSeveritySum(log: DailyLog): number | undefined {
 }
 
 export function computeLagCorrelations(logs: DailyLog[]): CorrelationFinding[] {
-  const nonSkipped = logs.filter((l) => !l.skipped);
+  const nonSkipped = logs.filter(isRecordedDay);
   const byDate = new Map(nonSkipped.map((l) => [l.targetDate, l]));
   const sortedDates = Array.from(byDate.keys()).sort();
   if (sortedDates.length === 0) return [];

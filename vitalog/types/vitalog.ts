@@ -220,6 +220,13 @@ export interface DailyLog {
   /** 入力方式(簡易入力かどうか)。未設定は通常入力 */
   entryMode?: EntryMode;
 
+  /**
+   * 「検査値のみ」の記録(検査結果票・通院記録・追記インポートから、その日の記録が無い日に作られたもの)。
+   * 症状・体調などを聞いていない日なので、記録日数・症状なしの日・相関分析の材料には数えない
+   * (lib/logKind.tsのisRecordedDay)。検査値(labs)は読み取り対象に含める。
+   */
+  labsOnly?: boolean;
+
   // --- 必須項目 ---
   /**
    * 体温(℃)。3つの状態を区別する:
@@ -343,6 +350,12 @@ export interface DailyLog {
  */
 export interface VitalogStoreV1 {
   version: 1;
+  /**
+   * 書き込み世代。データ形式にこのコードが知らない項目が加わった時に上げる整数
+   * (lib/storage.tsのCURRENT_STORE_REVISION)。自分より新しい世代のデータは、
+   * 古いコードが保存して項目を失わせないよう、読み取り専用として扱う。未設定は0。
+   */
+  storeRevision?: number;
   dailyLogs: DailyLog[];
   registeredMedications: RegisteredMedication[];
   taperingEvents: TaperingEvent[];

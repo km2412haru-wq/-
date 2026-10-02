@@ -10,6 +10,7 @@ import {
   toSeries,
   type DateRangeKey,
 } from "@/lib/trendData";
+import { isRecordedDay } from "@/lib/logKind";
 
 export default function TrendsView() {
   const { dailyLogs, ready } = useDailyLogs();
@@ -19,7 +20,7 @@ export default function TrendsView() {
 
   if (!ready) return null;
 
-  if (dailyLogs.filter((l) => !l.skipped).length === 0) {
+  if (dailyLogs.filter(isRecordedDay).length === 0) {
     return (
       <div className="card">
         <p className="muted">記録がまだありません。まずは「毎日の記録」から入力してください。</p>

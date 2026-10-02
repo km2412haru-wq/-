@@ -1,5 +1,6 @@
 import { UNSPECIFIED_SYMPTOM_NAME } from "@/lib/symptomStats";
 import type { DailyLog } from "@/types/vitalog";
+import { isRecordedDay } from "@/lib/logKind";
 
 /**
  * 前駆症状の順列(例: 喉の痛み → 倦怠感 → 関節痛 → 発熱)を、後から分析できるようにするための
@@ -75,7 +76,7 @@ function collectPresence(logs: DailyLog[]): Map<string, { kind: OnsetKind; name:
   };
 
   for (const log of logs) {
-    if (log.skipped) continue;
+    if (!isRecordedDay(log)) continue;
     for (const s of log.symptoms) {
       if (s.name === UNSPECIFIED_SYMPTOM_NAME) continue;
       add(`symptom:${s.name}`, "symptom", s.name, { date: log.targetDate, declaredOnset: s.onsetDate });

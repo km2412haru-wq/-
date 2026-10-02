@@ -1,49 +1,41 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { generateId } from "@/lib/id";
-import { loadHypotheses, saveHypotheses } from "@/lib/storage";
-import type { Hypothesis } from "@/types/vitalog";
+import { updateStore } from "@/lib/storage";
+import { patchById, removeById, upsertById } from "@/lib/storeOps";
+import { useStoreSelect } from "@/lib/useStoreSelect";
+import type { Hypothesis, VitalogStore } from "@/types/vitalog";
 
-/** F12-1: 仮説検証フレームワーク(登録・一覧のみ。支持率算出はF5/F11実装後) */
+const EMPTY: Hypothesis[] = [];
+
+function selectHypotheses(store: VitalogStore): Hypothesis[] {
+  return store.hypotheses;
+}
+
+/** F12-1: 仮説検証フレームワーク(登録・一覧のみ。保存の方式はuseDailyLogsと同じ) */
 export function useHypotheses() {
-  const [hypotheses, setHypotheses] = useState<Hypothesis[]>([]);
-  const [ready, setReady] = useState(false);
-  // 変更操作(add/update/delete等)を行ったインスタンスだけが保存する。
-  // 読み込んだだけのインスタンスが保存すると、他のインスタンスが直前に保存した最新の内容を
-  // 「読み込み時点の古い内容」で上書きして消してしまう(表示専用の利用側が後から
-  // マウントされた場合に起きる)ため、変更していないインスタンスは保存しない。
-  const dirty = useRef(false);
+  const { value: hypotheses, ready } = useStoreSelect(selectHypotheses, EMPTY);
 
-  useEffect(() => {
-    setHypotheses(loadHypotheses());
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !dirty.current) return;
-    saveHypotheses(hypotheses);
-  }, [hypotheses, ready]);
-
-  const addHypothesis = useCallback((statement: string) => {
+  const addHypothesis = useCallback((statement: string): Hypothesis | null => {
     const entry: Hypothesis = {
       id: generateId(),
       statement,
       createdAt: new Date().toISOString(),
     };
-    dirty.current = true;
-    setHypotheses((prev) => [entry, ...prev]);
-    return entry;
+    const ok = updateStore((store) => ({ ...store, hypotheses: upsertById(store.hypotheses, entry) }));
+    return ok ? entry : null;
   }, []);
 
-  const updateHypothesisNote = useCallback((id: string, note: string) => {
-    dirty.current = true;
-    setHypotheses((prev) => prev.map((h) => (h.id === id ? { ...h, note } : h)));
+  const updateHypothesisNote = useCallback((id: string, note: string): boolean => {
+    return updateStore((store) => ({
+      ...store,
+      hypotheses: patchById(store.hypotheses, id, (h) => ({ ...h, note })),
+    }));
   }, []);
 
-  const deleteHypothesis = useCallback((id: string) => {
-    dirty.current = true;
-    setHypotheses((prev) => prev.filter((h) => h.id !== id));
+  const deleteHypothesis = useCallback((id: string): boolean => {
+    return updateStore((store) => ({ ...store, hypotheses: removeById(store.hypotheses, id) }));
   }, []);
 
   return { hypotheses, ready, addHypothesis, updateHypothesisNote, deleteHypothesis };

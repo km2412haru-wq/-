@@ -27,6 +27,11 @@ export default function DailyLogList({ dailyLogs, onDelete, onAppend }: Props) {
           <div className="row" style={{ justifyContent: "space-between" }}>
             <strong>
               {log.targetDate}
+              {log.labsOnly && (
+                <span className="tag" style={{ marginLeft: 8 }}>
+                  検査値のみ
+                </span>
+              )}
               {log.entryMode === "quick" && (
                 <span className="tag" style={{ marginLeft: 8 }}>
                   簡易記録

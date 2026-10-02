@@ -1,50 +1,45 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { generateId } from "@/lib/id";
-import { loadSelfExperiments, saveSelfExperiments } from "@/lib/storage";
-import type { SelfExperiment } from "@/types/vitalog";
+import { updateStore } from "@/lib/storage";
+import { patchById, removeById, upsertById } from "@/lib/storeOps";
+import { useStoreSelect } from "@/lib/useStoreSelect";
+import type { SelfExperiment, VitalogStore } from "@/types/vitalog";
 
-/** F12-2: セルフA/Bテストの介入宣言のCRUD */
+const EMPTY: SelfExperiment[] = [];
+
+function selectExperiments(store: VitalogStore): SelfExperiment[] {
+  return store.selfExperiments;
+}
+
+/** F12-2: セルフA/Bテストの介入宣言のCRUD(保存の方式はuseDailyLogsと同じ) */
 export function useSelfExperiments() {
-  const [selfExperiments, setSelfExperiments] = useState<SelfExperiment[]>([]);
-  const [ready, setReady] = useState(false);
-  // 変更操作(add/update/delete等)を行ったインスタンスだけが保存する。
-  // 読み込んだだけのインスタンスが保存すると、他のインスタンスが直前に保存した最新の内容を
-  // 「読み込み時点の古い内容」で上書きして消してしまう(表示専用の利用側が後から
-  // マウントされた場合に起きる)ため、変更していないインスタンスは保存しない。
-  const dirty = useRef(false);
+  const { value: selfExperiments, ready } = useStoreSelect(selectExperiments, EMPTY);
 
-  useEffect(() => {
-    setSelfExperiments(loadSelfExperiments());
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !dirty.current) return;
-    saveSelfExperiments(selfExperiments);
-  }, [selfExperiments, ready]);
-
-  const addExperiment = useCallback((description: string, startDate: string) => {
+  const addExperiment = useCallback((description: string, startDate: string): SelfExperiment | null => {
     const entry: SelfExperiment = {
       id: generateId(),
       description,
       startDate,
       createdAt: new Date().toISOString(),
     };
-    dirty.current = true;
-    setSelfExperiments((prev) => [entry, ...prev]);
-    return entry;
+    const ok = updateStore((store) => ({
+      ...store,
+      selfExperiments: upsertById(store.selfExperiments, entry),
+    }));
+    return ok ? entry : null;
   }, []);
 
-  const endExperiment = useCallback((id: string, endDate: string) => {
-    dirty.current = true;
-    setSelfExperiments((prev) => prev.map((e) => (e.id === id ? { ...e, endDate } : e)));
+  const endExperiment = useCallback((id: string, endDate: string): boolean => {
+    return updateStore((store) => ({
+      ...store,
+      selfExperiments: patchById(store.selfExperiments, id, (e) => ({ ...e, endDate })),
+    }));
   }, []);
 
-  const deleteExperiment = useCallback((id: string) => {
-    dirty.current = true;
-    setSelfExperiments((prev) => prev.filter((e) => e.id !== id));
+  const deleteExperiment = useCallback((id: string): boolean => {
+    return updateStore((store) => ({ ...store, selfExperiments: removeById(store.selfExperiments, id) }));
   }, []);
 
   return { selfExperiments, ready, addExperiment, endExperiment, deleteExperiment };

@@ -38,13 +38,14 @@ export default function MedicationsManager() {
   const handleAddMedication = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    addMedication({
+    const saved = addMedication({
       name: name.trim(),
       dose: dose.trim() || undefined,
       type,
       startDate: startDate || undefined,
       reminderTime: reminderTime || undefined,
     });
+    if (!saved) return; // 保存できなかった時は入力を残す
     setName("");
     setDose("");
     setStartDate(todayIso());
@@ -54,12 +55,13 @@ export default function MedicationsManager() {
   const handleAddTapering = (e: React.FormEvent) => {
     e.preventDefault();
     if (!taperMedName.trim() || !taperDose.trim()) return;
-    addTaperingEvent({
+    const saved = addTaperingEvent({
       medicationName: taperMedName.trim(),
       date: taperDate,
       newDose: taperDose.trim(),
       note: taperNote.trim() || undefined,
     });
+    if (!saved) return;
     setTaperDose("");
     setTaperNote("");
   };

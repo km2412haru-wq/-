@@ -30,14 +30,14 @@ export default function ExperimentsManager() {
   const handleAddHypothesis = (e: React.FormEvent) => {
     e.preventDefault();
     if (!statement.trim()) return;
-    addHypothesis(statement.trim());
+    if (!addHypothesis(statement.trim())) return;
     setStatement("");
   };
 
   const handleAddExperiment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim()) return;
-    addExperiment(description.trim(), startDate);
+    if (!addExperiment(description.trim(), startDate)) return;
     setDescription("");
     setStartDate(todayIso());
   };

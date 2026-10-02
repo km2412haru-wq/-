@@ -2,6 +2,7 @@ import { checkDanger } from "@/lib/dangerCheck";
 import { checkEmergency } from "@/lib/emergencyCheck";
 import { KNOWN_LIMITATIONS } from "@/lib/chatLimitations";
 import type { DailyLog, RegisteredMedication } from "@/types/vitalog";
+import { isRecordedDay } from "@/lib/logKind";
 
 /**
  * チャットに渡す、記録の要約。統計は全てアプリ側で計算し、LLMには計算させない
@@ -100,7 +101,7 @@ export function buildChatSummary(
   const today = options.today ?? localIso(new Date());
   const from = shiftIso(today, -(SUMMARY_WINDOW_DAYS - 1));
   const inWindow = allLogs.filter((l) => l.targetDate >= from && l.targetDate <= today);
-  const logs = inWindow.filter((l) => !l.skipped);
+  const logs = inWindow.filter(isRecordedDay);
 
   const recordedDates = new Set(logs.map((l) => l.targetDate));
   const skippedDates = new Set(

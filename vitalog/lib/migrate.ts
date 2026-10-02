@@ -43,6 +43,8 @@ export function migrateToLatest(raw: unknown): VitalogStore {
     hypotheses?: unknown;
     selfExperiments?: unknown;
     visits?: unknown;
+    storeRevision?: unknown;
+    [extra: string]: unknown;
   };
 
   // バージョン番号が無い(=最初期のスキーマより前)データはここで空扱いにする。
@@ -51,8 +53,15 @@ export function migrateToLatest(raw: unknown): VitalogStore {
     return empty;
   }
 
+  // このコードが知らないトップレベルのキー(新しい版が足したコレクション等)は、そのまま保持する。
+  // 既知のキーだけで再構築すると、新しい版で作ったデータを古い版が保存した時に黙って消えてしまう。
+  const { version: _v, dailyLogs: _d, registeredMedications: _r, taperingEvents: _t, hypotheses: _h, selfExperiments: _s, visits: _vi, ...unknownTopLevel } = data;
+  void [_v, _d, _r, _t, _h, _s, _vi];
+
   return {
+    ...unknownTopLevel,
     version: SCHEMA_VERSION,
+    storeRevision: typeof data.storeRevision === "number" ? data.storeRevision : undefined,
     dailyLogs: Array.isArray(data.dailyLogs) ? data.dailyLogs.map(normalizeDailyLog) : [],
     registeredMedications: Array.isArray(data.registeredMedications)
       ? data.registeredMedications.map(normalizeRegisteredMedication)
@@ -72,6 +81,8 @@ export function migrateToLatest(raw: unknown): VitalogStore {
 function normalizeDailyLog(raw: unknown): DailyLog {
   const entry = raw as Partial<DailyLog>;
   return {
+    // このコードが知らないフィールド(新しい版が足した項目)も落とさず保持する
+    ...entry,
     id: entry.id ?? "",
     targetDate: entry.targetDate ?? "",
     recordedAt: entry.recordedAt ?? new Date().toISOString(),
@@ -151,6 +162,7 @@ function normalizeMedicationRecord(raw: MedicationRecord): MedicationRecord {
 function normalizeRegisteredMedication(raw: unknown): RegisteredMedication {
   const entry = raw as Partial<RegisteredMedication>;
   return {
+    ...entry,
     id: entry.id ?? "",
     name: entry.name ?? "",
     dose: entry.dose,
@@ -168,6 +180,7 @@ function normalizeRegisteredMedication(raw: unknown): RegisteredMedication {
 function normalizeTaperingEvent(raw: unknown): TaperingEvent {
   const entry = raw as Partial<TaperingEvent>;
   return {
+    ...entry,
     id: entry.id ?? "",
     medicationName: entry.medicationName ?? "",
     date: entry.date ?? "",
@@ -180,6 +193,7 @@ function normalizeTaperingEvent(raw: unknown): TaperingEvent {
 function normalizeHypothesis(raw: unknown): Hypothesis {
   const entry = raw as Partial<Hypothesis>;
   return {
+    ...entry,
     id: entry.id ?? "",
     statement: entry.statement ?? "",
     createdAt: entry.createdAt ?? new Date().toISOString(),
@@ -190,6 +204,7 @@ function normalizeHypothesis(raw: unknown): Hypothesis {
 function normalizeSelfExperiment(raw: unknown): SelfExperiment {
   const entry = raw as Partial<SelfExperiment>;
   return {
+    ...entry,
     id: entry.id ?? "",
     description: entry.description ?? "",
     startDate: entry.startDate ?? "",
@@ -201,6 +216,7 @@ function normalizeSelfExperiment(raw: unknown): SelfExperiment {
 function normalizeVisit(raw: unknown): Visit {
   const entry = raw as Partial<Visit>;
   return {
+    ...entry,
     id: entry.id ?? "",
     visitDate: entry.visitDate ?? "",
     hospitalName: entry.hospitalName,

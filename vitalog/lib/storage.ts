@@ -26,6 +26,17 @@ const CORRUPT_SNAPSHOT_KEY = "vitalog:store:corrupt-snapshot";
 
 /** 保存に失敗した時にwindowへ発火するイベント名(SaveFailureBannerが購読する) */
 export const SAVE_FAILED_EVENT = "vitalog:save-failed";
+/** 本データが更新された時に、同じタブ内へ発火するイベント名(各フックが読み直す。他タブはstorageイベント) */
+export const STORE_CHANGED_EVENT = "vitalog:store-changed";
+/** 本データが、このコードより新しい版で作られていて、保存を止めた時のイベント名 */
+export const STORE_READONLY_EVENT = "vitalog:store-readonly";
+
+/**
+ * このコードが書き込む世代。データ形式に、古いコードが知らない・消してしまう項目を足した時に上げる。
+ * 自分より新しい世代のデータを見つけたら、古いコードは保存せず読み取り専用にする
+ * (古い画面が開いたままのPWAや、別端末で作った新しいデータの復元で、新しい項目を消さないため)。
+ */
+export const CURRENT_STORE_REVISION = 1;
 
 export type StorageNotice = "recovered" | "unrecoverable";
 
@@ -140,6 +151,30 @@ function notifySaveFailed(): void {
   window.dispatchEvent(new CustomEvent(SAVE_FAILED_EVENT));
 }
 
+function notifyStoreChanged(): void {
+  window.dispatchEvent(new CustomEvent(STORE_CHANGED_EVENT));
+}
+
+function notifyReadOnly(): void {
+  window.dispatchEvent(new CustomEvent(STORE_READONLY_EVENT));
+}
+
+function revisionOfRaw(raw: string | null): number {
+  if (raw === null) return 0;
+  try {
+    const v = (JSON.parse(raw) as { storeRevision?: unknown }).storeRevision;
+    return typeof v === "number" ? v : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** いま保存されているデータが、このコードより新しい世代か(新しいなら保存してはいけない) */
+export function isStoreNewerThanApp(): boolean {
+  if (typeof window === "undefined") return false;
+  return revisionOfRaw(window.localStorage.getItem(STORAGE_KEY)) > CURRENT_STORE_REVISION;
+}
+
 /**
  * 破損耐性を持たせた保存フロー。localStorage.setItem自体はキー単位でアトミックだが、
  * 想定外の原因で本キー(STORAGE_KEY)が壊れる・消える事態に備えて多重化する。
@@ -159,9 +194,19 @@ function notifySaveFailed(): void {
 export function saveStore(store: VitalogStore): boolean {
   if (typeof window === "undefined") return true;
   try {
-    const json = JSON.stringify(store);
-
     const current = window.localStorage.getItem(STORAGE_KEY);
+    // 保存済み(または渡された)データがこのコードより新しい世代なら、書き込まない。
+    // 古いコードの保存で、新しい版が足した項目が消えるのを防ぐ。
+    if (
+      revisionOfRaw(current) > CURRENT_STORE_REVISION ||
+      (store.storeRevision ?? 0) > CURRENT_STORE_REVISION
+    ) {
+      console.error("データがこのアプリより新しい版で作られているため、保存を止めました。");
+      notifyReadOnly();
+      return false;
+    }
+    const json = JSON.stringify({ ...store, storeRevision: CURRENT_STORE_REVISION });
+
     if (isValidStoreJson(current)) {
       try {
         window.localStorage.setItem(BACKUP_KEY, current);
@@ -186,6 +231,27 @@ export function saveStore(store: VitalogStore): boolean {
     notifySaveFailed();
     return false;
   }
+}
+
+/**
+ * 保存の瞬間に最新のデータを読み直し、変更を適用して保存する(read-modify-write)。
+ *
+ * 画面が持っている配列をまるごと書き戻す方式だと、別のタブ・別のフックインスタンスが
+ * 直前に保存した記録を、古い配列で上書きして消してしまう。これを避けるため、変更は
+ * 「最新のストアに対する、id単位の操作」(lib/storeOps.tsのupsertById等)として表し、
+ * 読み直し→適用→保存を同じ同期処理の中で行う。保存手順・破損復旧・失敗通知はsaveStoreのまま。
+ *
+ * 残る限界: localStorageの読み書きは同期のため、読み直しと書き込みの間に他タブの保存が
+ * 入る窓は同一のJSタスク内(実質マイクロ秒)に限られるが、ゼロではない。同じ記録の同じ項目を
+ * 別タブで同時に編集した場合は、後の保存が勝つ。
+ * 成功すると STORE_CHANGED_EVENT を発火する(同一タブのフックが読み直す)。
+ */
+export function updateStore(mutator: (store: VitalogStore) => VitalogStore): boolean {
+  if (typeof window === "undefined") return true;
+  const latest = loadStore();
+  const ok = saveStore(mutator(latest));
+  if (ok) notifyStoreChanged();
+  return ok;
 }
 
 /**
@@ -233,8 +299,7 @@ export function loadDailyLogs(): DailyLog[] {
 }
 
 export function saveDailyLogs(dailyLogs: DailyLog[]): void {
-  const store = loadStore();
-  saveStore({ ...store, dailyLogs });
+  updateStore((store) => ({ ...store, dailyLogs }));
 }
 
 export function loadRegisteredMedications(): RegisteredMedication[] {
@@ -242,8 +307,7 @@ export function loadRegisteredMedications(): RegisteredMedication[] {
 }
 
 export function saveRegisteredMedications(registeredMedications: RegisteredMedication[]): void {
-  const store = loadStore();
-  saveStore({ ...store, registeredMedications });
+  updateStore((store) => ({ ...store, registeredMedications }));
 }
 
 export function loadTaperingEvents(): TaperingEvent[] {
@@ -251,8 +315,7 @@ export function loadTaperingEvents(): TaperingEvent[] {
 }
 
 export function saveTaperingEvents(taperingEvents: TaperingEvent[]): void {
-  const store = loadStore();
-  saveStore({ ...store, taperingEvents });
+  updateStore((store) => ({ ...store, taperingEvents }));
 }
 
 export function loadHypotheses(): Hypothesis[] {
@@ -260,8 +323,7 @@ export function loadHypotheses(): Hypothesis[] {
 }
 
 export function saveHypotheses(hypotheses: Hypothesis[]): void {
-  const store = loadStore();
-  saveStore({ ...store, hypotheses });
+  updateStore((store) => ({ ...store, hypotheses }));
 }
 
 export function loadSelfExperiments(): SelfExperiment[] {
@@ -269,8 +331,7 @@ export function loadSelfExperiments(): SelfExperiment[] {
 }
 
 export function saveSelfExperiments(selfExperiments: SelfExperiment[]): void {
-  const store = loadStore();
-  saveStore({ ...store, selfExperiments });
+  updateStore((store) => ({ ...store, selfExperiments }));
 }
 
 export function loadVisits(): Visit[] {
@@ -278,8 +339,7 @@ export function loadVisits(): Visit[] {
 }
 
 export function saveVisits(visits: Visit[]): void {
-  const store = loadStore();
-  saveStore({ ...store, visits });
+  updateStore((store) => ({ ...store, visits }));
 }
 
 /** F8: JSONエクスポート(バックアップ・医師向け提出等の土台) */
@@ -299,6 +359,12 @@ export function importStoreFromJson(json: string): VitalogStore {
   if (!isStoreShape(parsed)) {
     throw new Error("バックアップファイルの形式が不正です");
   }
+  const incomingRevision = (parsed as { storeRevision?: unknown }).storeRevision;
+  if (typeof incomingRevision === "number" && incomingRevision > CURRENT_STORE_REVISION) {
+    throw new Error(
+      "このバックアップは、より新しい版のアプリで作られています。アプリを更新(再読み込み)してから復元してください"
+    );
+  }
   if (typeof window !== "undefined") {
     const current = window.localStorage.getItem(STORAGE_KEY);
     if (current) {
@@ -313,6 +379,7 @@ export function importStoreFromJson(json: string): VitalogStore {
   if (!saveStore(store)) {
     throw new Error("復元データの保存に失敗しました");
   }
+  notifyStoreChanged();
   return store;
 }
 
@@ -329,5 +396,6 @@ export function restorePreRestoreSnapshot(): VitalogStore | null {
   const store = migrateToLatest(JSON.parse(raw));
   saveStore(store);
   window.localStorage.removeItem(PRE_RESTORE_SNAPSHOT_KEY);
+  notifyStoreChanged();
   return store;
 }

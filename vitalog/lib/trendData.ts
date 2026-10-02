@@ -1,4 +1,5 @@
 import type { DailyLog } from "@/types/vitalog";
+import { isRecordedDay } from "@/lib/logKind";
 
 export type DateRangeKey = "7d" | "30d" | "90d" | "all";
 
@@ -10,7 +11,7 @@ export const DATE_RANGE_OPTIONS: { key: DateRangeKey; label: string }[] = [
 ];
 
 export function filterByRange(logs: DailyLog[], range: DateRangeKey): DailyLog[] {
-  const nonSkipped = logs.filter((l) => !l.skipped);
+  const nonSkipped = logs.filter(isRecordedDay);
   if (range === "all") return nonSkipped;
 
   const days = range === "7d" ? 7 : range === "30d" ? 30 : 90;

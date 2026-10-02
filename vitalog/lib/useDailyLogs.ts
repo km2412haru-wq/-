@@ -1,36 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { generateId } from "@/lib/id";
-import { loadDailyLogs, saveDailyLogs } from "@/lib/storage";
-import type { DailyLog } from "@/types/vitalog";
+import { updateStore } from "@/lib/storage";
+import { patchById, removeById, upsertById } from "@/lib/storeOps";
+import { useStoreSelect } from "@/lib/useStoreSelect";
+import type { DailyLog, VitalogStore } from "@/types/vitalog";
 
 export type DailyLogDraft = Omit<
   DailyLog,
   "id" | "recordedAt" | "createdAt" | "updatedAt"
 >;
 
-/** 体調記録(F1)のCRUDとlocalStorageへの永続化を担うフック */
+const EMPTY: DailyLog[] = [];
+
+function selectLogs(store: VitalogStore): DailyLog[] {
+  // 日付の新しい順(同じ日は保存順のまま。比較が0を返すことで安定ソートになる)
+  return [...store.dailyLogs].sort((a, b) =>
+    a.targetDate < b.targetDate ? 1 : a.targetDate > b.targetDate ? -1 : 0
+  );
+}
+
+/**
+ * 体調記録(F1)のCRUD。保存されているデータの写しを返し、変更は保存の瞬間に読み直した
+ * 最新のデータへ、id単位で適用する(別のタブ・別のフックインスタンスの記録を消さない)。
+ * 変更操作は、保存できたかどうか(成功ならtrue / 追加は作った記録、失敗ならnull)を返す。
+ * 失敗した場合は画面の状態も変えない(保存されていない記録を表示しない)。
+ */
 export function useDailyLogs() {
-  const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
-  const [ready, setReady] = useState(false);
-  // 変更操作(add/update/delete等)を行ったインスタンスだけが保存する。
-  // 読み込んだだけのインスタンスが保存すると、他のインスタンスが直前に保存した最新の内容を
-  // 「読み込み時点の古い内容」で上書きして消してしまう(表示専用の利用側が後から
-  // マウントされた場合に起きる)ため、変更していないインスタンスは保存しない。
-  const dirty = useRef(false);
+  const { value: dailyLogs, ready } = useStoreSelect(selectLogs, EMPTY);
 
-  useEffect(() => {
-    setDailyLogs(loadDailyLogs());
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !dirty.current) return;
-    saveDailyLogs(dailyLogs);
-  }, [dailyLogs, ready]);
-
-  const addLog = useCallback((draft: DailyLogDraft): DailyLog => {
+  const addLog = useCallback((draft: DailyLogDraft): DailyLog | null => {
     const now = new Date().toISOString();
     const entry: DailyLog = {
       ...draft,
@@ -39,27 +39,23 @@ export function useDailyLogs() {
       createdAt: now,
       updatedAt: now,
     };
-    dirty.current = true;
-    setDailyLogs((prev) =>
-      [...prev, entry].sort((a, b) => (a.targetDate < b.targetDate ? 1 : -1))
-    );
-    return entry;
+    const ok = updateStore((store) => ({
+      ...store,
+      dailyLogs: upsertById(store.dailyLogs, entry, "end"),
+    }));
+    return ok ? entry : null;
   }, []);
 
-  const updateLog = useCallback((id: string, changes: Partial<DailyLog>) => {
-    dirty.current = true;
-    setDailyLogs((prev) =>
-      prev.map((log) =>
-        log.id === id
-          ? { ...log, ...changes, updatedAt: new Date().toISOString() }
-          : log
-      )
-    );
+  const updateLog = useCallback((id: string, changes: Partial<DailyLog>): boolean => {
+    const updatedAt = new Date().toISOString();
+    return updateStore((store) => ({
+      ...store,
+      dailyLogs: patchById(store.dailyLogs, id, (log) => ({ ...log, ...changes, updatedAt })),
+    }));
   }, []);
 
-  const deleteLog = useCallback((id: string) => {
-    dirty.current = true;
-    setDailyLogs((prev) => prev.filter((log) => log.id !== id));
+  const deleteLog = useCallback((id: string): boolean => {
+    return updateStore((store) => ({ ...store, dailyLogs: removeById(store.dailyLogs, id) }));
   }, []);
 
   return { dailyLogs, ready, addLog, updateLog, deleteLog };

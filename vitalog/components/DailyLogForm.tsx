@@ -74,7 +74,8 @@ const NEW_SYMPTOM_DETAIL: SymptomDetail = {
 };
 
 interface Props {
-  onSubmit: (draft: DailyLogDraft) => void;
+  /** 保存できたらtrue。失敗した場合は入力内容を消さない(保存されていないのにフォームが空になるのを防ぐ) */
+  onSubmit: (draft: DailyLogDraft) => boolean;
   onSkip: (targetDate: string) => void;
   /** 簡易記録への「詳細を追記」。指定すると、簡易入力でカバーした項目をプリフィルする */
   appendTo?: DailyLog | null;
@@ -374,8 +375,7 @@ export default function DailyLogForm({ onSubmit, onSkip, appendTo, onCancelAppen
       topicalMedications: topicalMedications.filter((t) => t.name.trim().length > 0),
       memo: memo.trim() || undefined,
     };
-    onSubmit(draft);
-    reset();
+    if (onSubmit(draft)) reset();
   };
 
   const handleRashPhoto = async (file: File | null) => {

@@ -47,13 +47,14 @@ export default function VisitsManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addVisit({
+    const savedVisit = addVisit({
       visitDate,
       hospitalName: hospitalName.trim() || undefined,
       department: department.trim() || undefined,
       memo: memo.trim() || undefined,
       nextVisitDate: nextVisitDate || undefined,
     });
+    if (!savedVisit) return; // 保存できなかった時は入力を残す
 
     if (Object.keys(pendingLabs).length > 0) {
       applyBulkLabResult(visitDate, pendingLabs);

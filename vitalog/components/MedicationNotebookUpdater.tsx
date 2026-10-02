@@ -126,19 +126,25 @@ export default function MedicationNotebookUpdater({ registeredMedications }: Pro
   };
 
   const handleApply = () => {
+    let failed = 0;
     for (const item of diffItems) {
       if (!item.checked) continue;
       const date = item.documentDate || todayIso();
       if (item.kind === "discontinued") {
-        discontinueRegisteredMedication(item.name, date);
-      } else {
-        applyPrescriptionToRegisteredMedications(item.name, item.newDose, date);
+        if (!discontinueRegisteredMedication(item.name, date)) failed += 1;
+      } else if (applyPrescriptionToRegisteredMedications(item.name, item.newDose, date) === "failed") {
+        failed += 1;
       }
     }
 
-    // 「登録済みの薬」はReactの状態管理を経由せず直接storageを更新しているため、
-    // 画面表示を最新化するために再読み込みする
-    window.location.reload();
+    // 画面の薬の一覧は保存の完了イベントで自動的に最新になるため、再読み込みは不要
+    if (failed > 0) {
+      setErrorMessage(`${failed}件を保存できませんでした。保存容量を確認してやり直してください。`);
+      setStatus("error");
+      return;
+    }
+    setDiffItems([]);
+    setStatus("idle");
   };
 
   return (
