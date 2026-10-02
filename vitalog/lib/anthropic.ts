@@ -196,3 +196,32 @@ export async function extractFromPhoto(
   if (!toolUse) return {};
   return toolUse.input as Record<string, unknown>;
 }
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+/**
+ * チャット(Vitalog Assistant)の返信を生成する。モデルは用途ごとに上書きできる
+ * (ANTHROPIC_CHAT_MODEL > ANTHROPIC_MODEL > Haiku)。統計の計算はアプリ側で済ませてあり、
+ * ここではLLMは渡されたデータの言い換えと説明だけを行う。
+ */
+export async function chatReply(system: string, messages: ChatMessage[]): Promise<string> {
+  const client = getClient();
+  const model =
+    process.env.ANTHROPIC_CHAT_MODEL || process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: 900,
+    system,
+    messages,
+  });
+
+  return response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("\n")
+    .trim();
+}

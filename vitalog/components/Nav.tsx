@@ -10,6 +10,7 @@ const TABS = [
   { href: "/visits", label: "通院" },
   { href: "/experiments", label: "仮説・実験" },
   { href: "/report", label: "レポート" },
+  { href: "/chat", label: "相談" },
   { href: "/backup", label: "バックアップ" },
   { href: "/settings", label: "設定" },
   { href: "/roadmap", label: "今後の機能" },
