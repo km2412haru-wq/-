@@ -9,6 +9,7 @@ import {
   loadStore,
   restorePreRestoreSnapshot,
 } from "@/lib/storage";
+import AppendImportPanel from "@/components/AppendImportPanel";
 import GoogleDriveBackup from "@/components/GoogleDriveBackup";
 import { localTodayIso } from "@/lib/dateUtil";
 
@@ -129,6 +130,8 @@ export default function BackupManager() {
           </div>
         </div>
       )}
+
+      <AppendImportPanel />
 
       <GoogleDriveBackup />
     </>
