@@ -10,6 +10,7 @@ import {
   restorePreRestoreSnapshot,
 } from "@/lib/storage";
 import GoogleDriveBackup from "@/components/GoogleDriveBackup";
+import { localTodayIso } from "@/lib/dateUtil";
 
 export default function BackupManager() {
   const [message, setMessage] = useState<string | null>(null);
@@ -50,7 +51,7 @@ export default function BackupManager() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `vitalog-corrupt-data-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `vitalog-corrupt-data-${localTodayIso()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };

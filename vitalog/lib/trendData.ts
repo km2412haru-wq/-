@@ -1,5 +1,6 @@
 import type { DailyLog } from "@/types/vitalog";
 import { isRecordedDay } from "@/lib/logKind";
+import { addDaysIso, localTodayIso } from "@/lib/dateUtil";
 
 export type DateRangeKey = "7d" | "30d" | "90d" | "all";
 
@@ -15,9 +16,7 @@ export function filterByRange(logs: DailyLog[], range: DateRangeKey): DailyLog[]
   if (range === "all") return nonSkipped;
 
   const days = range === "7d" ? 7 : range === "30d" ? 30 : 90;
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
-  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  const cutoffStr = addDaysIso(localTodayIso(), -days);
 
   return nonSkipped.filter((l) => l.targetDate >= cutoffStr);
 }

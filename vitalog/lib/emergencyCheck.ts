@@ -1,6 +1,7 @@
 import { isInLifeStageTransitionWindow } from "@/lib/lifeStage";
 import { isRecordedDay } from "@/lib/logKind";
 import type { DailyLog, RegisteredMedication } from "@/types/vitalog";
+import { localTodayIso } from "@/lib/dateUtil";
 
 /**
  * F10: MAS(マクロファージ活性化症候群)等の重篤合併症を疑うべきパターンの
@@ -150,7 +151,7 @@ function daysBetween(a: string, b: string): number {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 function hasRash(log: DailyLog | undefined): boolean {
@@ -176,10 +177,13 @@ function daysAgo(today: string, target: string): number {
 
 export function checkEmergency(
   dailyLogs: DailyLog[],
-  registeredMedications: RegisteredMedication[] = []
+  registeredMedications: RegisteredMedication[] = [],
+  /** 判定の基準日(YYYY-MM-DD)。省略時は端末のローカルの今日。過去の日を「今日」として評価するときに使う */
+  options: { today?: string } = {}
 ): EmergencyCheckResult {
+  const today = options.today ?? todayIso();
   // F12-4: ライフステージ移行の要注意期間中は、普段より敏感な閾値で検知する
-  const inTransition = isInLifeStageTransitionWindow();
+  const inTransition = isInLifeStageTransitionWindow(today);
   // 解熱・抗炎症薬の服用中は発熱がマスクされうるため敏感化する
   const feverSuppressed = isOnFeverSuppressingMedication(registeredMedications);
   // どちらか一方でも該当すれば「敏感モード」として各閾値を1段引き下げる
@@ -193,7 +197,6 @@ export function checkEmergency(
     ? JOINT_PAIN_SPIKE_SEVERITY_DELTA_SENSITIVE
     : JOINT_PAIN_SPIKE_SEVERITY_DELTA;
 
-  const today = todayIso();
   // 検査値は、検査値だけを取り込んだ日(labsOnly)の記録からも読む。
   // 一方、記録日数・発熱/倦怠感の日数・症状の急変は、その日の体調を記録した日だけで数える
   // (検査値だけの日を「症状なしの記録日」にしない)。
@@ -216,10 +219,15 @@ export function checkEmergency(
     insufficient: recordedDays < MIN_RECORDED_DAYS_FOR_CONFIDENCE,
   };
 
-  const feverDayCount = windowLogs.filter(
-    (l) => typeof l.temperature === "number" && l.temperature >= feverThreshold
-  ).length;
-  const fatigueDayCount = windowLogs.filter((l) => l.fatigueUnusual).length;
+  // 発熱・倦怠感の日数は、記録の件数ではなく日付で数える(同じ日に2件記録しても1日)
+  const feverDayCount = new Set(
+    windowLogs
+      .filter((l) => typeof l.temperature === "number" && l.temperature >= feverThreshold)
+      .map((l) => l.targetDate)
+  ).size;
+  const fatigueDayCount = new Set(
+    windowLogs.filter((l) => l.fatigueUnusual).map((l) => l.targetDate)
+  ).size;
 
   const sustainedFever = feverDayCount >= feverDaysThreshold;
   const sustainedFatigueWithFever = fatigueDayCount >= fatigueWithFeverThreshold;

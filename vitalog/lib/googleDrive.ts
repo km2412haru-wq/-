@@ -1,3 +1,4 @@
+import { localTodayIso } from "@/lib/dateUtil";
 /**
  * F8残り: Google Driveへの手動/オンデマンドバックアップ。
  *
@@ -113,7 +114,7 @@ async function deleteFile(token: string, fileId: string): Promise<void> {
 }
 
 export async function uploadBackupToDrive(token: string, json: string): Promise<void> {
-  const dateStr = new Date().toISOString().slice(0, 10);
+  const dateStr = localTodayIso();
   const fileName = `${BACKUP_FILE_PREFIX}${dateStr}.json`;
 
   const boundary = "vitalog-backup-boundary";

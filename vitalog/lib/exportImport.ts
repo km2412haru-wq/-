@@ -1,5 +1,6 @@
 import { exportStoreAsJson, importStoreFromJson, loadStore } from "@/lib/storage";
 import type { DailyLog } from "@/types/vitalog";
+import { localTodayIso } from "@/lib/dateUtil";
 
 function downloadBlob(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
@@ -13,7 +14,7 @@ function downloadBlob(content: string, filename: string, mimeType: string) {
 
 export function downloadJsonBackup() {
   const json = exportStoreAsJson();
-  const date = new Date().toISOString().slice(0, 10);
+  const date = localTodayIso();
   downloadBlob(json, `vitalog-backup-${date}.json`, "application/json");
 }
 
@@ -62,7 +63,7 @@ export function downloadCsvBackup() {
     )
   );
   const csv = [header, ...rows].join("\n");
-  const date = new Date().toISOString().slice(0, 10);
+  const date = localTodayIso();
   downloadBlob(csv, `vitalog-export-${date}.csv`, "text/csv");
 }
 

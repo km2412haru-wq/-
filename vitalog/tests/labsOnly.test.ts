@@ -42,7 +42,7 @@ const labsOnlyLog = (daysAgo: number, labs: DailyLog["labs"]) => makeLog(daysAgo
 
 beforeEach(() => {
   vi.useFakeTimers();
-  vi.setSystemTime(new Date(`${TODAY}T03:00:00Z`));
+  vi.setSystemTime(new Date(2026, 8, 29, 12, 0, 0)); // 端末のローカル時刻の正午(どのTZでも今日=TODAY)
 });
 afterEach(() => vi.useRealTimers());
 

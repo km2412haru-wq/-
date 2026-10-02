@@ -1,6 +1,7 @@
 import { computeFerritinEsrRatio } from "@/lib/ferritinEsrRatio";
 import { JOINT_SITES, type DailyLog } from "@/types/vitalog";
 import { isRecordedDay } from "@/lib/logKind";
+import { addDaysIso } from "@/lib/dateUtil";
 
 /** 「睡眠不足の翌日は症状が出やすいか」の目安として使う閾値(時間) */
 const LOW_SLEEP_THRESHOLD_HOURS = 6;
@@ -48,11 +49,7 @@ function average(values: number[]): number | undefined {
   return Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10;
 }
 
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(`${dateStr}T00:00:00`);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+const addDays = addDaysIso;
 
 /**
  * 睡眠不足だった日の翌日と、そうでない日の翌日とで、

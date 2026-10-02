@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
-    "gen-icons": "tsx scripts/gen-icons.mjs"
+    "gen-icons": "tsx scripts/gen-icons.mjs",
+    "test:tz": "TZ=Asia/Tokyo vitest run && TZ=UTC vitest run && TZ=America/Los_Angeles vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.125.0",

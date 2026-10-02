@@ -5,9 +5,10 @@ import { useHypotheses } from "@/lib/useHypotheses";
 import { useSelfExperiments } from "@/lib/useSelfExperiments";
 import { useDailyLogs } from "@/lib/useDailyLogs";
 import { compareExperiment } from "@/lib/selfExperimentAnalysis";
+import { localTodayIso } from "@/lib/dateUtil";
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 export default function ExperimentsManager() {

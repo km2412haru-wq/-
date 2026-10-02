@@ -9,9 +9,10 @@ import { applyBulkLabResult } from "@/lib/bulkImport";
 import PhotoCaptureButton from "@/components/PhotoCaptureButton";
 import MedicationNotebookUpdater from "@/components/MedicationNotebookUpdater";
 import type { DailyLog } from "@/types/vitalog";
+import { localTodayIso } from "@/lib/dateUtil";
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 const LAB_LABELS: { key: keyof NonNullable<DailyLog["labs"]>; label: string }[] = [

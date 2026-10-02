@@ -4,17 +4,15 @@
  * 発症日は記録の対象日(targetDate)からの相対で選ぶ。後入力で過去日を記録する場合も、
  * その日を基準に「1日前から」と選べる。
  */
+import { addDaysIso } from "@/lib/dateUtil";
+
 export type OnsetChoice = "same" | "1" | "2" | "custom";
 
 function dayNumber(date: string): number {
   return Math.round(Date.parse(`${date}T00:00:00Z`) / 86_400_000);
 }
 
-export function addDaysIso(date: string, days: number): string {
-  const d = new Date(`${date}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+export { addDaysIso };
 
 function isIsoDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));

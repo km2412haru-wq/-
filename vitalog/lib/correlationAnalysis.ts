@@ -1,5 +1,6 @@
 import type { DailyLog, LoadLevel } from "@/types/vitalog";
 import { isRecordedDay } from "@/lib/logKind";
+import { addDaysIso } from "@/lib/dateUtil";
 
 /**
  * F5/F6/F11: ラグ相関分析(叩き台)。
@@ -48,11 +49,7 @@ interface Variable {
   extract: (log: DailyLog) => number | undefined;
 }
 
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(`${dateStr}T00:00:00`);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+const addDays = addDaysIso;
 
 function pearsonR(xs: number[], ys: number[]): number | undefined {
   const n = xs.length;

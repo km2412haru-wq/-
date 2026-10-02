@@ -6,6 +6,7 @@ import { computeSymptomChips } from "@/lib/symptomStats";
 import { useMedications } from "@/lib/useMedications";
 import type { DailyLogDraft } from "@/lib/useDailyLogs";
 import { DANGER_SYMPTOMS, type DailyLog } from "@/types/vitalog";
+import { localTodayIso } from "@/lib/dateUtil";
 
 interface Props {
   historyLogs: DailyLog[];
@@ -14,7 +15,7 @@ interface Props {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 /** 大きく押しやすいボタン(体調が悪い時でも操作できる大きさ) */

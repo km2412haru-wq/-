@@ -2,6 +2,7 @@ import { checkDanger } from "@/lib/dangerCheck";
 import { checkEmergency } from "@/lib/emergencyCheck";
 import { KNOWN_LIMITATIONS } from "@/lib/chatLimitations";
 import type { DailyLog, RegisteredMedication } from "@/types/vitalog";
+import { addDaysIso, localTodayIso } from "@/lib/dateUtil";
 import { isRecordedDay } from "@/lib/logKind";
 
 /**
@@ -64,19 +65,8 @@ export interface ChatDataSummary {
   recentMemos?: { date: string; text: string }[];
 }
 
-function localIso(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-/** 日付文字列の加減算(UTC演算。端末のタイムゾーンに依存しない) */
-function shiftIso(date: string, days: number): string {
-  const d = new Date(`${date}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+const localIso = (d: Date): string => localTodayIso(d);
+const shiftIso = addDaysIso;
 
 function round(n: number, digits = 1): number {
   const f = 10 ** digits;

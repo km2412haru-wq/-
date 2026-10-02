@@ -1,5 +1,6 @@
 import type { DailyLog } from "@/types/vitalog";
 import { isRecordedDay } from "@/lib/logKind";
+import { localTodayIso } from "@/lib/dateUtil";
 
 /**
  * Danger層: 記録された危険症状に基づく、医療機関への相談の促し。
@@ -28,15 +29,19 @@ export interface DangerCheckResult {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 function daysBefore(today: string, target: string): number {
   return Math.round((new Date(today).getTime() - new Date(target).getTime()) / 86_400_000);
 }
 
-export function checkDanger(dailyLogs: DailyLog[]): DangerCheckResult {
-  const today = todayIso();
+export function checkDanger(
+  dailyLogs: DailyLog[],
+  /** 判定の基準日(YYYY-MM-DD)。省略時は端末のローカルの今日 */
+  options: { today?: string } = {}
+): DangerCheckResult {
+  const today = options.today ?? todayIso();
   const entries = dailyLogs
     .filter((l) => {
       if (!isRecordedDay(l)) return false;

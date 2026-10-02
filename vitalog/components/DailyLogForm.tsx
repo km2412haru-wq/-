@@ -32,11 +32,12 @@ import {
   type TopicalMedicationRecord,
 } from "@/types/vitalog";
 import type { DailyLogDraft } from "@/lib/useDailyLogs";
+import { localTodayIso } from "@/lib/dateUtil";
 
 const MOOD_LOW_THRESHOLD = 4;
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 /** 入眠時刻+睡眠時間から起床目安時刻(HH:mm)を算出する。表示用のみで保存はしない */

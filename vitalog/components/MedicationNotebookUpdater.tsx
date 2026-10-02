@@ -8,6 +8,7 @@ import {
 } from "@/lib/bulkImport";
 import type { RegisteredMedication } from "@/types/vitalog";
 import type { ExtractedNotebookEntry, ExtractPhotoResponse } from "@/types/photoCapture";
+import { localTodayIso } from "@/lib/dateUtil";
 
 type DiffKind = "new" | "changed" | "resumed" | "discontinued";
 
@@ -21,7 +22,7 @@ interface DiffItem {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 interface Props {

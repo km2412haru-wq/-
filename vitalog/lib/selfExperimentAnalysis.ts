@@ -1,4 +1,5 @@
 import type { DailyLog, SelfExperiment } from "@/types/vitalog";
+import { addDaysIso, localTodayIso } from "@/lib/dateUtil";
 
 export interface ExperimentComparison {
   beforeAvg?: number;
@@ -8,13 +9,11 @@ export interface ExperimentComparison {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 function shiftDate(dateStr: string, days: number): string {
-  const d = new Date(dateStr);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return addDaysIso(dateStr, days);
 }
 
 function daysBetween(a: string, b: string): number {

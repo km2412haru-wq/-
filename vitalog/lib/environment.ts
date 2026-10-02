@@ -1,3 +1,4 @@
+import { localTodayIso } from "@/lib/dateUtil";
 /**
  * F3: 環境データ(気温・気圧・湿度)の自動取得。
  * Open-Meteo(APIキー不要・無料)を使用。位置情報はブラウザのGeolocation APIで
@@ -51,7 +52,7 @@ export function requestLocation(): Promise<StoredLocation> {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localTodayIso();
 }
 
 /** 対象日が今日なら現在値API、過去日ならアーカイブAPI(正午の値)を使う */

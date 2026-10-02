@@ -1,4 +1,5 @@
 import { loadLifeStageDateOverride } from "@/lib/settings";
+import { localTodayIso } from "@/lib/dateUtil";
 
 /**
  * F12-4: ライフステージ移行監視モード。
@@ -21,7 +22,7 @@ function daysBetween(a: string, b: string): number {
 }
 
 export function isInLifeStageTransitionWindow(dateStr?: string): boolean {
-  const target = dateStr ?? new Date().toISOString().slice(0, 10);
+  const target = dateStr ?? localTodayIso();
   const transitionDate = getLifeStageTransitionDate();
   const diff = daysBetween(transitionDate, target);
   return diff >= -WINDOW_DAYS_BEFORE && diff <= WINDOW_DAYS_AFTER;

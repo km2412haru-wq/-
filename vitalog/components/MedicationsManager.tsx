@@ -6,6 +6,7 @@ import { useMedications } from "@/lib/useMedications";
 import MedicationNotebookUpdater from "@/components/MedicationNotebookUpdater";
 import BulkImportManager from "@/components/BulkImportManager";
 import { MEDICATION_TYPES, type MedicationType } from "@/types/vitalog";
+import { localTodayIso } from "@/lib/dateUtil";
 
 export default function MedicationsManager() {
   const {
@@ -20,7 +21,7 @@ export default function MedicationsManager() {
   } = useMedications();
   const { permission, requestPermission } = useForegroundReminders(registeredMedications);
 
-  const todayIso = () => new Date().toISOString().slice(0, 10);
+  const todayIso = () => localTodayIso();
 
   const [name, setName] = useState("");
   const [dose, setDose] = useState("");
@@ -29,7 +30,7 @@ export default function MedicationsManager() {
   const [reminderTime, setReminderTime] = useState("");
 
   const [taperMedName, setTaperMedName] = useState("");
-  const [taperDate, setTaperDate] = useState(new Date().toISOString().slice(0, 10));
+  const [taperDate, setTaperDate] = useState(localTodayIso());
   const [taperDose, setTaperDose] = useState("");
   const [taperNote, setTaperNote] = useState("");
 
