@@ -9,7 +9,7 @@ let handler: (e: unknown) => Promise<string>
 beforeAll(async () => {
   for (const k of ['TABLE_BATTLES', 'TABLE_POSTS', 'TABLE_EVENTS', 'TABLE_GUARDS']) process.env[k] = 't'
   process.env.HMAC_SECRET = 'secret'
-  handler = (await import('../amplify/functions/api/handler')).handler
+  handler = (await import('../amplify/functions/api/handler')).handler as typeof handler
 })
 
 const call = async (e: unknown) => JSON.parse(await handler(e))
