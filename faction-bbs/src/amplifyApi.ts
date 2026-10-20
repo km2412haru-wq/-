@@ -1,6 +1,7 @@
 import { generateClient } from 'aws-amplify/api'
 import type { Schema } from '../amplify/data/resource'
 import type { Api, ApiResult } from './api'
+import { decodeResult } from './decode'
 
 const client = generateClient<Schema>()
 
@@ -15,7 +16,7 @@ async function call<T>(p: Promise<{ data: unknown; errors?: readonly { message: 
       console.error('[api] GraphQL error', errors)
       return { ok: false, code: /Unauthorized|not authorized/i.test(msg) ? 'UNAUTHORIZED' : 'GRAPHQL_ERROR', message: msg }
     }
-    return JSON.parse(data as string) as ApiResult<T>
+    return decodeResult<T>(data)
   } catch (e) {
     console.error('[api] request failed', e)
     return { ok: false, code: 'REQUEST_FAILED', message: e instanceof Error ? e.message : String(e) }
