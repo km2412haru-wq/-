@@ -18,7 +18,9 @@ export interface MyStatus {
   spectatorVote: Side | null
 }
 
-export type ApiResult<T> = { ok: true; data: T } | { ok: false; code: string; detail?: { code: string; max?: number; word?: string } }
+export type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; code: string; detail?: { code: string; max?: number; word?: string }; message?: string }
 
 export interface Api {
   getCurrentBattle(): Promise<ApiResult<BattleView | null>>
@@ -51,7 +53,11 @@ const BODY_MESSAGES: Record<string, (d: { max?: number; word?: string }) => stri
   NG_WORD: (d) => `使えない言葉が含まれています：「${d.word}」`,
 }
 
-export function errorMessage(r: { code: string; detail?: { code: string; max?: number; word?: string } }): string {
+export function errorMessage(r: {
+  code: string
+  detail?: { code: string; max?: number; word?: string }
+  message?: string
+}): string {
   if (r.code === 'INVALID_BODY' && r.detail) return BODY_MESSAGES[r.detail.code]?.(r.detail) ?? '本文が正しくありません'
-  return MESSAGES[r.code] ?? 'エラーが発生しました'
+  return MESSAGES[r.code] ?? `エラーが発生しました（${r.code}${r.message ? `: ${r.message}` : ''}）`
 }

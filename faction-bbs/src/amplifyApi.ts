@@ -11,12 +11,14 @@ async function call<T>(p: Promise<{ data: unknown; errors?: readonly { message: 
   try {
     const { data, errors } = await p
     if (errors?.length || data == null) {
-      const msg = errors?.[0]?.message ?? ''
-      return { ok: false, code: /Unauthorized|not authorized/i.test(msg) ? 'UNAUTHORIZED' : 'UNKNOWN' }
+      const msg = errors?.[0]?.message ?? 'empty response'
+      console.error('[api] GraphQL error', errors)
+      return { ok: false, code: /Unauthorized|not authorized/i.test(msg) ? 'UNAUTHORIZED' : 'GRAPHQL_ERROR', message: msg }
     }
     return JSON.parse(data as string) as ApiResult<T>
-  } catch {
-    return { ok: false, code: 'UNKNOWN' }
+  } catch (e) {
+    console.error('[api] request failed', e)
+    return { ok: false, code: 'REQUEST_FAILED', message: e instanceof Error ? e.message : String(e) }
   }
 }
 

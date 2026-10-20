@@ -37,13 +37,15 @@ export function App() {
   const [view, setView] = useState<Side>('A')
   const [posts, setPosts] = useState<Record<Side, PostItem[]>>({ A: [], B: [] })
   const [notice, setNotice] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [showLogin, setShowLogin] = useState(false)
   const [clock, setClock] = useState(Date.now())
   const skew = useRef(0)
 
   const refresh = useCallback(async () => {
     const b = await api.getCurrentBattle()
-    if (!b.ok) return setNotice(errorMessage(b))
+    if (!b.ok) return setLoadError(errorMessage(b))
+    setLoadError(null)
     setBattle(b.data)
     if (!b.data) return
     skew.current = b.data.serverNow - Date.now()
@@ -81,6 +83,17 @@ export function App() {
           バックエンドに接続されていません。<code>npx ampx sandbox</code> で <code>amplify_outputs.json</code>{' '}
           を生成するか、<code>VITE_MOCK=1 npm run dev</code> でモック表示してください。
         </p>
+      </main>
+    )
+  }
+  if (loadError && battle === undefined) {
+    return (
+      <main className="page">
+        <h1>派閥決戦BBS</h1>
+        <p className="notice" role="alert">
+          読み込みに失敗しました。{loadError}
+        </p>
+        <button onClick={() => void refresh()}>再読み込み</button>
       </main>
     )
   }
