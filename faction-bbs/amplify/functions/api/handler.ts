@@ -1,4 +1,3 @@
-import type { AppSyncResolverEvent } from 'aws-lambda'
 import { createDynamoRepo } from './dynamoRepo'
 import { ApiError, createService } from './service'
 
@@ -21,19 +20,31 @@ const service = createService({
 
 type Args = Record<string, unknown>
 
+/**
+ * Amplify Gen2 の関数リゾルバは { typeName, fieldName, arguments, identity, ... } の平らな形で呼ばれる。
+ * 通常のAppSyncリゾルバ形式（info.fieldName）も念のため受け付ける。
+ */
+interface ResolverEvent {
+  fieldName?: string
+  info?: { fieldName?: string }
+  arguments?: Args
+  identity?: unknown
+}
+
 /** ユーザー認証(userPool)のときだけ sub が入る。ゲスト(IAM)では undefined */
-function userIdOf(event: AppSyncResolverEvent<Args>): string | undefined {
+function userIdOf(event: ResolverEvent): string | undefined {
   const id = event.identity as { sub?: string } | null | undefined
   return id && 'sub' in id ? id.sub : undefined
 }
 
 /** エラーは例外ではなく { ok:false, code } で返す（クライアントが文言を出し分けるため） */
-export const handler = async (event: AppSyncResolverEvent<Args>): Promise<string> => {
-  const a = event.arguments
+export const handler = async (event: ResolverEvent): Promise<string> => {
+  const a = event.arguments ?? {}
+  const fieldName = event.fieldName ?? event.info?.fieldName
   const userId = userIdOf(event)
   try {
     let data: unknown
-    switch (event.info.fieldName) {
+    switch (fieldName) {
       case 'getCurrentBattle':
         data = await service.getCurrentBattle()
         break
