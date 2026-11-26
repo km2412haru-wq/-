@@ -170,6 +170,17 @@ export function isOnFeverSuppressingMedication(
   );
 }
 
+/**
+ * 現在の発熱の判定温度(℃)。解熱・抗炎症薬の服用中は引き下げた値。
+ * 簡易入力の「いつもと違うようです」の案内も、F10と同じ基準を使うために公開している
+ * (新しい閾値を別に作らない)。
+ */
+export function getFeverThreshold(registeredMedications: RegisteredMedication[]): number {
+  return isOnFeverSuppressingMedication(registeredMedications)
+    ? FEVER_THRESHOLD_SUPPRESSED_C
+    : FEVER_THRESHOLD_C;
+}
+
 /** 実際の今日から何日前か(今日=0、未来日は負) */
 function daysAgo(today: string, target: string): number {
   return Math.round((new Date(today).getTime() - new Date(target).getTime()) / 86_400_000);

@@ -155,8 +155,9 @@ export function buildChatSummary(
   }
 
   // アプリ自身の警告の状態。チャットはこれを尊重して伝えるだけで、独自に緊急性を判定しない
-  const f10 = checkEmergency(allLogs, registeredMedications);
-  const danger = checkDanger(allLogs);
+  // 要約の「今日」と同じ基準日で判定する(要約の集計窓とF10の観察窓がずれないように)
+  const f10 = checkEmergency(allLogs, registeredMedications, { today });
+  const danger = checkDanger(allLogs, { today });
 
   const summary: ChatDataSummary = {
     today,

@@ -218,3 +218,23 @@ describe("今日の日付(端末のローカル日付)", () => {
     expect(s.window.from).toBe("2026-09-01");
   });
 });
+
+describe("F10・Danger層の状態は、要約の基準日(today)で評価する", () => {
+  const dangerLog: DailyLog = {
+    id: "d", targetDate: "2030-01-10", recordedAt: "", skipped: false, jointPain: [], symptoms: [],
+    dangerSymptoms: ["息苦しさ・呼吸困難"], moodReasonTags: [], activityTags: [], medications: [], topicalMedications: [],
+    createdAt: "", updatedAt: "", labs: { ferritinNgMl: 900 },
+  };
+
+  it("基準日が記録日と同じなら、警告が出ている状態になる(実際の今日ではなく基準日で判定)", () => {
+    const s = buildChatSummary([dangerLog], [], { today: "2030-01-10" });
+    expect(s.appState.danger.triggered).toBe(true);
+    expect(s.appState.f10.triggered).toBe(true);
+  });
+
+  it("基準日が十分に後なら、警告は出ない(古い記録を「今」の警告にしない)", () => {
+    const s = buildChatSummary([dangerLog], [], { today: "2030-03-01" });
+    expect(s.appState.danger.triggered).toBe(false);
+    expect(s.appState.f10.triggered).toBe(false);
+  });
+});

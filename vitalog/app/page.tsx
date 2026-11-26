@@ -14,13 +14,19 @@ import type { DailyLog } from "@/types/vitalog";
 
 export default function Home() {
   const { dailyLogs, ready, addLog, updateLog, deleteLog } = useDailyLogs();
-  const [quickMode, setQuickMode] = useState(false);
+  // 簡易入力の種類(null=通常入力)。どちらも同じ形式(entryMode: "quick")で保存する
+  const [quickVariant, setQuickVariant] = useState<"tired" | "noProblem" | null>(null);
+  const quickMode = quickVariant !== null;
+  const setQuickMode = (on: boolean) => setQuickVariant(on ? "tired" : null);
   const [appendTarget, setAppendTarget] = useState<DailyLog | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // PWAのホーム画面ショートカット(/?mode=quick)から起動した場合は、最初から簡易入力にする
+  // PWAのホーム画面ショートカット(/?mode=quick: しんどい日、/?mode=ok: 問題なし)から起動した場合は、
+  // 最初から簡易入力にする
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("mode") === "quick") setQuickMode(true);
+    const mode = new URLSearchParams(window.location.search).get("mode");
+    if (mode === "quick") setQuickVariant("tired");
+    else if (mode === "ok") setQuickVariant("noProblem");
   }, []);
 
   const tagMemo = (logId: string, memo: string | undefined) => {
@@ -61,8 +67,19 @@ export default function Home() {
     if (!addLog(draft)) return false;
     setQuickMode(false);
     setNotice(
-      "簡易記録を保存しました。体調が落ち着いたら、記録履歴の「詳細を追記」から続きを入力できます。"
+      "簡易記録を保存しました。関節痛・皮疹・睡眠などは聞いていないため、「なし」とは扱いません。体調が落ち着いたら、記録履歴の「詳細を追記」から続きを入力できます。"
     );
+    return true;
+  };
+
+  // 「いつもと違うようです」の案内から、保存してそのまま詳細の追記に進む
+  const handleQuickSubmitAndAppend = (draft: DailyLogDraft): boolean => {
+    const entry = addLog(draft);
+    if (!entry) return false;
+    setQuickMode(false);
+    setAppendTarget(entry);
+    setNotice(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
     return true;
   };
 
@@ -106,24 +123,39 @@ export default function Home() {
           )}
           {quickMode ? (
             <QuickLogForm
+              variant={quickVariant ?? "tired"}
               historyLogs={dailyLogs}
               onSubmit={handleQuickSubmit}
+              onSubmitAndAppend={handleQuickSubmitAndAppend}
               onCancel={() => setQuickMode(false)}
             />
           ) : (
             <>
               {!appendTarget && (
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  style={{ width: "100%", minHeight: 52, fontSize: "1.05rem", marginBottom: 12 }}
-                  onClick={() => {
-                    setQuickMode(true);
-                    setNotice(null);
-                  }}
-                >
-                  😣 今日はしんどい(簡易入力)
-                </button>
+                <div className="row" style={{ marginBottom: 12 }}>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    style={{ flex: 1, minHeight: 52, fontSize: "1.05rem" }}
+                    onClick={() => {
+                      setQuickVariant("noProblem");
+                      setNotice(null);
+                    }}
+                  >
+                    ✅ 今日は問題なし
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ flex: 1, minHeight: 52, fontSize: "1.05rem" }}
+                    onClick={() => {
+                      setQuickVariant("tired");
+                      setNotice(null);
+                    }}
+                  >
+                    😣 今日はしんどい(簡易入力)
+                  </button>
+                </div>
               )}
               <DailyLogForm
                 onSubmit={handleSubmit}
